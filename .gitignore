@@ -1,0 +1,4 @@
+raffle.db
+__pycache__
+.DS_Store
+config.ini

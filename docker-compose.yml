@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  bot:
+    image: raffle_bot:1
+    build:
+      context: .
+      args:
+        DB_PATH: '/var/raffle_bot/db/raffle.db'
+    environment:
+      DB_PATH: '/var/raffle_bot/db/raffle.db'
+      CONFIG_PATH: '/var/raffle_bot/config.ini'
+    volumes:
+      # - './:/var/raffle_bot'
+      - 'db_data:/var/raffle_bot/db/'
+
+volumes:
+  db_data: {}

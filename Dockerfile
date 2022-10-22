@@ -13,6 +13,6 @@ COPY . .
 ARG DB_PATH
 RUN mkdir -p $(dirname $DB_PATH)
 RUN touch $DB_PATH
-RUN sqlite3 $DB_PATH < ./raffle.db.schema
+RUN sqlite3 $DB_PATH < ./raffle.schema.sql
 
 CMD [ "python", "-u", "./bot.py" ]

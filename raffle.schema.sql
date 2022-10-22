@@ -1,6 +1,13 @@
 CREATE TABLE IF NOT EXISTS raffles (
-`guild_id` INT NOT NULL UNIQUE,
-`message_id` INT NOT NULL
+  `guild_id` INT NOT NULL UNIQUE,
+  `message_id` INT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS raffle_entries (
+  `id` INTEGER PRIMARY KEY,
+  `guild_id` INT NOT NULL,
+  `message_id` INT NOT NULL,
+  `user_id` INT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS past_wins (
@@ -14,3 +21,5 @@ CREATE TABLE IF NOT EXISTS eligible_roles (
   `guild_id` INT NOT NULL,
   `role_id` INT NOT NULL
 );
+
+

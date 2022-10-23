@@ -53,6 +53,10 @@ class RaffleView(View):
         self.redo_raffle_button.callback = self.redo_raffle_onclick
         self.add_item(self.redo_raffle_button)
 
+    def has_role(self, role_name: str, interaction: Interaction) -> bool:
+        role = discord.utils.get(interaction.user.roles, name=role_name)
+        return role is not None
+
     async def enter_raffle_onclick(self, interaction: Interaction):
         user = interaction.user
         if user in self.entrants:
@@ -69,6 +73,10 @@ class RaffleView(View):
         await interaction.response.send_message("Raffle entered!", ephemeral=True)
 
     async def end_raffle_onclick(self, interaction: Interaction):
+        if not self.has_role("Mod", interaction):
+            await interaction.response.send_message("You must be a mod to do that!", ephemeral=True)
+            return
+
         if not DB.get().has_ongoing_raffle(interaction.guild.id):
             await interaction.response.send_message("This raffle is no longer active!")
             return
@@ -93,6 +101,10 @@ class RaffleView(View):
 
 
     async def redo_raffle_onclick(self, interaction: Interaction):
+        if not self.has_role("Mod", interaction):
+            await interaction.response.send_message("You must be a mod to do that!", ephemeral=True)
+            return
+
         modal = RedoRaffleModal(raffle_message=interaction.message, entrants=self.entrants)
         await interaction.response.send_modal(modal)
 

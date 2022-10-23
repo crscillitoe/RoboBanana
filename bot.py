@@ -4,8 +4,8 @@ import configparser
 import logging
 import discord
 from datetime import datetime, timedelta
-from discord import app_commands, ButtonStyle, Client, Embed, Intents, Interaction, Member, Message, SelectOption, TextStyle
-from discord.ui import Button, TextInput, Modal, Select, View
+from discord import app_commands, ButtonStyle, Client, Embed, Intents, Interaction, Member, Message, TextStyle
+from discord.ui import Button, TextInput, Modal, View
 from enum import Enum
 import numpy
 import os
@@ -14,7 +14,6 @@ from DB import DB
 
 discord.utils.setup_logging(level=logging.INFO, root=False)
 
-# description = "Manage VOD review raffles 😎"
 intents = Intents.default()
 intents.members = True
 intents.message_content = True
@@ -26,39 +25,16 @@ tree = app_commands.CommandTree(client)
 config = configparser.ConfigParser()
 config.read(os.environ.get("CONFIG_PATH"))
 
-
-@client.event
-async def on_command_error(ctx, error) -> None:
-    await ctx.interaction.response.send_message(f"Error: {error}")
-    raise error
-
-@client.event
-async def on_ready() -> None:
-    ...
-    # guild = discord.Object(id=915336728707989534)
-    # print("Copying global commands...")
-    # bot.tree.copy_global_to(guild=guild)
-    # print("Global commands copied. Syncing commands...")
-    # bot.tree.clear_commands(guild=None)
-    # await bot.tree.sync(guild=None)
-    # await bot.tree.sync(guild=guild)
-    # print("Commands cleared.")
-
 class RaffleType(Enum):
-    # Normal Raffle type. Most recent 6 winners are not eligible to win
-    Normal = "normal"
-
-    # No restrictions. Anyone can win. But win is still recorded.
-    Anyone = "anyone"
-
-    # Only people who have never won a raffle are eligible
-    New = "new"
+    Normal = "normal"   # Normal Raffle type. Most recent 6 winners are not eligible to win
+    Anyone = "anyone"   # No restrictions. Anyone can win. But win is still recorded.
+    New = "new"         # Only people who have never won a raffle are eligible
 
 class RaffleView(View):
     def __init__(self, parent: RaffleEmbed, raffle_type: RaffleType, num_winners: int) -> None:
         super().__init__(timeout=None)
 
-        self.parent: RaffleEmbed = parent
+        self.parent = parent
 
         self.entrants: list[Member] = []
         self.winners: list[Member] = None
@@ -73,9 +49,9 @@ class RaffleView(View):
         self.end_raffle_button.callback = self.end_raffle_onclick
         self.add_item(self.end_raffle_button)
 
-    async def get_raffle_message(self, interaction: Interaction) -> Message:
-        raffle_message_id = DB.get().get_raffle_message_id(interaction.guild.id)
-        return await interaction.channel.fetch_message(raffle_message_id)
+        self.redo_raffle_button = Button(label="Redo Raffle", style=ButtonStyle.secondary, disabled=True)
+        self.redo_raffle_button.callback = self.redo_raffle_onclick
+        self.add_item(self.redo_raffle_button)
 
     async def enter_raffle_onclick(self, interaction: Interaction):
         user = interaction.user
@@ -85,11 +61,12 @@ class RaffleView(View):
 
         self.entrants.append(user)
         self.parent.update_fields()
-        await interaction.response.send_message("Raffle entered!", ephemeral=True)
 
         raffle_message_id = DB.get().get_raffle_message_id(interaction.guild.id)
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         await raffle_message.edit(embed=self.parent)
+
+        await interaction.response.send_message("Raffle entered!", ephemeral=True)
 
     async def end_raffle_onclick(self, interaction: Interaction):
         if not DB.get().has_ongoing_raffle(interaction.guild.id):
@@ -103,15 +80,21 @@ class RaffleView(View):
 
         self.enter_raffle_button.disabled = True
         self.end_raffle_button.disabled = True
+        self.redo_raffle_button.disabled = False
 
         self.parent.end_time = int(datetime.now().timestamp())
         self.parent.update_fields()
 
+        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.raffle_type, self.num_winners, self.entrants)
+        DB.get().close_raffle(interaction.guild.id)
+
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         await raffle_message.edit(embed=self.parent, view=self)
 
-        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.raffle_type, self.num_winners, self.entrants)
-        DB.get().close_raffle(interaction.guild.id)
+
+    async def redo_raffle_onclick(self, interaction: Interaction):
+        modal = RedoRaffleModal(raffle_message=interaction.message, entrants=self.entrants)
+        await interaction.response.send_modal(modal)
 
 
 def get_raffle_embed(
@@ -140,8 +123,10 @@ class RaffleEmbed(Embed):
             title="VOD Review Raffle",
             description=description,
         )
-        self.end_time = int((datetime.now() + timedelta(seconds=duration)).timestamp())
+
         self.buttons_view = RaffleView(parent=self, raffle_type=raffle_type, num_winners=num_winners)
+
+        self.end_time = int((datetime.now() + timedelta(seconds=duration)).timestamp())
         self.update_fields()
 
     def update_fields(self) -> None:
@@ -219,6 +204,53 @@ class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
 
         DB.get().create_raffle(interaction.guild.id, raffle_message.id)
 
+class RedoRaffleModal(Modal, title="Redo Raffle"):
+    def __init__(self, raffle_message: Message, entrants: list[Member]) -> None:
+        super().__init__(timeout=None)
+
+        self.raffle_message = raffle_message
+        self.entrants = entrants
+
+        self.raffle_type = TextInput(
+            label="Raffle Type (normal/anyone/new)",
+            default="normal",
+            placeholder="normal, anyone, or new",
+            style=TextStyle.short,
+            required=True,
+            min_length=3,
+            max_length=6,
+        )
+        self.num_winners = TextInput(
+            label="Number of Winners",
+            default="1",
+            placeholder="How many winners to draw (Must be an integer > 0)",
+            style=TextStyle.short,
+            required=True,
+            min_length=1,
+            max_length=2
+        )
+
+        self.add_item(self.raffle_type)
+        self.add_item(self.num_winners)
+
+    async def on_submit(self, interaction: Interaction) -> None:
+        try:
+            raffle_type = RaffleType(self.raffle_type.value.lower())
+        except ValueError:
+            await interaction.response.send_message('Invalid raffle type.', ephemeral=True)
+            return
+
+        try:
+            num_winners = int(self.num_winners.value)
+        except ValueError:
+            await interaction.response.send_message('Invalid number of winners.', ephemeral=True)
+            return
+
+        DB.get().clear_wins(interaction.guild.id, self.raffle_message.id)
+
+        await RaffleCog._end_raffle_impl(interaction, self.raffle_message.id, raffle_type, num_winners, self.entrants)
+
+
 @app_commands.guild_only()
 class RaffleCog(app_commands.Group, name="raffle"):
     def __init__(self, tree: app_commands.CommandTree) -> None:
@@ -253,7 +285,6 @@ class RaffleCog(app_commands.Group, name="raffle"):
         modal = NewRaffleModal()
         await interaction.response.send_modal(modal)
 
-
     @app_commands.command(name="end")
     @app_commands.describe(raffle_type="Type of raffle (default = Normal)")
     @app_commands.checks.has_role("Mod")
@@ -276,7 +307,6 @@ class RaffleCog(app_commands.Group, name="raffle"):
 
         await RaffleCog._end_raffle_impl(interaction, raffle_message_id, raffle_type, num_winners, [])
         DB.get().close_raffle(interaction.guild.id)
-
 
     @staticmethod
     async def _end_raffle_impl(

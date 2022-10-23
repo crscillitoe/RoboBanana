@@ -1,3 +1,4 @@
 configparser==5.3.0
 discord.py==2.0.1
 numpy==1.23.4
+SQLAlchemy==1.4.42

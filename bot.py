@@ -55,7 +55,7 @@ class RaffleType(Enum):
     New = "new"
 
 class RaffleView(View):
-    def __init__(self, parent: RaffleEmbed, raffle_type: RaffleType = RaffleType.Normal, num_winners: int = 1) -> None:
+    def __init__(self, parent: RaffleEmbed, raffle_type: RaffleType, num_winners: int) -> None:
         super().__init__(timeout=None)
 
         self.parent: RaffleEmbed = parent
@@ -73,6 +73,10 @@ class RaffleView(View):
         self.end_raffle_button.callback = self.end_raffle_onclick
         self.add_item(self.end_raffle_button)
 
+    async def get_raffle_message(self, interaction: Interaction) -> Message:
+        raffle_message_id = DB.get().get_raffle_message_id(interaction.guild.id)
+        return await interaction.channel.fetch_message(raffle_message_id)
+
     async def enter_raffle_onclick(self, interaction: Interaction):
         user = interaction.user
         if user in self.entrants:
@@ -81,10 +85,13 @@ class RaffleView(View):
 
         self.entrants.append(user)
         self.parent.update_fields()
-        await interaction.response.edit_message(embed=self.parent)
+        await interaction.response.send_message("Raffle entered!", ephemeral=True)
+
+        raffle_message_id = DB.get().get_raffle_message_id(interaction.guild.id)
+        raffle_message = await interaction.channel.fetch_message(raffle_message_id)
+        await raffle_message.edit(embed=self.parent)
 
     async def end_raffle_onclick(self, interaction: Interaction):
-        # print(f"Button was clicked: {interaction} | {button}")
         if not DB.get().has_ongoing_raffle(interaction.guild.id):
             await interaction.response.send_message("This raffle is no longer active!")
             return
@@ -96,10 +103,16 @@ class RaffleView(View):
 
         self.enter_raffle_button.disabled = True
         self.end_raffle_button.disabled = True
-        await interaction.response.edit_message(view=self)
 
-        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.raffle_type, self.num_winners)
+        self.parent.end_time = int(datetime.now().timestamp())
+        self.parent.update_fields()
+
+        raffle_message = await interaction.channel.fetch_message(raffle_message_id)
+        await raffle_message.edit(embed=self.parent, view=self)
+
+        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.raffle_type, self.num_winners, self.entrants)
         DB.get().close_raffle(interaction.guild.id)
+
 
 def get_raffle_embed(
     description: str | None,
@@ -126,7 +139,6 @@ class RaffleEmbed(Embed):
         super().__init__(
             title="VOD Review Raffle",
             description=description,
-            # colour=Colour.blurple(),
         )
         self.end_time = int((datetime.now() + timedelta(seconds=duration)).timestamp())
         self.buttons_view = RaffleView(parent=self, raffle_type=raffle_type, num_winners=num_winners)
@@ -262,32 +274,9 @@ class RaffleCog(app_commands.Group, name="raffle"):
             await interaction.response.send_message("Oops! That raffle does not exist anymore.")
             return
 
-        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, raffle_type, num_winners)
+        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, raffle_type, num_winners, [])
         DB.get().close_raffle(interaction.guild.id)
 
-
-    @tree.context_menu(name="Redo Raffle")
-    @app_commands.checks.has_role("Mod")
-    async def redo_raffle_context(interaction: Interaction, raffle_message: Message):
-        """
-        Picks new winner(s) from a past raffle.
-        Make sure to use this from the context menu of the original raffle message.
-        """
-        # await interaction.response.send_message(f"Target message ID: {original_raffle.id} | {original_raffle.content!r}")
-
-
-        # num_winners = int(num_winners)
-        # if num_winners < 1:
-        #     raise Exception("The number of winners must be at least 1.")
-
-        raffle_type = RaffleType.Normal
-        num_winners = 1
-
-        # We need to reset the past winners if we're re-doing a raffle draw
-        # otherwise it'd be unfairly counted against them
-        DB.get().clear_wins(interaction.guild.id, raffle_message.id)
-
-        await RaffleCog._end_raffle_impl(interaction, raffle_message.id, raffle_type, num_winners)
 
     @staticmethod
     async def _end_raffle_impl(
@@ -295,6 +284,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
         raffle_message_id: int,
         raffle_type: RaffleType,
         num_winners: int,
+        entrant_list: list[Member],
     ) -> None:
         guild_id = interaction.guild.id
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
@@ -313,12 +303,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
             case _:
                 raise Exception(f"Unimplemented raffle type: {raffle_type}")
 
-        entrants = set()
-        for reaction in raffle_message.reactions:
-            users = [u async for u in reaction.users()]
-            for user in users:
-                if user.id not in ineligible_winner_ids:
-                    entrants.add(user)
+        entrants = set(u for u in entrant_list if u.id not in ineligible_winner_ids)
 
         # Certain servers may only want you to be eligible for a raffle if you have
         # given role(s). These are checked as ORs meaning if you have at least one
@@ -330,7 +315,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
                     entrants.remove(entrant)
 
         if len(entrants) == 0:
-            await interaction.channel.send("No one eligible entered the raffle so there is no winner.")
+            await interaction.response.send_message("No one eligible entered the raffle so there is no winner.")
             return
 
         if raffle_type == RaffleType.Normal:
@@ -342,9 +327,9 @@ class RaffleCog(app_commands.Group, name="raffle"):
             DB.get().record_win(guild_id, raffle_message_id, *winners)
 
         if len(winners) == 1:
-            await interaction.channel.send(f"{winners[0].mention} has won the raffle!")
+            await interaction.response.send_message(f"{winners[0].mention} has won the raffle!")
         else:
-            await interaction.channel.send(
+            await interaction.response.send_message(
                 f"Raffle winners are: {', '.join(map(lambda w: w.mention, winners))}!"
             )
 

@@ -1,3 +1,0 @@
-- use `Exception(...)` and `@<command>.error` for handling command errors
-- store all raffle entries in DB
-- store winner/loser status per raffle entry

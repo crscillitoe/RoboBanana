@@ -1,2 +1,8 @@
 [Discord]
 Token =
+
+[MySQL]
+Username =
+Password =
+Host =
+Name =

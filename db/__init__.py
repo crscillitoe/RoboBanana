@@ -8,8 +8,6 @@ from config import Config
 from datetime import datetime
 from typing import Optional
 
-# DB_NAME = "raffle-new.db"
-
 class DB:
     _instance = None
 
@@ -72,7 +70,6 @@ class DB:
                 .where(Raffle.guild_id == guild_id)
                 .where(Raffle.message_id == raffle_message_id)
                 .where(Raffle.ended == False)
-                # .where(RaffleEntry.raffle_id == Raffle.id)
             )
             result = sess.execute(stmt).all()
 
@@ -146,7 +143,6 @@ class DB:
             raise Exception("There is no ongoing raffle! You need to start a new one.")
 
         with self.session() as sess:
-            # sess.execute(delete(Raffle).where(Raffle.guild_id == guild_id))
             sess.execute(
                 update(Raffle)
                 .where(Raffle.guild_id == guild_id)
@@ -159,8 +155,6 @@ class DB:
         self, guild_id: int, user_ids: list[int]
     ) -> None:
         raffle_id = self.get_raffle_id(guild_id)
-
-        # user_ids = [u.id for u in users]
         with self.session() as sess:
             # for uid in user_ids:
             sess.execute(
@@ -170,7 +164,6 @@ class DB:
                 .values(winner=True)
                 .execution_options(synchronize_session=False)
             )
-                # sess.execute(stmt)
 
     def clear_win(self, raffle_message_id: int) -> None:
         with self.session() as sess:

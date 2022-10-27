@@ -1,13 +1,14 @@
-from sqlalchemy import create_engine, select, delete, func
+from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 
-from .models import Base, EligibleRole, Raffle, Win
+from .models import Base, Raffle, RaffleEntry, RoleModifier
 
-from datetime import datetime, timedelta, timezone
-from discord import Member
+from config import Config
+
+from datetime import datetime
 from typing import Optional
 
-DB_NAME = 'raffle.db'
+# DB_NAME = "raffle-new.db"
 
 class DB:
     _instance = None
@@ -18,8 +19,13 @@ class DB:
         return cls._instance
 
     def __init__(self):
-        self.engine = create_engine(f"sqlite:///{DB_NAME}")
-        self.session = sessionmaker(self.engine)
+        username = Config.CONFIG["MySQL"]["Username"]
+        password = Config.CONFIG["MySQL"]["Password"]
+
+        # self.engine = create_engine(f"sqlite:///{DB_NAME}", echo=False)
+        self.engine = create_engine(f"mysql+pymysql://{username}:{password}@192.168.1.115/vod_raffle_bot", echo=False)
+        self.session = sessionmaker(self.engine, autoflush=True, autocommit=True)
+        # self.session = Session(self.engine, future=True)
 
         Base.metadata.create_all(self.engine)
 
@@ -28,15 +34,72 @@ class DB:
             raise Exception("There is already an ongoing raffle!")
 
         with self.session() as sess:
-            raffle = Raffle(guild_id=guild_id, message_id=message_id)
-            sess.add(raffle)
-            sess.commit()
+            sess.execute(
+                insert(Raffle)
+                .values(guild_id=guild_id, message_id=message_id)
+            )
+
+    def create_raffle_entry(self, guild_id: int, user_id: int, tickets: int) -> None:
+        raffle_id = self.get_raffle_id(guild_id)
+        with self.session() as sess:
+            sess.execute(
+                insert(RaffleEntry)
+                .values(raffle_id=raffle_id, user_id=user_id, tickets=tickets)
+            )
+
+    def get_user_raffle_entry(self, guild_id: int, user_id: int) -> RaffleEntry:
+        raffle_id = self.get_raffle_id(guild_id)
+        with self.session() as sess:
+            stmt = (
+                select(RaffleEntry)
+                .where(RaffleEntry.raffle_id == raffle_id)
+                .where(RaffleEntry.user_id == user_id)
+            )
+            result = sess.execute(stmt).all()
+
+        if len(result) == 0:
+            return None
+
+        return result[0][0]
+
+    def get_raffle_entries(self, guild_id: int, raffle_message_id: int) -> list[RaffleEntry]:
+        raffle_id = self.get_raffle_id(guild_id)
+        with self.session() as sess:
+            stmt = (
+                select(RaffleEntry)
+                .join(Raffle, Raffle.id == RaffleEntry.raffle_id)
+                .where(Raffle.id == raffle_id)
+                .where(Raffle.guild_id == guild_id)
+                .where(Raffle.message_id == raffle_message_id)
+                .where(Raffle.ended == False)
+                # .where(RaffleEntry.raffle_id == Raffle.id)
+            )
+            result = sess.execute(stmt).all()
+
+        return [r[0] for r in result]
+
+    def get_raffle_entry_count(self, guild_id: int) -> int:
+        # special case for immediately after raffle is created
+        if not self.has_ongoing_raffle(guild_id):
+            return 0
+
+        raffle_id = self.get_raffle_id(guild_id)
+        with self.session() as sess:
+            stmt = (
+                select(func.count("*"))
+                .select_from(RaffleEntry)
+                .where(RaffleEntry.raffle_id == raffle_id)
+            )
+            result = sess.execute(stmt).one()
+
+        return result[0]
 
     def has_ongoing_raffle(self, guild_id: int) -> bool:
         with self.session() as sess:
             stmt = (
                 select(Raffle)
                 .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == False)
             )
             result = sess.execute(stmt).all()
 
@@ -50,40 +113,79 @@ class DB:
             stmt = (
                 select(Raffle.message_id)
                 .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == False)
+                .limit(1)
             )
-            result = sess.execute(stmt).all()
+            result = sess.execute(stmt).one()
 
         if len(result) == 0:
             return None
 
-        return result[0][0]
+        return result[0]
 
-    def close_raffle(self, guild_id: int) -> None:
+    def get_raffle_id(self, guild_id: int) -> Optional[int]:
         if not self.has_ongoing_raffle(guild_id):
             raise Exception("There is no ongoing raffle! You need to start a new one.")
 
         with self.session() as sess:
-            sess.execute(delete(Raffle).where(Raffle.guild_id == guild_id))
-            sess.commit()
+            stmt = (
+                select(Raffle.id)
+                .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == False)
+                .limit(1)
+            )
+            result = sess.execute(stmt).one()
+
+        if len(result) == 0:
+            return None
+
+        return result[0]
+
+    def close_raffle(self, guild_id: int, end_time: datetime) -> None:
+        if not self.has_ongoing_raffle(guild_id):
+            raise Exception("There is no ongoing raffle! You need to start a new one.")
+
+        with self.session() as sess:
+            # sess.execute(delete(Raffle).where(Raffle.guild_id == guild_id))
+            sess.execute(
+                update(Raffle)
+                .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == False)
+                .values(ended=True, end_time=end_time)
+                .execution_options(synchronize_session="fetch")
+            )
 
     def record_win(
-        self, guild_id: int, message_id: int, *users: Member
+        self, guild_id: int, user_ids: list[int]
     ) -> None:
-        with self.session() as sess:
-            values = list(map(lambda user: Win(guild_id=guild_id, message_id=message_id, user_id=user.id), users))
-            sess.add_all(values)
-            sess.commit()
+        raffle_id = self.get_raffle_id(guild_id)
 
-    def clear_wins(self, guild_id: int, message_id: int) -> None:
+        # user_ids = [u.id for u in users]
+        with self.session() as sess:
+            # for uid in user_ids:
+            sess.execute(
+                update(RaffleEntry)
+                .where(RaffleEntry.raffle_id == raffle_id)
+                .where(RaffleEntry.user_id.in_(user_ids))
+                .values(winner=True)
+                .execution_options(synchronize_session=False)
+            )
+                # sess.execute(stmt)
+
+    def clear_win(self, raffle_message_id: int) -> None:
         with self.session() as sess:
             sess.execute(
-                delete(Win)
-                .where(Win.guild_id == guild_id)
-                .where(Win.message_id == message_id)
+                update(Raffle)
+                .where(Raffle.message_id == raffle_message_id)
+                .where(Raffle.ended == True)
+                .values(ended=False, end_time=None)
+                .execution_options(synchronize_session="fetch")
             )
-            sess.commit()
 
     def recent_winner_ids(self, guild_id: int) -> set[int]:
+        # TODO: rewrite to read from raffle_entries and check date
+        return set()
+
         with self.session() as sess:
             stmt = (
                 select(Win.user_id)
@@ -97,56 +199,12 @@ class DB:
 
         return {r[0] for r in result}
 
-    def past_week_winner_ids(self, guild_id: int) -> set[int]:
-        # Discord uses a snowflake ID scheme which stores the UTC timestamp
-        # So rather than need to store a separate timestamp column, we can
-        # filter on the ID prefix!
-        one_week_ago = int(
-            (datetime.now(tz=timezone.utc) - timedelta(days=7)).timestamp() * 1000
-        )
-        discord_timestamp = one_week_ago - 1420070400000  # Discord epoch
-        min_snowflake = discord_timestamp << 22
-
+    def get_role_modifiers(self, guild_id: int) -> dict[int, int]:
         with self.session() as sess:
             stmt = (
-                select(Win.user_id)
-                .distinct()
-                .where(Win.guild_id == guild_id)
-                .where(Win.message_id > min_snowflake)
+                select(RoleModifier)
+                .where(RoleModifier.guild_id == guild_id)
             )
             result = sess.execute(stmt).all()
 
-        return {r[0] for r in result}
-
-    def all_winner_ids(self, guild_id: int) -> set[int]:
-        with self.session() as sess:
-            stmt = (
-                select(Win.user_id)
-                .distinct()
-                .where(Win.guild_id == guild_id)
-            )
-            result = sess.execute(stmt).all()
-
-        return {r[0] for r in result}
-
-
-    def win_counts(self, guild_id: int) -> dict[int, int]:
-        with self.session() as sess:
-            stmt = (
-                select(Win.user_id, func.count("*").label("num_wins"))
-                .where(Win.guild_id == guild_id)
-                .group_by(Win.user_id)
-            )
-            result = sess.execute(stmt).all()
-
-        return {user_id: wins for user_id, wins in result}
-
-    def eligible_role_ids(self, guild_id: int) -> set[int]:
-        with self.session() as sess:
-            stmt = (
-                select(EligibleRole.role_id)
-                .where(EligibleRole.guild_id == guild_id)
-            )
-            result = sess.execute(stmt).all()
-
-        return {r[0] for r in result}
+        return {r[0].role_id: r[0].modifier for r in result}

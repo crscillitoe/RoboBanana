@@ -21,11 +21,11 @@ class DB:
     def __init__(self):
         username = Config.CONFIG["MySQL"]["Username"]
         password = Config.CONFIG["MySQL"]["Password"]
+        db_host = Config.CONFIG["MySQL"]["Host"]
+        db_name = Config.CONFIG["MySQL"]["Name"]
 
-        # self.engine = create_engine(f"sqlite:///{DB_NAME}", echo=False)
-        self.engine = create_engine(f"mysql+pymysql://{username}:{password}@192.168.1.115/vod_raffle_bot", echo=False)
+        self.engine = create_engine(f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}")
         self.session = sessionmaker(self.engine, autoflush=True, autocommit=True)
-        # self.session = Session(self.engine, future=True)
 
         Base.metadata.create_all(self.engine)
 

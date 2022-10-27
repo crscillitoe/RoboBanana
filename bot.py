@@ -292,7 +292,6 @@ class RaffleCog(app_commands.Group, name="raffle"):
             raise Exception("Oops! That raffle does not exist anymore.")
 
         # ineligible_winner_ids = DB().recent_winner_ids(guild_id)
-
         # entrants = set(u for u in entrant_list if u.id not in ineligible_winner_ids)
 
         raffle_entries = DB().get_raffle_entries(guild_id, raffle_message_id)

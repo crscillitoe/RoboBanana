@@ -49,6 +49,8 @@ class RaffleView(View):
             await interaction.response.send_message("You have already entered this raffle!", ephemeral=True)
             return
 
+        await interaction.response.defer(thinking=True, ephemeral=True)
+
         tickets = RaffleCog.get_tickets(guild_id, user)
         DB().create_raffle_entry(guild_id, user.id, tickets)
 
@@ -58,7 +60,7 @@ class RaffleView(View):
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         await raffle_message.edit(embed=self.parent)
 
-        await interaction.response.send_message(f"Raffle entered! Entry Tickets: {tickets}", ephemeral=True)
+        await interaction.followup.send(f"Raffle entered! Entry Tickets: {tickets}", ephemeral=True)
 
     async def end_raffle_onclick(self, interaction: Interaction):
         if not self.has_role("Mod", interaction):
@@ -223,6 +225,8 @@ class RedoRaffleModal(Modal, title="Redo Raffle"):
         DB().clear_win(self.raffle_message.id)
 
         await RaffleCog._end_raffle_impl(interaction, self.raffle_message.id, num_winners)
+
+        DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
 
 @app_commands.guild_only()

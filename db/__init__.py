@@ -60,6 +60,23 @@ class DB:
 
         return result[0][0]
 
+    def get_recent_win_stats(self, guild_id: int, user_id: int, after: datetime) -> tuple[int, datetime]:
+        with self.session() as sess:
+            stmt = (
+                select(func.count("*"), func.max(RaffleEntry.timestamp))
+                .select_from(RaffleEntry)
+                .join(Raffle)
+                .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == True)
+                .where(RaffleEntry.winner == True)
+                .where(RaffleEntry.user_id == user_id)
+                .where(Raffle.end_time > after)
+            )
+
+            result = sess.execute(stmt).one()
+
+        return result
+
     def get_raffle_entries(self, guild_id: int) -> list[RaffleEntry]:
         if not self.has_ongoing_raffle(guild_id):
             return []
@@ -68,14 +85,42 @@ class DB:
         with self.session() as sess:
             stmt = (
                 select(RaffleEntry)
-                .join(Raffle, Raffle.id == RaffleEntry.raffle_id)
+                .join(Raffle)
                 .where(Raffle.id == raffle_id)
                 .where(Raffle.guild_id == guild_id)
                 .where(Raffle.ended == False)
+                .where(RaffleEntry.winner == False)
             )
             result = sess.execute(stmt).all()
 
         return [r[0] for r in result]
+
+    def get_loss_streak_for_user(self, user_id: int) -> int:
+        """
+        Fetch the current number of consecutive losses since the last win
+        """
+
+        with self.session() as sess:
+            # get the most recent raffle entry with MAX(id)
+            subquery = (
+                select(func.ifnull(func.max(RaffleEntry.id), 0).label('last_win_id'))
+                .where(RaffleEntry.winner == True)
+                .where(RaffleEntry.user_id == user_id)
+                .subquery()
+            )
+
+            # count all losses for the same user after the last winning entry
+            stmt = (
+                select(func.count("*"))
+                .select_from(RaffleEntry)
+                .where(RaffleEntry.id > subquery.c.last_win_id)
+                .where(RaffleEntry.winner == False)
+                .where(RaffleEntry.user_id == user_id)
+            )
+            result = sess.execute(stmt).one()
+
+        return result[0]
+
 
     def get_raffle_entry_count(self, guild_id: int) -> int:
         # special case for immediately after raffle is created
@@ -176,23 +221,6 @@ class DB:
                 .values(ended=False, end_time=None)
                 .execution_options(synchronize_session="fetch")
             )
-
-    def recent_winner_ids(self, guild_id: int) -> set[int]:
-        # TODO: rewrite to read from raffle_entries and check date
-        return set()
-
-        with self.session() as sess:
-            stmt = (
-                select(Win.user_id)
-                .distinct()
-                .where(Win.guild_id == guild_id)
-                .order_by(Win.id.desc())
-                .limit(6)
-            )
-
-            result = sess.execute(stmt).all()
-
-        return {r[0] for r in result}
 
     def get_role_modifiers(self, guild_id: int) -> dict[int, int]:
         with self.session() as sess:

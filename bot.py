@@ -7,17 +7,9 @@ from discord import app_commands, ButtonStyle, Client, Embed, Intents, Interacti
 from discord.ui import Button, TextInput, Modal, View
 import random
 from config import Config
-from db import DB
+from db import DB, RaffleEntry
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
-
-intents = Intents.default()
-intents.members = True
-intents.message_content = True
-intents.guilds = True
-
-client = Client(intents=intents)
-tree = app_commands.CommandTree(client)
 
 class RaffleView(View):
     def __init__(self, parent: RaffleEmbed, num_winners: int) -> None:
@@ -26,15 +18,15 @@ class RaffleView(View):
         self.parent = parent
         self.num_winners = num_winners
 
-        self.enter_raffle_button = Button(label="Enter Raffle", style=ButtonStyle.blurple)
+        self.enter_raffle_button = Button(label="Enter Raffle", style=ButtonStyle.blurple, custom_id="raffle_view:enter_button")
         self.enter_raffle_button.callback = self.enter_raffle_onclick
         self.add_item(self.enter_raffle_button)
 
-        self.end_raffle_button = Button(label="End Raffle", style=ButtonStyle.red)
+        self.end_raffle_button = Button(label="End Raffle", style=ButtonStyle.red, custom_id="raffle_view:end_button")
         self.end_raffle_button.callback = self.end_raffle_onclick
         self.add_item(self.end_raffle_button)
 
-        self.redo_raffle_button = Button(label="Redo Raffle", style=ButtonStyle.secondary, disabled=True)
+        self.redo_raffle_button = Button(label="Redo Raffle", style=ButtonStyle.secondary, disabled=True, custom_id="raffle_view:redo_button")
         self.redo_raffle_button.callback = self.redo_raffle_onclick
         self.add_item(self.redo_raffle_button)
 
@@ -43,13 +35,24 @@ class RaffleView(View):
         return role is not None
 
     async def enter_raffle_onclick(self, interaction: Interaction):
+        await interaction.response.defer(thinking=True, ephemeral=True)
+
         guild_id = interaction.guild.id
         user = interaction.user
         if DB().get_user_raffle_entry(guild_id, user.id) is not None:
-            await interaction.response.send_message("You have already entered this raffle!", ephemeral=True)
+            await interaction.followup.send("You have already entered this raffle!", ephemeral=True)
             return
 
-        await interaction.response.defer(thinking=True, ephemeral=True)
+        one_week_ago = datetime.now().date() - timedelta(days=7)
+        weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(guild_id=guild_id, user_id=user.id, after=one_week_ago)
+        if weekly_wins > 0:
+            next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
+            next_eligible_ts = int(datetime.combine(next_eligible_date, datetime.min.time()).timestamp())
+            await interaction.followup.send(
+                f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
+                ephemeral=True
+            )
+            return
 
         tickets = RaffleCog.get_tickets(guild_id, user)
         DB().create_raffle_entry(guild_id, user.id, tickets)
@@ -104,7 +107,7 @@ class RaffleEmbed(Embed):
         guild_id: int,
         description: str | None,
         num_winners: int,
-        duration: int,
+        end_time: datetime,
         role_odds: list[tuple[str, int]],
     ):
         super().__init__(
@@ -114,7 +117,16 @@ class RaffleEmbed(Embed):
 
         self.guild_id = guild_id
         self.buttons_view = RaffleView(parent=self, num_winners=num_winners)
-        self.end_time = int((datetime.now() + timedelta(seconds=duration)).timestamp())
+        self.end_time = int(end_time.timestamp())
+
+        self.global_odds_str = """
+Everyone: +100 Tickets
+Bad Luck Protection*: +5 Tickets
+
+*\*Per consecutive loss, resets when you win.*
+"""
+
+        # role odds
         self.role_odds = role_odds
 
         self.update_fields()
@@ -124,7 +136,8 @@ class RaffleEmbed(Embed):
         self.add_field(name="Raffle End", value=f"<t:{self.end_time}:R>", inline=True)
         self.add_field(name="Entries", value=str(DB().get_raffle_entry_count(self.guild_id)), inline=True)
         self.add_field(name="Total Tickets", value=str(self.get_raffle_tickets()), inline=True)
-        self.add_field(name="Odds", value=self.get_role_odds_string(), inline=True)
+        self.add_field(name="Global Odds", value=self.global_odds_str, inline=True)
+        self.add_field(name="Role Odds", value=self.get_role_odds_string(), inline=True)
 
     def get_raffle_tickets(self) -> int:
         entries = DB().get_raffle_entries(self.guild_id)
@@ -132,7 +145,8 @@ class RaffleEmbed(Embed):
 
     def get_role_odds_string(self) -> str:
         return "\n".join(
-            f"{name}: {'+' if mod > 0 else '-'}{mod} Tickets" for name, mod in self.role_odds
+            f"{name}: {'+' if mod > 0 else '-'}{mod} Tickets"
+            for name, mod in self.role_odds
         )
 
 class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
@@ -184,15 +198,15 @@ class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
         description = self.description.value
         guild_role_names = {r.id: r.name for r in interaction.guild.roles}
         role_modifiers = DB().get_role_modifiers(interaction.guild.id)
-        role_odds = [
-            ('Everyone', 100)
-        ] + [(guild_role_names[_id], m) for _id, m in role_modifiers.items() if m != 0]
+        role_odds = [(guild_role_names[_id], m) for _id, m in role_modifiers.items() if m != 0]
+
+        end_time = datetime.now() + timedelta(seconds=duration)
 
         embed = RaffleEmbed(
             guild_id=interaction.guild.id,
             description=description,
             num_winners=num_winners,
-            duration=duration,
+            end_time=end_time,
             role_odds=role_odds,
         )
         await interaction.response.send_message(embed=embed, view=embed.buttons_view)
@@ -233,6 +247,28 @@ class RedoRaffleModal(Modal, title="Redo Raffle"):
 
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
+
+
+class RaffleBot(Client):
+    def __init__(self):
+        intents = Intents.default()
+        intents.members = True
+        intents.message_content = True
+        intents.guilds = True
+
+        super().__init__(intents=intents)
+
+    # async def setup_hook(self) -> None:
+
+    async def on_ready(self):
+        logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
+
+    async def on_button_click(self, interaction):
+        logging.info(f'button clicked: {interaction}')
+
+
+client = RaffleBot()
+tree = app_commands.CommandTree(client)
 
 @app_commands.guild_only()
 class RaffleCog(app_commands.Group, name="raffle"):
@@ -300,52 +336,44 @@ class RaffleCog(app_commands.Group, name="raffle"):
         if raffle_message is None:
             raise Exception("Oops! That raffle does not exist anymore.")
 
-        # ineligible_winner_ids = DB().recent_winner_ids(guild_id)
-        # entrants = set(u for u in entrant_list if u.id not in ineligible_winner_ids)
+        await interaction.response.defer(thinking=True)
 
         raffle_entries = DB().get_raffle_entries(guild_id)
-        entrants = [interaction.guild.get_member(e.user_id) for e in raffle_entries]
-
-        if len(entrants) == 0:
-            await interaction.response.send_message("No one eligible entered the raffle so there is no winner.")
+        if len(raffle_entries) == 0:
+            await interaction.followup.send("No one eligible entered the raffle so there is no winner.")
             return
 
-        winners = RaffleCog.choose_winners(guild_id, list(entrants), num_winners)
-        winner_ids = [w.id for w in winners]
+        winner_ids = RaffleCog.choose_winners(raffle_entries, num_winners)
+        winners = [interaction.guild.get_member(_id) for _id in winner_ids]
 
         if len(winners) == 1:
-            await interaction.response.send_message(f"{winners[0].mention} has won the raffle!")
+            await interaction.followup.send(f"{winners[0].mention} has won the raffle!")
         else:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 f"Raffle winners are: {', '.join(w.mention for w in winners)}!"
             )
 
         DB().record_win(guild_id, winner_ids)
 
     @staticmethod
-    def choose_winners(
-        guild_id: int, entrants: list[Member], num_winners: int
-    ) -> list[Member]:
+    def choose_winners(entries: list[RaffleEntry], num_winners: int) -> list[int]:
         """
         Every raffle entry starts with 100 "tickets". Certain roles will get extra tickets.
 
         Then we let random.choices work its magic.
         """
-        if len(entrants) < num_winners:
-            raise Exception("There are not enough entrants for that many winners.")
+        if len(entries) < num_winners:
+            raise Exception("There are not enough entries for that many winners.")
 
-        # step 1. fetch all role modifiers
-        role_modifiers = DB().get_role_modifiers(guild_id)
-
-        # step 2. calculate tickets-per-entrant
-        entrant_tickets = []
-        for ent in entrants:
-            # every entrant starts with 100 ticket + any ticket modifiers per role
-            tickets = 100 + sum(role_modifiers.get(r.id, 0) for r in ent.roles)
-            entrant_tickets.append(tickets)
+        # step 1. convert raffle entries into lists of user_ids and tickets
+        entrants = []
+        entrant_weights = []
+        for ent in entries:
+            entrants.append(ent.user_id)
+            entrant_weights.append(ent.tickets)
 
         # step 3. using weighted probability, select a random winner
-        winners = random.choices(entrants, weights=entrant_tickets, k=num_winners)
+        winners = random.choices(entrants, weights=entrant_weights, k=num_winners)
 
         return winners
 
@@ -356,10 +384,19 @@ class RaffleCog(app_commands.Group, name="raffle"):
         """
         # fetch all role modifiers for the guild
         role_modifiers = DB().get_role_modifiers(guild_id)
+        loss_streak = DB().get_loss_streak_for_user(user.id)
 
         # calculate tickets
-        # every entrant starts with 100 ticket + any ticket modifiers per role
-        return 100 + sum(role_modifiers.get(r.id, 0) for r in user.roles)
+        return (
+            # every entrant starts with 100 ticket
+            100
+
+            # + any role modifiers from the DB
+            + sum(role_modifiers.get(r.id, 0) for r in user.roles)
+
+            # + 5tk/loss since last win
+            + (5 * loss_streak)
+        )
 
 
 async def main():

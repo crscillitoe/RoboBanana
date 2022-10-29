@@ -60,7 +60,10 @@ class DB:
 
         return result[0][0]
 
-    def get_raffle_entries(self, guild_id: int, raffle_message_id: int) -> list[RaffleEntry]:
+    def get_raffle_entries(self, guild_id: int) -> list[RaffleEntry]:
+        if not self.has_ongoing_raffle(guild_id):
+            return []
+
         raffle_id = self.get_raffle_id(guild_id)
         with self.session() as sess:
             stmt = (
@@ -68,7 +71,6 @@ class DB:
                 .join(Raffle, Raffle.id == RaffleEntry.raffle_id)
                 .where(Raffle.id == raffle_id)
                 .where(Raffle.guild_id == guild_id)
-                .where(Raffle.message_id == raffle_message_id)
                 .where(Raffle.ended == False)
             )
             result = sess.execute(stmt).all()

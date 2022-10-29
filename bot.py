@@ -84,11 +84,11 @@ class RaffleView(View):
         self.parent.end_time = int(end_time.timestamp())
         self.parent.update_fields()
 
-        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.num_winners)
-        DB().close_raffle(interaction.guild.id, end_time)
-
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         await raffle_message.edit(embed=self.parent, view=self)
+
+        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, self.num_winners)
+        DB().close_raffle(interaction.guild.id, end_time)
 
 
     async def redo_raffle_onclick(self, interaction: Interaction):
@@ -122,8 +122,13 @@ class RaffleEmbed(Embed):
     def update_fields(self) -> None:
         self.clear_fields()
         self.add_field(name="Raffle End", value=f"<t:{self.end_time}:R>", inline=True)
+        self.add_field(name="Entries", value=str(DB().get_raffle_entry_count(self.guild_id)), inline=True)
+        self.add_field(name="Total Tickets", value=str(self.get_raffle_tickets()), inline=True)
         self.add_field(name="Odds", value=self.get_role_odds_string(), inline=True)
-        self.add_field(name="Total Entries", value=str(DB().get_raffle_entry_count(self.guild_id)), inline=True)
+
+    def get_raffle_tickets(self) -> int:
+        entries = DB().get_raffle_entries(self.guild_id)
+        return sum([e.tickets for e in entries])
 
     def get_role_odds_string(self) -> str:
         return "\n".join(
@@ -298,7 +303,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
         # ineligible_winner_ids = DB().recent_winner_ids(guild_id)
         # entrants = set(u for u in entrant_list if u.id not in ineligible_winner_ids)
 
-        raffle_entries = DB().get_raffle_entries(guild_id, raffle_message_id)
+        raffle_entries = DB().get_raffle_entries(guild_id)
         entrants = [interaction.guild.get_member(e.user_id) for e in raffle_entries]
 
         if len(entrants) == 0:

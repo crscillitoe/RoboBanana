@@ -1,6 +1,4 @@
-# VODReviewRaffleBot
-
-Based on [iamlawfulgood/raffle_bot](https://github.com/iamlawfulgood/raffle_bot).
+# VOD Review Raffle Bot
 
 Made for [Woohoojin](https://twitch.tv/woohoojin).
 

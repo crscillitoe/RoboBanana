@@ -214,11 +214,21 @@ class DB:
 
     def clear_win(self, raffle_message_id: int) -> None:
         with self.session() as sess:
+            # TODO: do we want to enable this?
+            # clear winner status from previous entries, so anyone can win again
+            # sess.execute(
+            #     update(RaffleEntry)
+            #     .values(winner=False)
+            #     .where(RaffleEntry.raffle_id == Raffle.id)
+            #     .where(Raffle.message_id == raffle_message_id)
+            #     .where(Raffle.ended == True)
+            #     .execution_options(synchronize_session="fetch")
+            # )
             sess.execute(
                 update(Raffle)
+                .values(ended=False, end_time=None)
                 .where(Raffle.message_id == raffle_message_id)
                 .where(Raffle.ended == True)
-                .values(ended=False, end_time=None)
                 .execution_options(synchronize_session="fetch")
             )
 

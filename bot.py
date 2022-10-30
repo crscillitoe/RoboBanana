@@ -43,16 +43,18 @@ class RaffleView(View):
             await interaction.followup.send("You have already entered this raffle!", ephemeral=True)
             return
 
-        one_week_ago = datetime.now().date() - timedelta(days=7)
-        weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(guild_id=guild_id, user_id=user.id, after=one_week_ago)
-        if weekly_wins > 0:
-            next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
-            next_eligible_ts = int(datetime.combine(next_eligible_date, datetime.min.time()).timestamp())
-            await interaction.followup.send(
-                f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
-                ephemeral=True
-            )
-            return
+        # Mods can always enter a raffle
+        if not self.has_role("Mod", interaction):
+            one_week_ago = datetime.now().date() - timedelta(days=7)
+            weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(guild_id=guild_id, user_id=user.id, after=one_week_ago)
+            if weekly_wins > 0 and last_win_entry_dt is not None:
+                next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
+                next_eligible_ts = int(datetime.combine(next_eligible_date, datetime.min.time()).timestamp())
+                await interaction.followup.send(
+                    f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
+                    ephemeral=True
+                )
+                return
 
         tickets = RaffleCog.get_tickets(guild_id, user)
         DB().create_raffle_entry(guild_id, user.id, tickets)
@@ -257,8 +259,6 @@ class RaffleBot(Client):
         intents.guilds = True
 
         super().__init__(intents=intents)
-
-    # async def setup_hook(self) -> None:
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")

@@ -7,16 +7,17 @@ from discord import app_commands, ButtonStyle, Client, Embed, Intents, Interacti
 from discord.ui import Button, TextInput, Modal, View
 import random
 from config import Config
-from db import DB, RaffleEntry
+from db import DB, RaffleEntry, RaffleType
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
 class RaffleView(View):
-    def __init__(self, parent: RaffleEmbed, num_winners: int) -> None:
+    def __init__(self, parent: RaffleEmbed, num_winners: int, raffle_type: RaffleType) -> None:
         super().__init__(timeout=None)
 
         self.parent = parent
         self.num_winners = num_winners
+        self.raffle_type = raffle_type
 
         self.enter_raffle_button = Button(label="Enter Raffle", style=ButtonStyle.blurple, custom_id="raffle_view:enter_button")
         self.enter_raffle_button.callback = self.enter_raffle_onclick
@@ -38,13 +39,18 @@ class RaffleView(View):
         await interaction.response.defer(thinking=True, ephemeral=True)
 
         guild_id = interaction.guild.id
+        if not DB().has_ongoing_raffle(interaction.guild.id):
+            await interaction.followup.send("This raffle is no longer active!")
+            return
+
         user = interaction.user
         if DB().get_user_raffle_entry(guild_id, user.id) is not None:
             await interaction.followup.send("You have already entered this raffle!", ephemeral=True)
             return
 
-        # Mods can always enter a raffle
-        if not self.has_role("Mod", interaction):
+
+        # Mods can always enter a raffle, anyone can enter in "anyone" raffle type
+        if not self.has_role("Mod", interaction) and self.raffle_type == RaffleType.normal:
             one_week_ago = datetime.now().date() - timedelta(days=7)
             weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(guild_id=guild_id, user_id=user.id, after=one_week_ago)
             if weekly_wins > 0 and last_win_entry_dt is not None:
@@ -56,7 +62,7 @@ class RaffleView(View):
                 )
                 return
 
-        tickets = RaffleCog.get_tickets(guild_id, user)
+        tickets = RaffleCog.get_tickets(guild_id, user, self.raffle_type)
         DB().create_raffle_entry(guild_id, user.id, tickets)
 
         self.parent.update_fields()
@@ -108,9 +114,9 @@ class RaffleEmbed(Embed):
     def __init__(self,
         guild_id: int,
         description: str | None,
-        num_winners: int,
         end_time: datetime,
         role_odds: list[tuple[str, int]],
+        raffle_type: RaffleType,
     ):
         super().__init__(
             title="VOD Review Raffle",
@@ -118,18 +124,26 @@ class RaffleEmbed(Embed):
         )
 
         self.guild_id = guild_id
-        self.buttons_view = RaffleView(parent=self, num_winners=num_winners)
+        self.raffle_type = raffle_type
         self.end_time = int(end_time.timestamp())
 
-        self.global_odds_str = """
-Everyone: +100 Tickets
-Bad Luck Protection*: +5 Tickets
-
-*\*Per consecutive loss, resets when you win.*
-"""
+        # global odds
+        global_odds_str_parts = [
+            "Everyone: +100 Tickets"
+        ]
+        if self.raffle_type == RaffleType.normal:
+            global_odds_str_parts += [
+                "Bad Luck Protection*: +5 Tickets",
+                "",
+                "*\*Per consecutive loss, resets when you win.*"
+            ]
+        self.global_odds_str = "\n".join(global_odds_str_parts)
 
         # role odds
-        self.role_odds = role_odds
+        self.role_odds_str = "\n".join(
+            f"{name}: {'+' if mod > 0 else '-'}{mod} Tickets"
+            for name, mod in role_odds
+        )
 
         self.update_fields()
 
@@ -139,21 +153,17 @@ Bad Luck Protection*: +5 Tickets
         self.add_field(name="Entries", value=str(DB().get_raffle_entry_count(self.guild_id)), inline=True)
         self.add_field(name="Total Tickets", value=str(self.get_raffle_tickets()), inline=True)
         self.add_field(name="Global Odds", value=self.global_odds_str, inline=True)
-        self.add_field(name="Role Odds", value=self.get_role_odds_string(), inline=True)
+        self.add_field(name="Role Odds", value=self.role_odds_str, inline=True)
 
     def get_raffle_tickets(self) -> int:
         entries = DB().get_raffle_entries(self.guild_id)
         return sum([e.tickets for e in entries])
 
-    def get_role_odds_string(self) -> str:
-        return "\n".join(
-            f"{name}: {'+' if mod > 0 else '-'}{mod} Tickets"
-            for name, mod in self.role_odds
-        )
-
 class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
-    def __init__(self) -> None:
+    def __init__(self, raffle_type: RaffleType) -> None:
         super().__init__(timeout=None)
+
+        self.raffle_type = raffle_type
 
         self.duration = TextInput(
             label="Duration (in seconds)",
@@ -207,14 +217,17 @@ class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
         embed = RaffleEmbed(
             guild_id=interaction.guild.id,
             description=description,
-            num_winners=num_winners,
             end_time=end_time,
             role_odds=role_odds,
+            raffle_type=self.raffle_type,
         )
-        await interaction.response.send_message(embed=embed, view=embed.buttons_view)
+        view = RaffleView(parent=embed, num_winners=num_winners, raffle_type=self.raffle_type)
+        await interaction.response.send_message("Creating raffle...")
         raffle_message = await interaction.original_response()
 
-        DB().create_raffle(interaction.guild.id, raffle_message.id)
+        DB().create_raffle(guild_id=interaction.guild.id, message_id=raffle_message.id, raffle_type=self.raffle_type)
+
+        await raffle_message.edit(content="", embed=embed, view=view)
 
 
 
@@ -294,14 +307,15 @@ class RaffleCog(app_commands.Group, name="raffle"):
 
     @app_commands.command(name="start")
     @app_commands.checks.has_role("Mod")
-    async def start(self, interaction: Interaction):
+    @app_commands.describe(raffle_type='Raffle Type (default: normal)')
+    async def start(self, interaction: Interaction, raffle_type: RaffleType = RaffleType.normal):
         """Starts a new raffle"""
 
         if DB().has_ongoing_raffle(interaction.guild.id):
             await interaction.response.send_message("There is already an ongoing raffle!")
             return
 
-        modal = NewRaffleModal()
+        modal = NewRaffleModal(raffle_type=raffle_type)
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="end")
@@ -331,6 +345,10 @@ class RaffleCog(app_commands.Group, name="raffle"):
         raffle_message_id: int,
         num_winners: int,
     ) -> None:
+        if num_winners == 0:
+            await interaction.response.send_message("There is no winner.")
+            return
+
         guild_id = interaction.guild.id
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         if raffle_message is None:
@@ -340,7 +358,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
 
         raffle_entries = DB().get_raffle_entries(guild_id)
         if len(raffle_entries) == 0:
-            await interaction.followup.send("No one eligible entered the raffle so there is no winner.")
+            await interaction.followup.send("No one is elligble to win the raffle.")
             return
 
         winner_ids = RaffleCog.choose_winners(raffle_entries, num_winners)
@@ -358,7 +376,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
     @staticmethod
     def choose_winners(entries: list[RaffleEntry], num_winners: int) -> list[int]:
         """
-        Every raffle entry starts with 100 "tickets". Certain roles will get extra tickets.
+        Every raffle entry has a ticket count, which is their entry weight.
 
         Then we let random.choices work its magic.
         """
@@ -378,26 +396,24 @@ class RaffleCog(app_commands.Group, name="raffle"):
         return winners
 
     @staticmethod
-    def get_tickets(guild_id: int, user: Member) -> int:
+    def get_tickets(guild_id: int, user: Member, raffle_type: RaffleType) -> int:
         """
         Calculate the number of tickers a specific user should have for a raffle entry.
         """
-        # fetch all role modifiers for the guild
+        # every entrant starts with 100 ticket
+        tickets = 100
+
+        # + any role modifiers from the DB
         role_modifiers = DB().get_role_modifiers(guild_id)
-        loss_streak = DB().get_loss_streak_for_user(user.id)
+        tickets += sum(role_modifiers.get(r.id, 0) for r in user.roles)
 
-        # calculate tickets
-        return (
-            # every entrant starts with 100 ticket
-            100
-
-            # + any role modifiers from the DB
-            + sum(role_modifiers.get(r.id, 0) for r in user.roles)
-
+        # add bad luck protection for normal raffles
+        if raffle_type == RaffleType.normal:
             # + 5tk/loss since last win
-            + (5 * loss_streak)
-        )
+            loss_streak = DB().get_loss_streak_for_user(user.id)
+            tickets += (5 * loss_streak)
 
+        return tickets
 
 async def main():
     async with client:

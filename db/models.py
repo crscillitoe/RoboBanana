@@ -1,7 +1,12 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, BigInteger, ForeignKey, func
+import enum
+from sqlalchemy import BigInteger, Boolean, Column, DateTime, Enum, ForeignKey, Integer, func
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
+
+class RaffleType(enum.Enum):
+    normal = 1
+    anyone = 2
 
 class Raffle(Base):
     __tablename__ = "raffles"
@@ -12,6 +17,7 @@ class Raffle(Base):
     ended = Column(Boolean, nullable=False, default=False)
     start_time = Column(DateTime, default=func.now())
     end_time = Column(DateTime, nullable=True)
+    raffle_type = Column(Enum(RaffleType), default=RaffleType.normal)
 
     entries = relationship("RaffleEntry", back_populates="raffle")
 

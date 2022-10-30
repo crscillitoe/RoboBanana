@@ -1,12 +1,11 @@
+from datetime import datetime
 from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
+from typing import Optional
 
-from .models import Base, Raffle, RaffleEntry, RoleModifier
-
+from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
-from datetime import datetime
-from typing import Optional
 
 class DB:
     _instance = None
@@ -27,14 +26,14 @@ class DB:
 
         Base.metadata.create_all(self.engine)
 
-    def create_raffle(self, guild_id: int, message_id: int) -> None:
+    def create_raffle(self, guild_id: int, message_id: int, raffle_type: RaffleType) -> None:
         if self.has_ongoing_raffle(guild_id):
             raise Exception("There is already an ongoing raffle!")
 
         with self.session() as sess:
             sess.execute(
                 insert(Raffle)
-                .values(guild_id=guild_id, message_id=message_id)
+                .values(guild_id=guild_id, message_id=message_id, raffle_type=raffle_type)
             )
 
     def create_raffle_entry(self, guild_id: int, user_id: int, tickets: int) -> None:
@@ -61,6 +60,11 @@ class DB:
         return result[0][0]
 
     def get_recent_win_stats(self, guild_id: int, user_id: int, after: datetime) -> tuple[int, datetime]:
+        """
+        Query how many (normal) raffle wins a :user_id has had within a :guild_id since :after
+
+        Returns wins since :after and the date they last won
+        """
         with self.session() as sess:
             stmt = (
                 select(func.count("*"), func.max(RaffleEntry.timestamp))
@@ -68,6 +72,7 @@ class DB:
                 .join(Raffle)
                 .where(Raffle.guild_id == guild_id)
                 .where(Raffle.ended == True)
+                .where(Raffle.raffle_type == RaffleType.normal)
                 .where(RaffleEntry.winner == True)
                 .where(RaffleEntry.user_id == user_id)
                 .where(Raffle.end_time > after)
@@ -104,8 +109,10 @@ class DB:
             # get the most recent raffle entry with MAX(id)
             subquery = (
                 select(func.ifnull(func.max(RaffleEntry.id), 0).label('last_win_id'))
+                .join(Raffle)
                 .where(RaffleEntry.winner == True)
                 .where(RaffleEntry.user_id == user_id)
+                .where(Raffle.raffle_type == RaffleType.normal)
                 .subquery()
             )
 
@@ -113,9 +120,11 @@ class DB:
             stmt = (
                 select(func.count("*"))
                 .select_from(RaffleEntry)
+                .join(Raffle)
                 .where(RaffleEntry.id > subquery.c.last_win_id)
                 .where(RaffleEntry.winner == False)
                 .where(RaffleEntry.user_id == user_id)
+                .where(Raffle.raffle_type == RaffleType.normal)
             )
             result = sess.execute(stmt).one()
 

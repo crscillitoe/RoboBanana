@@ -390,10 +390,17 @@ class RaffleCog(app_commands.Group, name="raffle"):
             entrants.append(ent.user_id)
             entrant_weights.append(ent.tickets)
 
-        # step 3. using weighted probability, select a random winner
-        winners = random.choices(entrants, weights=entrant_weights, k=num_winners)
+        # step 3. using weighted probability (without replacement), select the random winner(s)
+        winners = RaffleCog.weighted_sample_without_replacement(population=entrants, weights=entrant_weights, k=num_winners)
 
         return winners
+
+    # h/t https://maxhalford.github.io/blog/weighted-sampling-without-replacement/
+    @staticmethod
+    def weighted_sample_without_replacement(population, weights, k):
+        v = [random.random() ** (1 / w) for w in weights]
+        order = sorted(range(len(population)), key=lambda i: v[i])
+        return [population[i] for i in order[-k:]]
 
     @staticmethod
     def get_tickets(guild_id: int, user: Member, raffle_type: RaffleType) -> int:

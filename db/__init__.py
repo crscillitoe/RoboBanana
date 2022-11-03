@@ -21,27 +21,33 @@ class DB:
         db_host = Config.CONFIG["MySQL"]["Host"]
         db_name = Config.CONFIG["MySQL"]["Name"]
 
-        self.engine = create_engine(f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}")
+        self.engine = create_engine(
+            f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}"
+        )
         self.session = sessionmaker(self.engine, autoflush=True, autocommit=True)
 
         Base.metadata.create_all(self.engine)
 
-    def create_raffle(self, guild_id: int, message_id: int, raffle_type: RaffleType) -> None:
+    def create_raffle(
+        self, guild_id: int, message_id: int, raffle_type: RaffleType
+    ) -> None:
         if self.has_ongoing_raffle(guild_id):
             raise Exception("There is already an ongoing raffle!")
 
         with self.session() as sess:
             sess.execute(
-                insert(Raffle)
-                .values(guild_id=guild_id, message_id=message_id, raffle_type=raffle_type)
+                insert(Raffle).values(
+                    guild_id=guild_id, message_id=message_id, raffle_type=raffle_type
+                )
             )
 
     def create_raffle_entry(self, guild_id: int, user_id: int, tickets: int) -> None:
         raffle_id = self.get_raffle_id(guild_id)
         with self.session() as sess:
             sess.execute(
-                insert(RaffleEntry)
-                .values(raffle_id=raffle_id, user_id=user_id, tickets=tickets)
+                insert(RaffleEntry).values(
+                    raffle_id=raffle_id, user_id=user_id, tickets=tickets
+                )
             )
 
     def get_user_raffle_entry(self, guild_id: int, user_id: int) -> RaffleEntry:
@@ -59,7 +65,9 @@ class DB:
 
         return result[0][0]
 
-    def get_recent_win_stats(self, guild_id: int, user_id: int, after: datetime) -> tuple[int, datetime]:
+    def get_recent_win_stats(
+        self, guild_id: int, user_id: int, after: datetime
+    ) -> tuple[int, datetime]:
         """
         Query how many (normal) raffle wins a :user_id has had within a :guild_id since :after
 
@@ -108,7 +116,7 @@ class DB:
         with self.session() as sess:
             # get the most recent raffle entry with MAX(id)
             subquery = (
-                select(func.ifnull(func.max(RaffleEntry.id), 0).label('last_win_id'))
+                select(func.ifnull(func.max(RaffleEntry.id), 0).label("last_win_id"))
                 .join(Raffle)
                 .where(RaffleEntry.winner == True)
                 .where(RaffleEntry.user_id == user_id)
@@ -129,7 +137,6 @@ class DB:
             result = sess.execute(stmt).one()
 
         return result[0]
-
 
     def get_raffle_entry_count(self, guild_id: int) -> int:
         # special case for immediately after raffle is created
@@ -207,9 +214,7 @@ class DB:
                 .execution_options(synchronize_session="fetch")
             )
 
-    def record_win(
-        self, guild_id: int, user_ids: list[int]
-    ) -> None:
+    def record_win(self, guild_id: int, user_ids: list[int]) -> None:
         raffle_id = self.get_raffle_id(guild_id)
         with self.session() as sess:
             # for uid in user_ids:
@@ -243,10 +248,7 @@ class DB:
 
     def get_role_modifiers(self, guild_id: int) -> dict[int, int]:
         with self.session() as sess:
-            stmt = (
-                select(RoleModifier)
-                .where(RoleModifier.guild_id == guild_id)
-            )
+            stmt = select(RoleModifier).where(RoleModifier.guild_id == guild_id)
             result = sess.execute(stmt).all()
 
         return {r[0].role_id: r[0].modifier for r in result}

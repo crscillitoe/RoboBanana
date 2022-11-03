@@ -1,12 +1,23 @@
 import enum
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Enum, ForeignKey, Integer, func
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    func,
+)
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
+
 class RaffleType(enum.Enum):
     normal = 1
     anyone = 2
+
 
 class Raffle(Base):
     __tablename__ = "raffles"
@@ -24,6 +35,7 @@ class Raffle(Base):
     def __repr__(self):
         return f"Raffle(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
 
+
 class RaffleEntry(Base):
     __tablename__ = "raffle_entries"
 
@@ -38,6 +50,7 @@ class RaffleEntry(Base):
 
     def __repr__(self):
         return f"RaffleEntry(id={self.id!r}, raffle_id={self.raffle_id!r}, user_id={self.user_id!r}, tickets={self.tickets!r}, timestamp={self.timestamp!r}, winner={self.winner!r})"
+
 
 class RoleModifier(Base):
     __tablename__ = "role_modifiers"

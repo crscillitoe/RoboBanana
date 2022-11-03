@@ -25,6 +25,7 @@ def accrue_channel_points(user_id: int, session: sessionmaker) -> bool:
             sess.execute(
                 insert(ChannelPoints).values(user_id=user_id, points=POINTS_PER_ACCRUAL)
             )
+            return True
 
         # Ensure points are not accruing on every message
         # Only award points once per hour

@@ -2,3 +2,4 @@ configparser==5.3.0
 discord.py==2.0.1
 SQLAlchemy==1.4.42
 PyMySQL==1.0.2
+cffi==1.15.1

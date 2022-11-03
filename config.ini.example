@@ -1,6 +1,10 @@
 [Discord]
 Token =
-StreamChannel =
+StreamChannel = 1037040541017309225
+WelcomeChannel = 1026538706443718656
+Tier1RoleID = 1036801694564102174
+Tier2RoleID = 1036807522457231384
+Tier3RoleID = 1036807951484203099
 
 [MySQL]
 Username =

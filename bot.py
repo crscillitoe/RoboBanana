@@ -381,6 +381,11 @@ class RaffleBot(Client):
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)
+@client.event
+async def on_guild_join(guild):
+    tree.clear_commands(guild=guild)
+    tree.copy_global_to(guild=guild)
+    await tree.sync(guild=guild)
 
 
 @app_commands.guild_only()

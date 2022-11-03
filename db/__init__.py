@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
+from .point_accrual import accrue_channel_points
 from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
@@ -252,3 +253,14 @@ class DB:
             result = sess.execute(stmt).all()
 
         return {r[0].role_id: r[0].modifier for r in result}
+
+    def accrue_channel_points(self, user_id: int) -> bool:
+        """Accrues channel points for a given user
+
+        Args:
+            user_id (int): Discord user ID to give points to
+
+        Returns:
+            bool: True if points were awarded to the user
+        """
+        return accrue_channel_points(user_id, self.session)

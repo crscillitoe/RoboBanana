@@ -344,6 +344,16 @@ class RaffleBot(Client):
     async def on_button_click(self, interaction):
         logging.info(f"button clicked: {interaction}")
 
+    async def on_message(self, message: Message):
+        # Don't respond to ourselves
+        if message.author == self.user:
+            return
+        # Only look in the active stream channel
+        if message.channel.name != Config.CONFIG["Discord"]["StreamChannel"]:
+            return
+
+        DB().accrue_channel_points(message.author.id)
+
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)

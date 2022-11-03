@@ -62,3 +62,13 @@ class RoleModifier(Base):
 
     def __repr__(self):
         return f"RoleModifier(id={self.id!r}, guild_id={self.guild_id!r}, role_id={self.role_id!r}, modifier={self.modifier!r})"
+
+
+class ChannelPoints(Base):
+    __tablename__ = "channel_points"
+    user_id = Column(BigInteger, primary_key=True)
+    points = Column(Integer, nullable=False, default=0)
+    timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    def __repr__(self):
+        return f"ChannelPoints(user_id={self.user_id!r}, points={self.points!r}, timestamp={self.timestamp!r})"

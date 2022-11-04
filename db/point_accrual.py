@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import timedelta, datetime
 
 MIN_ACCRUAL_TIME = timedelta(minutes=15)
+MAX_ACCRUAL_WINDOW = timedelta(minutes=30)
 POINTS_PER_ACCRUAL = 50
 
 
@@ -37,9 +38,16 @@ def accrue_channel_points(user_id: int, session: sessionmaker) -> bool:
         if time_difference < MIN_ACCRUAL_TIME:
             return False
 
+        updated_timestamp = now
+        if time_difference < MAX_ACCRUAL_WINDOW:
+            updated_timestamp = last_accrued + MIN_ACCRUAL_TIME
+
         sess.execute(
             update(ChannelPoints)
             .where(ChannelPoints.user_id == user_id)
-            .values(points=channel_points.points + POINTS_PER_ACCRUAL)
+            .values(
+                points=channel_points.points + POINTS_PER_ACCRUAL,
+                timestamp=updated_timestamp,
+            )
         )
         return True

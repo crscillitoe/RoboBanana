@@ -16,6 +16,7 @@ from discord import (
     SelectOption,
     User,
 )
+from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord.ui import Button, TextInput, Modal, View, Select
 import random
 from config import Config
@@ -556,6 +557,17 @@ class HoojBot(app_commands.Group, name="hooj"):
     def check_owner(interaction: Interaction) -> bool:
         return interaction.user.id == 112386674155122688
 
+    @staticmethod
+    def check_hooj(interaction: Interaction) -> bool:
+        return interaction.user.id == 82969926125490176
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions."
+            )
+        super().on_error()
+
     @app_commands.command(name="sync")
     @app_commands.check(check_owner)
     @app_commands.checks.has_role("Mod")
@@ -645,7 +657,7 @@ class HoojBot(app_commands.Group, name="hooj"):
         )
 
     @app_commands.command(name="give_points")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.check(check_hooj)
     @app_commands.describe(user="User ID to award points")
     @app_commands.describe(points="Number of points to award")
     async def give_points(self, interaction: Interaction, user: User, points: int):

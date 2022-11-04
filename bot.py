@@ -23,6 +23,9 @@ from db.models import ChannelReward
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
+STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
+WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
+
 
 class RaffleView(View):
     def __init__(
@@ -360,9 +363,12 @@ class AddRewardModal(Modal, title="Add new channel reward"):
 
 
 class RedeemRewardView(View):
-    def __init__(self, user_points: int, channel_rewards: list[ChannelReward]):
+    def __init__(
+        self, user_points: int, channel_rewards: list[ChannelReward], client: Client
+    ):
         super().__init__(timeout=None)
         self.options = []
+        self.client = client
         self.user_points = user_points
         self.reward_lookup = {
             channel_reward.id: channel_reward for channel_reward in channel_rewards
@@ -399,8 +405,11 @@ class RedeemRewardView(View):
                 "Failed to redeem reward - please try again.", ephemeral=True
             )
 
-        return await interaction.response.send_message(
+        await interaction.response.send_message(
             f"Redeemed! You have {balance} points remaining.", ephemeral=True
+        )
+        await self.client.get_channel(STREAM_CHAT_ID).send(
+            f"{interaction.user.mention} redeemed {redeemed_reward.name}!"
         )
 
 
@@ -428,16 +437,14 @@ class RaffleBot(Client):
         if message.author == self.user:
             return
         # Only look in the active stream channel
-        stream_chat = int(Config.CONFIG["Discord"]["StreamChannel"])
-        welcome = int(Config.CONFIG["Discord"]["WelcomeChannel"])
-        channels_to_listen_to = {stream_chat, welcome}
+        channels_to_listen_to = {STREAM_CHAT_ID, WELCOME_CHAT_ID}
         if message.channel.id not in channels_to_listen_to:
             return
 
-        if message.channel.id == stream_chat:
+        if message.channel.id == STREAM_CHAT_ID:
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
-        if message.channel.id == welcome:
+        if message.channel.id == WELCOME_CHAT_ID:
             premium_ids = map(
                 int,
                 [
@@ -455,7 +462,7 @@ class RaffleBot(Client):
                     break
 
             if role_name is not None:
-                await self.get_channel(stream_chat).send(
+                await self.get_channel(STREAM_CHAT_ID).send(
                     f"Thank you {message.author.mention} for joining {role_name}!"
                 )
 
@@ -547,7 +554,7 @@ class HoojBot(app_commands.Group, name="hooj"):
         """Redeem an available channel reward"""
         rewards = DB().get_channel_rewards()
         user_points = DB().get_point_balance(interaction.user.id)
-        view = RedeemRewardView(user_points, rewards)
+        view = RedeemRewardView(user_points, rewards, client)
         await interaction.response.send_message(
             f"You currently have {user_points} points", view=view, ephemeral=True
         )

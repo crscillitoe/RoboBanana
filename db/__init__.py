@@ -4,7 +4,12 @@ from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
-from .point_accrual import accrue_channel_points, get_point_balance, withdraw_points
+from .point_accrual import (
+    accrue_channel_points,
+    deposit_points,
+    get_point_balance,
+    withdraw_points,
+)
 from .channel_rewards import add_channel_reward, get_channel_rewards
 from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
@@ -291,6 +296,19 @@ class DB:
             tuple[bool, int]: True if points were successfully withdrawn. If so, return new balance
         """
         return withdraw_points(user_id, point_amount, self.session)
+
+    def deposit_points(self, user_id: int, point_amount: int) -> tuple[bool, int]:
+        """Deposit points into user's current balance
+
+        Args:
+            user_id (int): Discord user ID to give points to
+            point_amount (int): Number of points to withdraw
+            session (sessionmaker): Open DB session
+
+        Returns:
+            tuple[bool, int]: True if points were successfully deposited. If so, return new balance
+        """
+        return deposit_points(user_id, point_amount, self.session)
 
     def add_channel_reward(self, name: str, point_cost: int):
         """Add new reward that can be redeemed for ChannelPoints

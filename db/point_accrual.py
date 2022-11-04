@@ -79,6 +79,38 @@ def withdraw_points(
         return True, new_balance
 
 
+def deposit_points(
+    user_id: int, point_amount: int, session: sessionmaker
+) -> tuple[bool, int]:
+    """Deposit points into user's balance
+
+    Args:
+        user_id (int): Discord user ID to give points to
+        point_amount (int): Number of points to withdraw
+        session (sessionmaker): Open DB session
+
+    Returns:
+        tuple[bool, int]: True if points were successfully depisoted. If so, return new balance
+    """
+    with session() as sess:
+        result = sess.execute(
+            select(ChannelPoints).where(ChannelPoints.user_id == user_id)
+        ).first()
+        if result is None:
+            return False, -1
+
+        channel_points: ChannelPoints = result[0]
+        new_balance = channel_points.points + point_amount
+        sess.execute(
+            update(ChannelPoints)
+            .where(ChannelPoints.user_id == user_id)
+            .values(
+                points=new_balance,
+            )
+        )
+        return True, new_balance
+
+
 def accrue_channel_points(
     user_id: int, roles: list[Role], session: sessionmaker
 ) -> bool:

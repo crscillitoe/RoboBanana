@@ -14,6 +14,7 @@ from discord import (
     Message,
     TextStyle,
     SelectOption,
+    User,
 )
 from discord.ui import Button, TextInput, Modal, View, Select
 import random
@@ -25,6 +26,7 @@ discord.utils.setup_logging(level=logging.INFO, root=True)
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
+PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
 
 
 class RaffleView(View):
@@ -410,6 +412,72 @@ class RedeemRewardView(View):
         )
         await self.client.get_channel(STREAM_CHAT_ID).send(
             f"{interaction.user.mention} redeemed {redeemed_reward.name}!"
+        )
+
+        pending_reward_view = PendingReward(
+            redeemed_reward, interaction.user, self.client
+        )
+        await self.client.get_channel(PENDING_REWARDS_CHAT_ID).send(
+            f"Pending {redeemed_reward.name} for {interaction.user.mention}",
+            view=pending_reward_view,
+        )
+
+
+class PendingReward(View):
+    def __init__(self, reward: ChannelReward, user: User, client: Client) -> None:
+        super().__init__(timeout=None)
+
+        self.reward = reward
+        self.user = user
+        self.client = client
+
+        self.complete_reward_button = Button(
+            label="Complete reward",
+            style=ButtonStyle.blurple,
+            custom_id="pending_reward_view:complete_button",
+        )
+        self.complete_reward_button.callback = self.complete_reward_onclick
+        self.add_item(self.complete_reward_button)
+
+        self.refund_reward_button = Button(
+            label="Refund reward",
+            style=ButtonStyle.red,
+            custom_id="pending_reward_view:refund_button",
+        )
+        self.refund_reward_button.callback = self.refund_reward_onclick
+        self.add_item(self.refund_reward_button)
+
+    async def complete_reward_onclick(self, interaction: Interaction):
+        self.complete_reward_button.disabled = True
+        self.refund_reward_button.disabled = True
+        await self.client.get_channel(STREAM_CHAT_ID).send(
+            f"Completed reward for {self.user.mention}"
+        )
+
+        await interaction.response.send_message(
+            f"Reward completed for {self.user.mention}"
+        )
+        await interaction.message.edit(content="Reward no longer pending", view=self)
+
+    async def refund_reward_onclick(self, interaction: Interaction):
+        success, _ = DB().deposit_points(self.user.id, self.reward.point_cost)
+        if not success:
+            return await interaction.response.send_message(
+                f"Failed to refund points to {self.user.mention} - please try again.",
+                ephemeral=True,
+            )
+
+        await self.client.get_channel(STREAM_CHAT_ID).send(
+            f"Refunded reward for {self.user.mention}"
+        )
+
+        self.complete_reward_button.disabled = True
+        self.refund_reward_button.disabled = True
+        await interaction.message.edit(content="Reward no longer pending", view=self)
+
+        await interaction.response.send_message(
+            f"Refunded {self.reward.point_cost} points for {self.user.mention}",
+            ephemeral=True,
         )
 
 

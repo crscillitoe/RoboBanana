@@ -356,7 +356,7 @@ class RaffleBot(Client):
             return
 
         if message.channel.id == stream_chat:
-            DB().accrue_channel_points(message.author.id)
+            DB().accrue_channel_points(message.author.id, message.author.roles)
 
         if message.channel.id == welcome:
             premium_ids = map(

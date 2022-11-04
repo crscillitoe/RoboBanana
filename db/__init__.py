@@ -1,4 +1,5 @@
 from datetime import datetime
+from discord import Role
 from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
@@ -254,13 +255,14 @@ class DB:
 
         return {r[0].role_id: r[0].modifier for r in result}
 
-    def accrue_channel_points(self, user_id: int) -> bool:
+    def accrue_channel_points(self, user_id: int, roles: list[Role]) -> bool:
         """Accrues channel points for a given user
 
         Args:
             user_id (int): Discord user ID to give points to
+            roles (list[int]): List of Discord Role IDs that user is assigned
 
         Returns:
             bool: True if points were awarded to the user
         """
-        return accrue_channel_points(user_id, self.session)
+        return accrue_channel_points(user_id, roles, self.session)

@@ -100,7 +100,7 @@ class RaffleView(View):
                 )
                 return
 
-        tickets = RaffleCog.get_tickets(guild_id, user, self.raffle_type)
+        tickets = HoojBot.get_tickets(guild_id, user, self.raffle_type)
         DB().create_raffle_entry(guild_id, user.id, tickets)
 
         self.parent.update_fields()
@@ -142,9 +142,7 @@ class RaffleView(View):
         raffle_message = await interaction.channel.fetch_message(raffle_message_id)
         await raffle_message.edit(embed=self.parent, view=self)
 
-        await RaffleCog._end_raffle_impl(
-            interaction, raffle_message_id, self.num_winners
-        )
+        await HoojBot._end_raffle_impl(interaction, raffle_message_id, self.num_winners)
         DB().close_raffle(interaction.guild.id, end_time)
 
     async def redo_raffle_onclick(self, interaction: Interaction):
@@ -324,9 +322,7 @@ class RedoRaffleModal(Modal, title="Redo Raffle"):
 
         DB().clear_win(self.raffle_message.id)
 
-        await RaffleCog._end_raffle_impl(
-            interaction, self.raffle_message.id, num_winners
-        )
+        await HoojBot._end_raffle_impl(interaction, self.raffle_message.id, num_winners)
 
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
@@ -476,7 +472,7 @@ async def on_guild_join(guild):
 
 
 @app_commands.guild_only()
-class RaffleCog(app_commands.Group, name="raffle"):
+class HoojBot(app_commands.Group, name="hooj"):
     def __init__(self, tree: app_commands.CommandTree) -> None:
         super().__init__()
         self.tree = tree
@@ -536,7 +532,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
             )
             return
 
-        await RaffleCog._end_raffle_impl(interaction, raffle_message_id, num_winners)
+        await HoojBot._end_raffle_impl(interaction, raffle_message_id, num_winners)
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
     @app_commands.command(name="add_reward")
@@ -595,7 +591,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
             await interaction.followup.send("No one is elligble to win the raffle.")
             return
 
-        winner_ids = RaffleCog.choose_winners(raffle_entries, num_winners)
+        winner_ids = HoojBot.choose_winners(raffle_entries, num_winners)
         winners = [interaction.guild.get_member(_id) for _id in winner_ids]
 
         if len(winners) == 1:
@@ -625,7 +621,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
             entrant_weights.append(ent.tickets)
 
         # step 3. using weighted probability (without replacement), select the random winner(s)
-        winners = RaffleCog.weighted_sample_without_replacement(
+        winners = HoojBot.weighted_sample_without_replacement(
             population=entrants, weights=entrant_weights, k=num_winners
         )
 
@@ -661,7 +657,7 @@ class RaffleCog(app_commands.Group, name="raffle"):
 
 async def main():
     async with client:
-        tree.add_command(RaffleCog(tree))
+        tree.add_command(HoojBot(tree))
         await client.start(Config.CONFIG["Discord"]["Token"])
 
 

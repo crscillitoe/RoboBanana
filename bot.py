@@ -644,6 +644,19 @@ class HoojBot(app_commands.Group, name="hooj"):
             f"You currently have {user_points} points", ephemeral=True
         )
 
+    @app_commands.command(name="give_points")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="User ID to award points")
+    @app_commands.describe(points="Number of points to award")
+    async def give_points(self, interaction: Interaction, user: User, points: int):
+        """Manually give points to user"""
+        success, _ = DB().deposit_points(user.id, points)
+        if not success:
+            return await interaction.response.send_message(
+                f"Failed to award points - please try again."
+            )
+        await interaction.response.send_message("Successfully awarded points!")
+
     @staticmethod
     async def _end_raffle_impl(
         interaction: Interaction,

@@ -359,11 +359,14 @@ class RaffleBot(Client):
             DB().accrue_channel_points(message.author.id)
 
         if message.channel.id == welcome:
-            premium_ids = map(int, [
-                Config.CONFIG["Discord"]["Tier1RoleID"],
-                Config.CONFIG["Discord"]["Tier2RoleID"],
-                Config.CONFIG["Discord"]["Tier3RoleID"]
-            ])
+            premium_ids = map(
+                int,
+                [
+                    Config.CONFIG["Discord"]["Tier1RoleID"],
+                    Config.CONFIG["Discord"]["Tier2RoleID"],
+                    Config.CONFIG["Discord"]["Tier3RoleID"],
+                ],
+            )
 
             role_name = None
             for role_id in premium_ids:
@@ -373,11 +376,15 @@ class RaffleBot(Client):
                     break
 
             if role_name is not None:
-                await self.get_channel(stream_chat).send(f"Thank you {message.author.mention} for joining {role_name}!")
+                await self.get_channel(stream_chat).send(
+                    f"Thank you {message.author.mention} for joining {role_name}!"
+                )
 
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)
+
+
 @client.event
 async def on_guild_join(guild):
     tree.clear_commands(guild=guild)

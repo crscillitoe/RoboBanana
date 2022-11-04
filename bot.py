@@ -13,11 +13,13 @@ from discord import (
     Member,
     Message,
     TextStyle,
+    SelectOption,
 )
-from discord.ui import Button, TextInput, Modal, View
+from discord.ui import Button, TextInput, Modal, View, Select
 import random
 from config import Config
 from db import DB, RaffleEntry, RaffleType
+from db.models import ChannelReward
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
@@ -329,6 +331,83 @@ class RedoRaffleModal(Modal, title="Redo Raffle"):
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
 
+class AddRewardModal(Modal, title="Add new channel reward"):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.name = TextInput(
+            label="Name",
+            placeholder="Name of new channel reward",
+            required=True,
+        )
+        self.point_cost = TextInput(
+            label="Point Cost",
+            placeholder="The number of points required to redeem this reward",
+            required=True,
+            style=TextStyle.short,
+            min_length=1,
+        )
+
+        self.add_item(self.name)
+        self.add_item(self.point_cost)
+
+    async def on_submit(self, interaction: Interaction):
+        try:
+            point_cost = int(self.point_cost.value)
+        except ValueError:
+            await interaction.response.send_message(
+                "Invalid point cost for reward.", ephemeral=True
+            )
+            return
+
+        DB().add_channel_reward(self.name.value, point_cost)
+        await interaction.response.send_message(f"New reward added!", ephemeral=True)
+
+
+class RedeemRewardView(View):
+    def __init__(self, user_points: int, channel_rewards: list[ChannelReward]):
+        super().__init__(timeout=None)
+        self.options = []
+        self.user_points = user_points
+        self.reward_lookup = {
+            channel_reward.id: channel_reward for channel_reward in channel_rewards
+        }
+        for channel_reward in channel_rewards:
+            # Only display options the user can afford
+            if channel_reward.point_cost > user_points:
+                continue
+
+            self.options.append(
+                SelectOption(
+                    label=f"({channel_reward.point_cost}) {channel_reward.name}",
+                    value=channel_reward.id,
+                )
+            )
+        self.select = Select(placeholder="Reward to redeem", options=self.options)
+
+        self.add_item(self.select)
+
+    async def interaction_check(self, interaction: Interaction):
+        redeemed_reward = self.reward_lookup.get(int(self.select.values[0]))
+        if redeemed_reward is None:
+            return await interaction.response.send_message("Invalid reward redeemed")
+        if redeemed_reward.point_cost > self.user_points:
+            return await interaction.response.send_message(
+                "Not enough channel points to redeem this reward - try again later!"
+            )
+
+        success, balance = DB().withdraw_points(
+            interaction.user.id, redeemed_reward.point_cost
+        )
+        if not success:
+            return await interaction.response.send_message(
+                "Failed to redeem reward - please try again.", ephemeral=True
+            )
+
+        return await interaction.response.send_message(
+            f"Redeemed! You have {balance} points remaining.", ephemeral=True
+        )
+
+
 class RaffleBot(Client):
     def __init__(self):
         intents = Intents.default()
@@ -340,6 +419,10 @@ class RaffleBot(Client):
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
+        guild = discord.Object(id=1037471015216885791)
+        tree.clear_commands(guild=guild)
+        tree.copy_global_to(guild=guild)
+        await tree.sync(guild=guild)
 
     async def on_button_click(self, interaction):
         logging.info(f"button clicked: {interaction}")
@@ -455,6 +538,40 @@ class RaffleCog(app_commands.Group, name="raffle"):
 
         await RaffleCog._end_raffle_impl(interaction, raffle_message_id, num_winners)
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
+
+    @app_commands.command(name="add_reward")
+    @app_commands.checks.has_role("Mod")
+    async def add_reward(self, interaction: Interaction):
+        """Creates new channel reward for redemption"""
+        modal = AddRewardModal()
+        await interaction.response.send_modal(modal)
+
+    @app_commands.command(name="redeem")
+    async def redeem_reward(self, interaction: Interaction):
+        """Redeem an available channel reward"""
+        rewards = DB().get_channel_rewards()
+        user_points = DB().get_point_balance(interaction.user.id)
+        view = RedeemRewardView(user_points, rewards)
+        await interaction.response.send_message(
+            f"You currently have {user_points} points", view=view, ephemeral=True
+        )
+
+    @app_commands.command(name="list_rewards")
+    async def list_rewards(self, interaction: Interaction):
+        """List all available channel rewards"""
+        rewards = DB().get_channel_rewards()
+        return_message = "The rewards currently available to redeem are:\n\n"
+        for reward in rewards:
+            return_message += f"({reward.point_cost}) {reward.name}\n"
+        await interaction.response.send_message(return_message, ephemeral=True)
+
+    @app_commands.command(name="point_balance")
+    async def point_balance(self, interaction: Interaction):
+        """Get your current number of channel points"""
+        user_points = DB().get_point_balance(interaction.user.id)
+        await interaction.response.send_message(
+            f"You currently have {user_points} points", ephemeral=True
+        )
 
     @staticmethod
     async def _end_raffle_impl(

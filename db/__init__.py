@@ -4,7 +4,8 @@ from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
-from .point_accrual import accrue_channel_points
+from .point_accrual import accrue_channel_points, get_point_balance, withdraw_points
+from .channel_rewards import add_channel_reward, get_channel_rewards
 from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
@@ -266,3 +267,44 @@ class DB:
             bool: True if points were awarded to the user
         """
         return accrue_channel_points(user_id, roles, self.session)
+
+    def get_point_balance(self, user_id: int) -> int:
+        """Get the number of points a user has accrued
+
+        Args:
+            user_id (int): Discord user ID to give points to
+
+        Returns:
+            int: Number of points currently accrued
+        """
+        return get_point_balance(user_id, self.session)
+
+    def withdraw_points(self, user_id: int, point_amount: int) -> tuple[bool, int]:
+        """Withdraw points from user's current balance
+
+        Args:
+            user_id (int): Discord user ID to give points to
+            point_amount (int): Number of points to withdraw
+            session (sessionmaker): Open DB session
+
+        Returns:
+            tuple[bool, int]: True if points were successfully withdrawn. If so, return new balance
+        """
+        return withdraw_points(user_id, point_amount, self.session)
+
+    def add_channel_reward(self, name: str, point_cost: int):
+        """Add new reward that can be redeemed for ChannelPoints
+
+        Args:
+            name (str): Name of channel reward
+            point_cost (int): Number of ChannelPoints required to redeem
+        """
+        return add_channel_reward(name, point_cost, self.session)
+
+    def get_channel_rewards(self):
+        """Get all available channel rewards
+
+        Returns:
+            list[ChannelReward]: All currently available channel rewards
+        """
+        return get_channel_rewards(self.session)

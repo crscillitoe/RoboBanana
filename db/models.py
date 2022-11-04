@@ -7,6 +7,7 @@ from sqlalchemy import (
     Enum,
     ForeignKey,
     Integer,
+    VARCHAR,
     func,
 )
 from sqlalchemy.orm import declarative_base, relationship
@@ -72,3 +73,13 @@ class ChannelPoints(Base):
 
     def __repr__(self):
         return f"ChannelPoints(user_id={self.user_id!r}, points={self.points!r}, timestamp={self.timestamp!r})"
+
+
+class ChannelReward(Base):
+    __tablename__ = "channel_rewards"
+    id = Column(Integer, primary_key=True)
+    point_cost = Column(Integer, nullable=False)
+    name = Column(VARCHAR(100), nullable=False)
+
+    def __repr__(self):
+        return f"ChannelReward(id={self.id!r}, point_cost={self.point_cost!r}, name={self.name!r})"

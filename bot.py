@@ -349,12 +349,9 @@ class RaffleBot(Client):
         if message.author == self.user:
             return
         # Only look in the active stream channel
-        stream_chat = Config.CONFIG["Discord"]["StreamChannel"]
-        welcome = Config.CONFIG["Discord"]["WelcomeChannel"]
-        channels_to_listen_to = [
-            stream_chat,
-            welcome
-        ]
+        stream_chat = int(Config.CONFIG["Discord"]["StreamChannel"])
+        welcome = int(Config.CONFIG["Discord"]["WelcomeChannel"])
+        channels_to_listen_to = {stream_chat, welcome}
         if message.channel.id not in channels_to_listen_to:
             return
 

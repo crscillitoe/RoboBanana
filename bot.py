@@ -89,7 +89,7 @@ class RaffleView(View):
             not self.has_role("Mod", interaction)
             and self.raffle_type == RaffleType.normal
         ):
-            one_week_ago = datetime.now().date() - timedelta(days=7)
+            one_week_ago = datetime.now().date() - timedelta(days=6)
             weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(
                 guild_id=guild_id, user_id=user.id, after=one_week_ago
             )

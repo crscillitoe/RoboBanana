@@ -83,3 +83,34 @@ class ChannelReward(Base):
 
     def __repr__(self):
         return f"ChannelReward(id={self.id!r}, point_cost={self.point_cost!r}, name={self.name!r})"
+
+
+class Prediction(Base):
+    __tablename__ = "predictions"
+
+    id = Column(Integer, primary_key=True)
+    guild_id = Column(BigInteger, nullable=False)
+    message_id = Column(BigInteger, nullable=False, unique=True)
+    ended = Column(Boolean, nullable=False, default=False)
+    start_time = Column(DateTime, default=func.now())
+    end_time = Column(DateTime, nullable=True)
+    option_one = Column(VARCHAR(100), nullable=False)
+    option_two = Column(VARCHAR(100), nullable=False)
+
+    entries = relationship("PredictionEntry", back_populates="prediction")
+
+    def __repr__(self):
+        return f"Raffle(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
+
+
+class PredictionEntry(Base):
+    __tablename__ = "prediction_entries"
+
+    id = Column(Integer, primary_key=True)
+    raffle_id = Column(Integer, ForeignKey("raffles.id"))
+    user_id = Column(BigInteger, nullable=False)
+    channel_points = Column(Integer, nullable=False, default=0)
+    timestamp = Column(DateTime, default=func.now())
+    guess = Column(Integer, nullable=False)
+
+    prediction = relationship("Prediction", back_populates="entries")

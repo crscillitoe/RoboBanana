@@ -629,9 +629,25 @@ class HoojBot(app_commands.Group, name="hooj"):
         modal = AddRewardModal()
         await interaction.response.send_modal(modal)
 
+    @app_commands.command(name="remove_reward")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(name="Name of reward to remove")
+    async def remove_reward(self, interaction: Interaction, name: str):
+        """Removes channel reward for redemption"""
+        DB().remove_channel_reward(name)
+        await interaction.response.send_message(
+            f"Successfully removed {name}!", ephemeral=True
+        )
+
     @app_commands.command(name="redeem")
     async def redeem_reward(self, interaction: Interaction):
         """Redeem an available channel reward"""
+        redemptions_allowed = DB().check_redemption_status()
+        if not redemptions_allowed:
+            return await interaction.response.send_message(
+                "Sorry! Reward redemptions are currently paused. Try again during stream!"
+            )
+
         rewards = DB().get_channel_rewards()
         user_points = DB().get_point_balance(interaction.user.id)
         view = RedeemRewardView(user_points, rewards, client)
@@ -647,6 +663,29 @@ class HoojBot(app_commands.Group, name="hooj"):
         for reward in rewards:
             return_message += f"({reward.point_cost}) {reward.name}\n"
         await interaction.response.send_message(return_message, ephemeral=True)
+
+    @app_commands.command(name="allow_redemptions")
+    @app_commands.checks.has_role("Mod")
+    async def allow_redemptions(self, interaction: Interaction):
+        """Allow rewards to be redeemed"""
+        DB().allow_redemptions()
+        await interaction.response.send_message("Redemptions are now enabled")
+
+    @app_commands.command(name="pause_redemptions")
+    @app_commands.checks.has_role("Mod")
+    async def pause_redemptions(self, interaction: Interaction):
+        """Pause rewards from being redeemed"""
+        DB().pause_redemptions()
+        await interaction.response.send_message("Redemptions are now paused")
+
+    @app_commands.command(name="check_redemption_status")
+    async def check_redemption_status(self, interaction: Interaction):
+        """Check whether or not rewards are eligible to be redeemed"""
+        status = DB().check_redemption_status()
+        status_message = "allowed" if status else "paused"
+        await interaction.response.send_message(
+            f"Redemptions are currently {status_message}."
+        )
 
     @app_commands.command(name="point_balance")
     async def point_balance(self, interaction: Interaction):

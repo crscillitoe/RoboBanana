@@ -394,10 +394,13 @@ class RedeemRewardView(View):
     async def interaction_check(self, interaction: Interaction):
         redeemed_reward = self.reward_lookup.get(int(self.select.values[0]))
         if redeemed_reward is None:
-            return await interaction.response.send_message("Invalid reward redeemed")
+            return await interaction.response.send_message(
+                "Invalid reward redeemed", ephemeral=True
+            )
         if redeemed_reward.point_cost > self.user_points:
             return await interaction.response.send_message(
-                "Not enough channel points to redeem this reward - try again later!"
+                "Not enough channel points to redeem this reward - try again later!",
+                ephemeral=True,
             )
 
         success, balance = DB().withdraw_points(
@@ -564,7 +567,7 @@ class HoojBot(app_commands.Group, name="hooj"):
     async def on_error(self, interaction: Interaction, error: AppCommandError):
         if isinstance(error, CheckFailure):
             return await interaction.response.send_message(
-                "Failed to perform command - please verify permissions."
+                "Failed to perform command - please verify permissions.", ephemeral=True
             )
         super().on_error()
 
@@ -645,7 +648,8 @@ class HoojBot(app_commands.Group, name="hooj"):
         redemptions_allowed = DB().check_redemption_status()
         if not redemptions_allowed:
             return await interaction.response.send_message(
-                "Sorry! Reward redemptions are currently paused. Try again during stream!"
+                "Sorry! Reward redemptions are currently paused. Try again during stream!",
+                ephemeral=True,
             )
 
         rewards = DB().get_channel_rewards()
@@ -669,14 +673,16 @@ class HoojBot(app_commands.Group, name="hooj"):
     async def allow_redemptions(self, interaction: Interaction):
         """Allow rewards to be redeemed"""
         DB().allow_redemptions()
-        await interaction.response.send_message("Redemptions are now enabled")
+        await interaction.response.send_message(
+            "Redemptions are now enabled", ephemeral=True
+        )
 
     @app_commands.command(name="pause_redemptions")
     @app_commands.checks.has_role("Mod")
     async def pause_redemptions(self, interaction: Interaction):
         """Pause rewards from being redeemed"""
         DB().pause_redemptions()
-        await interaction.response.send_message("Redemptions are now paused")
+        await interaction.response.send_message("Redemptions are now paused", ephemeral=True)
 
     @app_commands.command(name="check_redemption_status")
     async def check_redemption_status(self, interaction: Interaction):
@@ -704,9 +710,11 @@ class HoojBot(app_commands.Group, name="hooj"):
         success, _ = DB().deposit_points(user.id, points)
         if not success:
             return await interaction.response.send_message(
-                f"Failed to award points - please try again."
+                f"Failed to award points - please try again.", ephemeral=True
             )
-        await interaction.response.send_message("Successfully awarded points!")
+        await interaction.response.send_message(
+            "Successfully awarded points!", ephemeral=True
+        )
 
     @staticmethod
     async def _end_raffle_impl(

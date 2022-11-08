@@ -629,6 +629,16 @@ class HoojBot(app_commands.Group, name="hooj"):
         modal = AddRewardModal()
         await interaction.response.send_modal(modal)
 
+    @app_commands.command(name="remove_reward")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(name="Name of reward to remove")
+    async def remove_reward(self, interaction: Interaction, name: str):
+        """Removes channel reward for redemption"""
+        DB().remove_channel_reward(name)
+        await interaction.response.send_message(
+            f"Successfully removed {name}!", ephemeral=True
+        )
+
     @app_commands.command(name="redeem")
     async def redeem_reward(self, interaction: Interaction):
         """Redeem an available channel reward"""

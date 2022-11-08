@@ -10,7 +10,11 @@ from .point_accrual import (
     get_point_balance,
     withdraw_points,
 )
-from .channel_rewards import add_channel_reward, get_channel_rewards
+from .channel_rewards import (
+    add_channel_reward,
+    get_channel_rewards,
+    remove_channel_reward,
+)
 from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
@@ -318,6 +322,14 @@ class DB:
             point_cost (int): Number of ChannelPoints required to redeem
         """
         return add_channel_reward(name, point_cost, self.session)
+
+    def remove_channel_reward(self, name: str):
+        """Delete channel reward with matching name
+
+        Args:
+            name (str): Name of channel reward to delete
+        """
+        return remove_channel_reward(name, self.session)
 
     def get_channel_rewards(self):
         """Get all available channel rewards

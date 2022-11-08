@@ -658,6 +658,29 @@ class HoojBot(app_commands.Group, name="hooj"):
             return_message += f"({reward.point_cost}) {reward.name}\n"
         await interaction.response.send_message(return_message, ephemeral=True)
 
+    @app_commands.command(name="allow_redemptions")
+    @app_commands.checks.has_role("Mod")
+    async def allow_redemptions(self, interaction: Interaction):
+        """Allow rewards to be redeemed"""
+        DB().allow_redemptions()
+        await interaction.response.send_message("Redemptions are now enabled")
+
+    @app_commands.command(name="pause_redemptions")
+    @app_commands.checks.has_role("Mod")
+    async def pause_redemptions(self, interaction: Interaction):
+        """Pause rewards from being redeemed"""
+        DB().pause_redemptions()
+        await interaction.response.send_message("Redemptions are now paused")
+
+    @app_commands.command(name="check_redemption_status")
+    async def check_redemption_status(self, interaction: Interaction):
+        """Check whether or not rewards are eligible to be redeemed"""
+        status = DB().check_redemption_status()
+        status_message = "allowed" if status else "paused"
+        await interaction.response.send_message(
+            f"Redemptions are currently {status_message}."
+        )
+
     @app_commands.command(name="point_balance")
     async def point_balance(self, interaction: Interaction):
         """Get your current number of channel points"""

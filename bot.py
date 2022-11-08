@@ -642,6 +642,12 @@ class HoojBot(app_commands.Group, name="hooj"):
     @app_commands.command(name="redeem")
     async def redeem_reward(self, interaction: Interaction):
         """Redeem an available channel reward"""
+        redemptions_allowed = DB().check_redemption_status()
+        if not redemptions_allowed:
+            return await interaction.response.send_message(
+                "Sorry! Reward redemptions are currently paused. Try again during stream!"
+            )
+
         rewards = DB().get_channel_rewards()
         user_points = DB().get_point_balance(interaction.user.id)
         view = RedeemRewardView(user_points, rewards, client)

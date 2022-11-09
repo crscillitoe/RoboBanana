@@ -85,6 +85,16 @@ class ChannelReward(Base):
         return f"ChannelReward(id={self.id!r}, point_cost={self.point_cost!r}, name={self.name!r})"
 
 
+class AllowRedemption(Base):
+    __tablename__ = "allow_redemption"
+
+    id = Column(Integer, primary_key=True)
+    allowed = Column(Boolean, default=False)
+
+    def __repr__(self):
+        return f"AllowRedemption(id={self.id!r}, allowed={self.allowed!r})"
+
+
 class Prediction(Base):
     __tablename__ = "predictions"
 

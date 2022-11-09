@@ -23,7 +23,14 @@ from .predictions import (
     get_user_prediction_entry,
     has_ongoing_prediction,
 )
-from .channel_rewards import add_channel_reward, get_channel_rewards
+from .channel_rewards import (
+    add_channel_reward,
+    get_channel_rewards,
+    remove_channel_reward,
+    allow_redemptions,
+    pause_redemptions,
+    check_redemption_status,
+)
 from .models import Base, PredictionEntry, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
@@ -332,6 +339,14 @@ class DB:
         """
         return add_channel_reward(name, point_cost, self.session)
 
+    def remove_channel_reward(self, name: str):
+        """Delete channel reward with matching name
+
+        Args:
+            name (str): Name of channel reward to delete
+        """
+        return remove_channel_reward(name, self.session)
+
     def get_channel_rewards(self):
         """Get all available channel rewards
 
@@ -339,6 +354,22 @@ class DB:
             list[ChannelReward]: All currently available channel rewards
         """
         return get_channel_rewards(self.session)
+
+    def allow_redemptions(self):
+        """Allow channel rewards to be redeemed"""
+        return allow_redemptions(self.session)
+
+    def pause_redemptions(self):
+        """Puase channel rewards from being redeemed"""
+        return pause_redemptions(self.session)
+
+    def check_redemption_status(self) -> bool:
+        """Check whether or not channel rewards are eligible for redemption
+
+        Returns:
+            bool: True if rewards are currently allowed
+        """
+        return check_redemption_status(self.session)
 
     def create_prediction(
         self,

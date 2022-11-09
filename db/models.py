@@ -91,9 +91,11 @@ class Prediction(Base):
     id = Column(Integer, primary_key=True)
     guild_id = Column(BigInteger, nullable=False)
     message_id = Column(BigInteger, nullable=False, unique=True)
+    accepting_entries = Column(Boolean, nullable=False, default=True)
     ended = Column(Boolean, nullable=False, default=False)
     start_time = Column(DateTime, default=func.now())
     end_time = Column(DateTime, nullable=True)
+    description = Column(VARCHAR(100), nullable=False)
     option_one = Column(VARCHAR(100), nullable=False)
     option_two = Column(VARCHAR(100), nullable=False)
 
@@ -107,7 +109,7 @@ class PredictionEntry(Base):
     __tablename__ = "prediction_entries"
 
     id = Column(Integer, primary_key=True)
-    raffle_id = Column(Integer, ForeignKey("raffles.id"))
+    prediction_id = Column(Integer, ForeignKey("predictions.id"))
     user_id = Column(BigInteger, nullable=False)
     channel_points = Column(Integer, nullable=False, default=0)
     timestamp = Column(DateTime, default=func.now())

@@ -21,7 +21,7 @@ from discord.ui import Button, TextInput, Modal, View, Select
 import random
 from config import Config
 from db import DB, RaffleEntry, RaffleType
-from db.models import ChannelReward
+from db.models import ChannelReward, PredictionEntry
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
@@ -363,6 +363,252 @@ class AddRewardModal(Modal, title="Add new channel reward"):
 
         DB().add_channel_reward(self.name.value, point_cost)
         await interaction.response.send_message(f"New reward added!", ephemeral=True)
+
+
+class CreatePredictionModal(Modal, title="Start new prediction"):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.description = TextInput(
+            label="Description",
+            placeholder="What are viewers trying to predict?",
+            required=True,
+        )
+        self.option_one = TextInput(
+            label="Option 1",
+            placeholder="BELIEF",
+            required=True,
+        )
+        self.option_two = TextInput(
+            label="Option 2",
+            placeholder="DOUBT",
+            required=True,
+        )
+        self.duration = TextInput(
+            label="Duration (in seconds)",
+            default="120",
+            style=TextStyle.short,
+            required=True,
+            min_length=1,
+        )
+
+        self.add_item(self.description)
+        self.add_item(self.option_one)
+        self.add_item(self.option_two)
+        self.add_item(self.duration)
+
+    async def on_submit(self, interaction: Interaction):
+        try:
+            duration = int(self.duration.value)
+        except ValueError:
+            await interaction.response.send_message(
+                "Invalid prediction duration.", ephemeral=True
+            )
+            return
+        await interaction.response.send_message("Creating prediction...")
+
+        end_time = datetime.now() + timedelta(seconds=duration)
+        prediction_message = await interaction.original_response()
+        DB().create_prediction(
+            interaction.guild_id,
+            prediction_message.id,
+            self.description.value,
+            self.option_one.value,
+            self.option_two.value,
+            end_time,
+        )
+        prediction_embed = PredictionEmbed(
+            interaction.guild_id, self.description.value, end_time
+        )
+        prediction_view = PredictionView(
+            prediction_embed, self.option_one.value, self.option_two.value
+        )
+        await prediction_message.edit(
+            content="", embed=prediction_embed, view=prediction_view
+        )
+
+
+class PredictionVoteModal(Modal, title="Cast your vote!"):
+    def __init__(self, parent: PredictionEmbed, guess: int, point_balance: int):
+        super().__init__(timeout=None)
+        self.guess = guess
+        self.parent = parent
+        self.point_balance = point_balance
+        self.channel_points = TextInput(
+            label=f"Channel Points ({point_balance})",
+            placeholder="50",
+            style=TextStyle.short,
+            min_length=1,
+            required=True,
+        )
+        self.add_item(self.channel_points)
+
+    async def on_submit(self, interaction: Interaction):
+        try:
+            channel_points = int(self.channel_points.value)
+        except ValueError:
+            await interaction.response.send_message(
+                "Invalid point value", ephemeral=True
+            )
+            return
+
+        if channel_points > self.point_balance:
+            return await interaction.response.send_message(
+                f"You can only wager up to {self.point_balance} points", ephemeral=True
+            )
+
+        result, _ = DB().withdraw_points(interaction.user.id, channel_points)
+        if not result:
+            return await interaction.response.send_message(
+                "Unable to cast vote - please try again!", ephemeral=True
+            )
+
+        DB().create_prediction_entry(
+            interaction.guild_id, interaction.user.id, channel_points, self.guess
+        )
+        self.parent.update_fields()
+
+        prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
+        prediction_message = await interaction.channel.fetch_message(
+            prediction_message_id
+        )
+        await prediction_message.edit(embed=self.parent)
+
+        await interaction.response.send_message(
+            f"Vote cast with {channel_points} points!", ephemeral=True
+        )
+
+
+class PredictionEmbed(Embed):
+    def __init__(
+        self,
+        guild_id: int,
+        description: str,
+        end_time: datetime,
+    ):
+        super().__init__(
+            title="Prediction!",
+            description=description,
+        )
+
+        self.guild_id = guild_id
+        self.end_time = int(end_time.timestamp())
+
+        self.update_fields()
+
+    def update_fields(self) -> None:
+        self.clear_fields()
+        self.add_field(
+            name="Prediction End", value=f"<t:{self.end_time}:R>", inline=True
+        )
+        option_one_points, option_two_points = DB().get_prediction_point_counts(
+            self.guild_id
+        )
+        total_points = option_one_points + option_two_points
+        if total_points == 0:
+            total_points = 1
+
+        option_one_percent = round((option_one_points / total_points) * 100, 1)
+        option_two_percent = 100 - option_one_percent
+
+        self.add_field(
+            name="Option One Points",
+            value=f"{option_one_points} ({option_one_percent}%)",
+            inline=True,
+        )
+        self.add_field(
+            name="Option Two Points",
+            value=f"{option_two_points} ({option_two_percent}%)",
+            inline=True,
+        )
+
+
+class PredictionView(View):
+    def __init__(
+        self, parent: PredictionEmbed, option_one: str, option_two: str
+    ) -> None:
+        super().__init__(timeout=None)
+
+        self.parent = parent
+
+        self.vote_one_button = Button(
+            label=option_one,
+            style=ButtonStyle.blurple,
+            custom_id="prediction_view:vote_one_button",
+        )
+        self.vote_one_button.callback = self.vote_one_button_onclick
+        self.add_item(self.vote_one_button)
+
+        self.vote_two_button = Button(
+            label=option_two,
+            style=ButtonStyle.secondary,
+            custom_id="prediction_view:vote_two_button",
+        )
+        self.vote_two_button.callback = self.vote_two_button_onclick
+        self.add_item(self.vote_two_button)
+
+        self.end_prediction_button = Button(
+            label="End Prediction",
+            style=ButtonStyle.red,
+            custom_id="prediction_view:end_prediction_button",
+        )
+        self.end_prediction_button.callback = self.end_prediction_button_onclick
+        self.add_item(self.end_prediction_button)
+
+    async def user_eligible(self, interaction: Interaction) -> bool:
+        entry = DB().get_user_prediction_entry(
+            interaction.guild_id, interaction.user.id
+        )
+        if entry is not None:
+            await interaction.response.send_message(
+                "You have already entered the prediction!", ephemeral=True
+            )
+            return False
+
+        if not DB().accepting_prediction_entries(interaction.guild_id):
+            await interaction.response.send_message(
+                "Prediction has been closed!", ephemeral=True
+            )
+            return False
+        return True
+
+    def has_role(self, role_name: str, interaction: Interaction) -> bool:
+        role = discord.utils.get(interaction.user.roles, name=role_name)
+        return role is not None
+
+    async def end_prediction_button_onclick(self, interaction: Interaction):
+        if not self.has_role("Mod", interaction):
+            interaction.response.send_message(
+                "You must be a mod to do that!", ephemeral=True
+            )
+
+        DB().close_prediction(interaction.guild_id)
+        self.parent.update_fields()
+
+        self.vote_one_button.disabled = True
+        self.vote_two_button.disabled = True
+        self.end_prediction_button.disabled = True
+
+        prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
+        prediction_message = await interaction.channel.fetch_message(
+            prediction_message_id
+        )
+        await prediction_message.edit(embed=self.parent, view=self)
+
+        await interaction.response.send_message("Prediction closed!")
+
+    async def vote_one_button_onclick(self, interaction: Interaction):
+        if not await self.user_eligible(interaction):
+            return
+        point_balance = DB().get_point_balance(interaction.user.id)
+        modal = PredictionVoteModal(self.parent, 0, point_balance)
+        await interaction.response.send_modal(modal)
+
+    async def vote_two_button_onclick(self, interaction: Interaction):
+        if not await self.user_eligible(interaction):
+            return
+        point_balance = DB().get_point_balance(interaction.user.id)
+        modal = PredictionVoteModal(self.parent, 1, point_balance)
+        await interaction.response.send_modal(modal)
 
 
 class RedeemRewardView(View):
@@ -714,6 +960,41 @@ class HoojBot(app_commands.Group, name="hooj"):
             )
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
+        )
+
+    @app_commands.command(name="start_prediction")
+    @app_commands.checks.has_role("Mod")
+    async def start_prediction(self, interaction: Interaction):
+        if DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "There is already an ongoing prediction!", ephemeral=True
+            )
+        await interaction.response.send_modal(CreatePredictionModal())
+
+    @app_commands.command(name="payout_prediction")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(option="Option to payout")
+    async def payout_prediction(self, interaction: Interaction, option: int):
+        if not DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "No ongoing prediction!", ephemeral=True
+            )
+
+        option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)
+        total_points = option_one + option_two
+        winning_pot = option_one if option == 0 else option_two
+        entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
+            interaction.guild_id, option
+        )
+
+        for entry in entries:
+            pot_percentage = entry.channel_points / winning_pot
+            payout = round(total_points * pot_percentage)
+            DB().deposit_points(entry.user_id, payout)
+
+        DB().complete_prediction(interaction.guild_id)
+        await interaction.response.send_message(
+            f"Payout complete! {total_points} distributed.", ephemeral=True
         )
 
     @staticmethod

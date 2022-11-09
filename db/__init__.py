@@ -10,6 +10,19 @@ from .point_accrual import (
     get_point_balance,
     withdraw_points,
 )
+from .predictions import (
+    accepting_prediction_entries,
+    close_prediction,
+    complete_prediction,
+    create_prediction,
+    create_prediction_entry,
+    get_prediction_entries_for_guess,
+    get_prediction_id,
+    get_prediction_point_counts,
+    get_prediction_message_id,
+    get_user_prediction_entry,
+    has_ongoing_prediction,
+)
 from .channel_rewards import (
     add_channel_reward,
     get_channel_rewards,
@@ -18,7 +31,7 @@ from .channel_rewards import (
     pause_redemptions,
     check_redemption_status,
 )
-from .models import Base, Raffle, RaffleEntry, RoleModifier, RaffleType
+from .models import Base, PredictionEntry, Raffle, RaffleEntry, RoleModifier, RaffleType
 from config import Config
 
 
@@ -357,3 +370,134 @@ class DB:
             bool: True if rewards are currently allowed
         """
         return check_redemption_status(self.session)
+
+    def create_prediction(
+        self,
+        guild_id: int,
+        message_id: str,
+        description: str,
+        option_one: str,
+        option_two: str,
+        end_time: datetime,
+    ):
+        """Create new prediction for users to enter channel points into
+
+        Args:
+            guild_id (int): Discord Guild ID initiating prediction
+            message_id (str): Discord ID for message initiating prediction
+            description (str): Description of what viewers are trying to predict
+            option_one (str): First option that users can vote for
+            option_two (str): Second option that users can vote for
+            end_time (datetime): Timestamp when prediction entries will no longer be accepted
+        """
+        return create_prediction(
+            guild_id,
+            message_id,
+            option_one,
+            option_two,
+            description,
+            end_time,
+            self.session,
+        )
+
+    def has_ongoing_prediction(self, guild_id: int) -> bool:
+        """Check if the given Guild has an ongoing prediction
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            bool: True if there is an ongoing prediction
+        """
+        return has_ongoing_prediction(guild_id, self.session)
+
+    def get_prediction_point_counts(self, guild_id: int) -> tuple[int, int]:
+        """Get the total points predicted on each option
+
+        Args:
+            guild_id (int):Discord Guild ID which started prediction
+
+        Returns:
+            tuple[int, int]: The total points voted for each option
+        """
+        return get_prediction_point_counts(guild_id, self.session)
+
+    def create_prediction_entry(
+        self, guild_id: int, user_id: int, channel_points: int, guess: int
+    ):
+        """Create new prediction entry for user
+
+        Args:
+            guild_id (int): Discord Guild ID which created prediction
+            user_id (int): Discord ID of user voting
+            channel_points (int): Number of channel points to vote
+            guess (int): Option to vote for
+        """
+        return create_prediction_entry(
+            guild_id, user_id, channel_points, guess, self.session
+        )
+
+    def get_prediction_message_id(self, guild_id: int) -> Optional[int]:
+        """Get message ID of initial prediction start
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            Optional(int): ID of message which started prediction
+        """
+        return get_prediction_message_id(guild_id, self.session)
+
+    def get_user_prediction_entry(self, guild_id: int, user_id: int):
+        """Gets user prediction entry for given user id
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+            user_id (int): Discord User ID to retrieve entry for
+
+        Returns:
+            Optional[PredictionEntry]: PredictionEntry for user if one has been cast
+        """
+        return get_user_prediction_entry(guild_id, user_id, self.session)
+
+    def accepting_prediction_entries(self, guild_id: int) -> bool:
+        """Check if current prediction is accepting entries
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            bool: True if entries are currently being accepted
+        """
+
+        return accepting_prediction_entries(guild_id, self.session)
+
+    def close_prediction(self, guild_id: int):
+        """Close prediction from currently accepting entries
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+        """
+        return close_prediction(guild_id, self.session)
+
+    def complete_prediction(self, guild_id: int):
+        """Complete prediction, indicating points have been paid out
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+        """
+        return complete_prediction(guild_id, self.session)
+
+    def get_prediction_entries_for_guess(
+        self, guild_id: int, guess: int
+    ) -> list[PredictionEntry]:
+        """Get all PredictionEntries that voted for an option
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+            guess (int): Option to retrieve entries for
+
+        Returns:
+            list[PredictionEntry]: All entries cast for given option
+        """
+        return get_prediction_entries_for_guess(guild_id, guess, self.session)

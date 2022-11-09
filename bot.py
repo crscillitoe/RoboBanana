@@ -577,7 +577,7 @@ class PredictionView(View):
 
     async def end_prediction_button_onclick(self, interaction: Interaction):
         if not self.has_role("Mod", interaction):
-            interaction.response.send_message(
+            return await interaction.response.send_message(
                 "You must be a mod to do that!", ephemeral=True
             )
 

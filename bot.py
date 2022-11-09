@@ -981,6 +981,11 @@ class HoojBot(app_commands.Group, name="hooj"):
                 "No ongoing prediction!", ephemeral=True
             )
 
+        if DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Please close prediction from entries before refunding!", ephemeral=True
+            )
+
         option_one_entries = DB().get_prediction_entries_for_guess(
             interaction.guild_id, 0
         )
@@ -1005,6 +1010,12 @@ class HoojBot(app_commands.Group, name="hooj"):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
+            )
+
+        if DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Please close prediction from entries before paying out!",
+                ephemeral=True,
             )
 
         option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)

@@ -126,6 +126,16 @@ class ModCommands(app_commands.Group, name="mod"):
             "Redemptions are now paused", ephemeral=True
         )
 
+    @app_commands.command(name="check_redemption_status")
+    @app_commands.checks.has_role("Mod")
+    async def check_redemption_status(self, interaction: Interaction):
+        """Check whether or not rewards are eligible to be redeemed"""
+        status = DB().check_redemption_status()
+        status_message = "allowed" if status else "paused"
+        await interaction.response.send_message(
+            f"Redemptions are currently {status_message}.", ephemeral=True
+        )
+
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_role("Mod")
     async def start_prediction(self, interaction: Interaction):

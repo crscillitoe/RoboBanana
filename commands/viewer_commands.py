@@ -36,15 +36,6 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             return_message += f"({reward.point_cost}) {reward.name}\n"
         await interaction.response.send_message(return_message, ephemeral=True)
 
-    @app_commands.command(name="check_redemption_status")
-    async def check_redemption_status(self, interaction: Interaction):
-        """Check whether or not rewards are eligible to be redeemed"""
-        status = DB().check_redemption_status()
-        status_message = "allowed" if status else "paused"
-        await interaction.response.send_message(
-            f"Redemptions are currently {status_message}."
-        )
-
     @app_commands.command(name="point_balance")
     async def point_balance(self, interaction: Interaction):
         """Get your current number of channel points"""

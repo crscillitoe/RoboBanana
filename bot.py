@@ -577,7 +577,7 @@ class PredictionView(View):
 
     async def end_prediction_button_onclick(self, interaction: Interaction):
         if not self.has_role("Mod", interaction):
-            interaction.response.send_message(
+            return await interaction.response.send_message(
                 "You must be a mod to do that!", ephemeral=True
             )
 
@@ -928,7 +928,9 @@ class HoojBot(app_commands.Group, name="hooj"):
     async def pause_redemptions(self, interaction: Interaction):
         """Pause rewards from being redeemed"""
         DB().pause_redemptions()
-        await interaction.response.send_message("Redemptions are now paused", ephemeral=True)
+        await interaction.response.send_message(
+            "Redemptions are now paused", ephemeral=True
+        )
 
     @app_commands.command(name="check_redemption_status")
     async def check_redemption_status(self, interaction: Interaction):
@@ -971,6 +973,36 @@ class HoojBot(app_commands.Group, name="hooj"):
             )
         await interaction.response.send_modal(CreatePredictionModal())
 
+    @app_commands.command(name="refund_prediction")
+    @app_commands.checks.has_role("Mod")
+    async def refund_prediction(self, interaction: Interaction):
+        if not DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "No ongoing prediction!", ephemeral=True
+            )
+
+        if DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Please close prediction from entries before refunding!", ephemeral=True
+            )
+
+        option_one_entries = DB().get_prediction_entries_for_guess(
+            interaction.guild_id, 0
+        )
+
+        option_two_entries = DB().get_prediction_entries_for_guess(
+            interaction.guild_id, 1
+        )
+
+        entries = option_one_entries + option_two_entries
+        for entry in entries:
+            DB().deposit_points(entry.user_id, entry.channel_points)
+
+        DB().complete_prediction(interaction.guild_id)
+        await interaction.response.send_message(
+            "Prediction has been refunded!", ephemeral=True
+        )
+
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(option="Option to payout")
@@ -978,6 +1010,12 @@ class HoojBot(app_commands.Group, name="hooj"):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
+            )
+
+        if DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Please close prediction from entries before paying out!",
+                ephemeral=True,
             )
 
         option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)

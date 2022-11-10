@@ -742,7 +742,7 @@ class RaffleBot(Client):
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
-        guild = discord.Object(id=1037471015216885791)
+        guild = discord.Object(id=915336728707989534)
         tree.clear_commands(guild=guild)
         tree.copy_global_to(guild=guild)
         await tree.sync(guild=guild)

@@ -27,14 +27,31 @@ class PayoutPredictionView(View):
         self.option_two_button.callback = self.option_two_onclick
         self.add_item(self.option_two_button)
 
+        self.refund_button = Button(
+            label="Refund Prediction",
+            style=ButtonStyle.red,
+            custom_id="payout_prediction_view:refund_button",
+        )
+        self.refund_button.callback = self.refund_onclick
+        self.add_item(self.refund_button)
+
     async def option_one_onclick(self, interaction: Interaction):
         await PredictionController.payout_prediction(0, interaction)
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
+        self.refund_button.disabled = True
         await interaction.message.edit(content="", view=self)
 
     async def option_two_onclick(self, interaction: Interaction):
         await PredictionController.payout_prediction(1, interaction)
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
+        self.refund_button.disabled = True
+        await interaction.message.edit(content="", view=self)
+
+    async def refund_onclick(self, interaction: Interaction):
+        await PredictionController.refund_prediction(interaction)
+        self.option_one_button.disabled = True
+        self.option_two_button.disabled = True
+        self.refund_button.disabled = True
         await interaction.message.edit(content="", view=self)

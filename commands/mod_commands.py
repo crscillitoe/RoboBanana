@@ -151,32 +151,7 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
-        if not DB().has_ongoing_prediction(interaction.guild_id):
-            return await interaction.response.send_message(
-                "No ongoing prediction!", ephemeral=True
-            )
-
-        if DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.response.send_message(
-                "Please close prediction from entries before refunding!", ephemeral=True
-            )
-
-        option_one_entries = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, 0
-        )
-
-        option_two_entries = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, 1
-        )
-
-        entries = option_one_entries + option_two_entries
-        for entry in entries:
-            DB().deposit_points(entry.user_id, entry.channel_points)
-
-        DB().complete_prediction(interaction.guild_id)
-        await interaction.response.send_message(
-            "Prediction has been refunded!", ephemeral=True
-        )
+        PredictionController.refund_prediction(interaction)
 
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")

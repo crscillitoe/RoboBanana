@@ -1,6 +1,7 @@
 from datetime import datetime
 from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
+from controllers.prediction_controller import PredictionController
 from db import DB, RaffleType
 from db.models import PredictionEntry
 from views.predictions.create_predictions_modal import CreatePredictionModal
@@ -144,7 +145,7 @@ class ModCommands(app_commands.Group, name="mod"):
             return await interaction.response.send_message(
                 "There is already an ongoing prediction!", ephemeral=True
             )
-        await interaction.response.send_modal(CreatePredictionModal())
+        await interaction.response.send_modal(CreatePredictionModal(self.client))
 
     @app_commands.command(name="refund_prediction")
     @app_commands.checks.has_role("Mod")
@@ -182,33 +183,7 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(option="Option to payout")
     async def payout_prediction(self, interaction: Interaction, option: int):
         """Payout predicton to option 0 or 1"""
-        if not DB().has_ongoing_prediction(interaction.guild_id):
-            return await interaction.response.send_message(
-                "No ongoing prediction!", ephemeral=True
-            )
-
-        if DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.response.send_message(
-                "Please close prediction from entries before paying out!",
-                ephemeral=True,
-            )
-
-        option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)
-        total_points = option_one + option_two
-        winning_pot = option_one if option == 0 else option_two
-        entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, option
-        )
-
-        for entry in entries:
-            pot_percentage = entry.channel_points / winning_pot
-            payout = round(total_points * pot_percentage)
-            DB().deposit_points(entry.user_id, payout)
-
-        DB().complete_prediction(interaction.guild_id)
-        await interaction.response.send_message(
-            f"Payout complete! {total_points} distributed.", ephemeral=True
-        )
+        PredictionController.payout_prediction(option, interaction)
 
     @app_commands.command(name="give_points")
     @app_commands.check(check_hooj)

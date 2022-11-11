@@ -1,4 +1,4 @@
-from discord import TextStyle, Interaction
+from discord import TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
 from datetime import datetime, timedelta
 from db import DB
@@ -8,8 +8,9 @@ from .prediction_view import PredictionView
 
 
 class CreatePredictionModal(Modal, title="Start new prediction"):
-    def __init__(self):
+    def __init__(self, client: Client):
         super().__init__(timeout=None)
+        self.client = client
         self.description = TextInput(
             label="Description",
             placeholder="What are viewers trying to predict?",
@@ -62,7 +63,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             interaction.guild_id, self.description.value, end_time
         )
         prediction_view = PredictionView(
-            prediction_embed, self.option_one.value, self.option_two.value
+            prediction_embed, self.option_one.value, self.option_two.value, self.client
         )
         await prediction_message.edit(
             content="", embed=prediction_embed, view=prediction_view

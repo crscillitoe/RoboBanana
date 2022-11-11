@@ -1,19 +1,26 @@
 import discord
-from discord import ButtonStyle, Interaction
+from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from db import DB
+from config import Config
 
+from .payout_prediction_modal import PayoutPredictionView
 from .prediction_embed import PredictionEmbed
 from .prediction_vote_modal import PredictionVoteModal
+
+PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
 
 
 class PredictionView(View):
     def __init__(
-        self, parent: PredictionEmbed, option_one: str, option_two: str
+        self, parent: PredictionEmbed, option_one: str, option_two: str, client: Client
     ) -> None:
         super().__init__(timeout=None)
 
         self.parent = parent
+        self.client = client
+        self.option_one = option_one
+        self.option_two = option_two
 
         self.vote_one_button = Button(
             label=option_one,
@@ -78,6 +85,12 @@ class PredictionView(View):
             prediction_message_id
         )
         await prediction_message.edit(embed=self.parent, view=self)
+
+        payout_prediction_view = PayoutPredictionView(self.option_one, self.option_two)
+        await self.client.get_channel(PENDING_REWARDS_CHAT_ID).send(
+            f"Payout Prediction!",
+            view=payout_prediction_view,
+        )
 
         await interaction.response.send_message("Prediction closed!")
 

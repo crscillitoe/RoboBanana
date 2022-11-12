@@ -11,7 +11,7 @@ from controllers.raffle_controller import RaffleController
 
 
 JOEL_DISCORD_ID = 112386674155122688
-HOOJ_DISCORD_ID = 1037471015216885791
+HOOJ_DISCORD_ID = 82969926125490176
 
 
 @app_commands.guild_only()

@@ -20,6 +20,7 @@ from .predictions import (
     get_prediction_id,
     get_prediction_point_counts,
     get_prediction_message_id,
+    get_prediction_channel_id,
     get_prediction_summary,
     get_user_prediction_entry,
     has_ongoing_prediction,
@@ -383,6 +384,7 @@ class DB:
     def create_prediction(
         self,
         guild_id: int,
+        channel_id: int,
         message_id: str,
         description: str,
         option_one: str,
@@ -401,6 +403,7 @@ class DB:
         """
         return create_prediction(
             guild_id,
+            channel_id,
             message_id,
             description,
             option_one,
@@ -456,6 +459,17 @@ class DB:
             Optional(int): ID of message which started prediction
         """
         return get_prediction_message_id(guild_id, self.session)
+
+    def get_prediction_channel_id(self, guild_id: int) -> Optional[int]:
+        """Get channel ID of an ongoing prediction
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            Optional(int): ID of channel that the prediction belongs to
+        """
+        return get_prediction_channel_id(guild_id, self.session)
 
     def get_user_prediction_entry(self, guild_id: int, user_id: int):
         """Gets user prediction entry for given user id

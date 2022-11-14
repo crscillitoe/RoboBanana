@@ -100,6 +100,7 @@ class PredictionController:
     @staticmethod
     async def create_prediction(
         guild_id: int,
+        channel_id: int,
         message_id: str,
         description: str,
         option_one: str,
@@ -108,6 +109,7 @@ class PredictionController:
     ):
         DB().create_prediction(
             guild_id,
+            channel_id,
             message_id,
             description,
             option_one,

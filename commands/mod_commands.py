@@ -8,6 +8,7 @@ from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
+import logging
 
 
 JOEL_DISCORD_ID = 112386674155122688
@@ -34,7 +35,8 @@ class ModCommands(app_commands.Group, name="mod"):
             return await interaction.response.send_message(
                 "Failed to perform command - please verify permissions.", ephemeral=True
             )
-        super().on_error()
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="sync")
     @app_commands.check(check_owner)
@@ -151,14 +153,14 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
-        PredictionController.refund_prediction(interaction)
+        await PredictionController.refund_prediction(interaction)
 
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(option="Option to payout")
     async def payout_prediction(self, interaction: Interaction, option: int):
         """Payout predicton to option 0 or 1"""
-        PredictionController.payout_prediction(option, interaction)
+        await PredictionController.payout_prediction(option, interaction)
 
     @app_commands.command(name="give_points")
     @app_commands.check(check_hooj)

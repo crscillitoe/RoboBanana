@@ -7,6 +7,7 @@ from typing import Optional
 
 def create_prediction(
     guild_id: int,
+    channel_id: int,
     message_id: int,
     description: str,
     option_one: str,
@@ -21,6 +22,7 @@ def create_prediction(
         sess.execute(
             insert(Prediction).values(
                 guild_id=guild_id,
+                channel_id=channel_id,
                 message_id=message_id,
                 description=description,
                 option_one=option_one,
@@ -28,7 +30,6 @@ def create_prediction(
                 end_time=end_time,
             )
         )
-
 
 def has_ongoing_prediction(guild_id: int, session: sessionmaker) -> bool:
     with session() as sess:
@@ -101,6 +102,24 @@ def get_prediction_message_id(guild_id: int, session: sessionmaker) -> Optional[
     with session() as sess:
         stmt = (
             select(Prediction.message_id)
+            .where(Prediction.guild_id == guild_id)
+            .where(Prediction.ended == False)
+            .limit(1)
+        )
+        result = sess.execute(stmt).one()
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
+
+def get_prediction_channel_id(guild_id: int, session: sessionmaker) -> Optional[int]:
+    if not has_ongoing_prediction(guild_id, session):
+        raise Exception("There is no ongoing prediction! You need to start a new one.")
+
+    with session() as sess:
+        stmt = (
+            select(Prediction.channel_id)
             .where(Prediction.guild_id == guild_id)
             .where(Prediction.ended == False)
             .limit(1)

@@ -44,7 +44,8 @@ class ClosePredictionView(View):
         self.entry_view.vote_two_button.disabled = True
 
         prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
-        prediction_message = await self.client.get_channel(STREAM_CHAT).fetch_message(
+        prediction_channel_id = DB().get_prediction_channel_id(interaction.guild_id)
+        prediction_message = await self.client.get_channel(prediction_channel_id).fetch_message(
             prediction_message_id
         )
         await prediction_message.edit(embed=self.entry_embed, view=self.entry_view)

@@ -59,6 +59,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
         prediction_message = await interaction.original_response()
         await PredictionController.create_prediction(
             interaction.guild_id,
+            interaction.channel.id,
             prediction_message.id,
             self.description.value,
             self.option_one.value,

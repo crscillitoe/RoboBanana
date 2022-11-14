@@ -8,6 +8,9 @@ Tier2RoleID = 1036807522457231384
 Tier3RoleID = 1036807951484203099
 GuildID = 82969926125490176
 
+[Server]
+AuthToken = 
+
 [MySQL]
 Username =
 Password =

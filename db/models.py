@@ -1,3 +1,4 @@
+from datetime import datetime
 import enum
 from sqlalchemy import (
     BigInteger,
@@ -18,6 +19,26 @@ Base = declarative_base()
 class RaffleType(enum.Enum):
     normal = 1
     anyone = 2
+
+
+class PredictionSummary:
+    def __init__(
+        self,
+        description: str,
+        option_one: str,
+        option_two: str,
+        option_one_points: int,
+        option_two_points: int,
+        end_time: datetime,
+        accepting_entries: bool,
+    ):
+        self.description = description
+        self.option_one = option_one
+        self.option_two = option_two
+        self.option_one_points = option_one_points
+        self.option_two_points = option_two_points
+        self.end_time = end_time
+        self.accepting_entries = accepting_entries
 
 
 class Raffle(Base):
@@ -112,7 +133,7 @@ class Prediction(Base):
     entries = relationship("PredictionEntry", back_populates="prediction")
 
     def __repr__(self):
-        return f"Raffle(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
+        return f"Prediction(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
 
 
 class PredictionEntry(Base):
@@ -126,3 +147,6 @@ class PredictionEntry(Base):
     guess = Column(Integer, nullable=False)
 
     prediction = relationship("Prediction", back_populates="entries")
+
+    def __repr__(self):
+        return f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r}, user_id={self.user_id!r}, channel_points={self.channel_points!r}, guess={self.guess!r})"

@@ -1,5 +1,6 @@
 from discord import TextStyle, Interaction
 from discord.ui import Modal, TextInput
+from controllers.prediction_controller import PredictionController
 from db import DB
 
 from .prediction_embed import PredictionEmbed
@@ -29,19 +30,8 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
             )
             return
 
-        if channel_points > self.point_balance:
-            return await interaction.response.send_message(
-                f"You can only wager up to {self.point_balance} points", ephemeral=True
-            )
-
-        result, _ = DB().withdraw_points(interaction.user.id, channel_points)
-        if not result:
-            return await interaction.response.send_message(
-                "Unable to cast vote - please try again!", ephemeral=True
-            )
-
-        DB().create_prediction_entry(
-            interaction.guild_id, interaction.user.id, channel_points, self.guess
+        await PredictionController.create_prediction_entry(
+            channel_points, self.point_balance, self.guess, interaction
         )
         self.parent.update_fields()
 

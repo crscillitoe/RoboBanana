@@ -20,6 +20,7 @@ from .predictions import (
     get_prediction_id,
     get_prediction_point_counts,
     get_prediction_message_id,
+    get_prediction_summary,
     get_user_prediction_entry,
     has_ongoing_prediction,
 )
@@ -31,7 +32,15 @@ from .channel_rewards import (
     pause_redemptions,
     check_redemption_status,
 )
-from .models import Base, PredictionEntry, Raffle, RaffleEntry, RoleModifier, RaffleType
+from .models import (
+    Base,
+    PredictionEntry,
+    PredictionSummary,
+    Raffle,
+    RaffleEntry,
+    RoleModifier,
+    RaffleType,
+)
 from config import Config
 
 
@@ -393,9 +402,9 @@ class DB:
         return create_prediction(
             guild_id,
             message_id,
+            description,
             option_one,
             option_two,
-            description,
             end_time,
             self.session,
         )
@@ -501,3 +510,14 @@ class DB:
             list[PredictionEntry]: All entries cast for given option
         """
         return get_prediction_entries_for_guess(guild_id, guess, self.session)
+
+    def get_prediction_summary(self, guild_id: int) -> PredictionSummary:
+        """Get prediction sumamry for ongoing prediction
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            PredictionSummary: Summary about the current state of the ongoing prediction
+        """
+        return get_prediction_summary(guild_id, self.session)

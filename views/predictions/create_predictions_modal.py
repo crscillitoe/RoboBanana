@@ -2,6 +2,7 @@ from discord import TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
 from datetime import datetime, timedelta
 from config import Config
+from controllers.prediction_controller import PredictionController
 from db import DB
 
 from .close_prediction_embed import ClosePredictionEmbed
@@ -56,7 +57,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
 
         end_time = datetime.now() + timedelta(seconds=duration)
         prediction_message = await interaction.original_response()
-        DB().create_prediction(
+        await PredictionController.create_prediction(
             interaction.guild_id,
             prediction_message.id,
             self.description.value,

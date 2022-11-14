@@ -1,5 +1,5 @@
 from datetime import datetime
-from db.models import Prediction, PredictionEntry
+from db.models import Prediction, PredictionEntry, PredictionSummary
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, update, insert, func
 from typing import Optional
@@ -175,7 +175,7 @@ def get_prediction_point_counts(
         if result_two is None:
             result_two = 0
 
-    return (result_one, result_two)
+    return (int(result_one), int(result_two))
 
 
 def get_prediction_entries_for_guess(
@@ -192,3 +192,30 @@ def get_prediction_entries_for_guess(
             return results
 
         return list(map(lambda result: result[0], results))
+
+
+def get_prediction_summary(guild_id: int, session: sessionmaker) -> PredictionSummary:
+    with session() as sess:
+        stmt = (
+            select(Prediction)
+            .where(Prediction.guild_id == guild_id)
+            .where(Prediction.ended == False)
+        )
+        result = sess.execute(stmt).all()
+        if len(result) == 0:
+            raise Exception(
+                "There is no ongoing prediction! You need to start a new one."
+            )
+        prediction: Prediction = result[0][0]
+        option_one_points, option_two_points = get_prediction_point_counts(
+            guild_id, session
+        )
+        return PredictionSummary(
+            prediction.description,
+            prediction.option_one,
+            prediction.option_two,
+            option_one_points,
+            option_two_points,
+            prediction.end_time,
+            prediction.accepting_entries,
+        )

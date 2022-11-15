@@ -6,6 +6,7 @@ from discord import (
     app_commands,
     Client,
     Intents,
+    Member,
     Message,
 )
 from commands.mod_commands import ModCommands
@@ -19,6 +20,11 @@ STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
 PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
 GUILD_ID = int(Config.CONFIG["Discord"]["GuildID"])
+PREMIUM_IDS = list(map(int, [
+    Config.CONFIG["Discord"]["Tier1RoleID"],
+    Config.CONFIG["Discord"]["Tier2RoleID"],
+    Config.CONFIG["Discord"]["Tier3RoleID"],
+]))
 
 
 class RaffleBot(Client):
@@ -37,43 +43,27 @@ class RaffleBot(Client):
         # tree.copy_global_to(guild=guild)
         # await tree.sync(guild=guild)
 
-    async def on_button_click(self, interaction):
-        logging.info(f"button clicked: {interaction}")
-
     async def on_message(self, message: Message):
         # Don't respond to ourselves
         if message.author == self.user:
             return
-        # Only look in the active stream channel
-        channels_to_listen_to = {STREAM_CHAT_ID, WELCOME_CHAT_ID}
-        if message.channel.id not in channels_to_listen_to:
-            return
 
+        # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
-        if message.channel.id == WELCOME_CHAT_ID:
-            premium_ids = map(
-                int,
-                [
-                    Config.CONFIG["Discord"]["Tier1RoleID"],
-                    Config.CONFIG["Discord"]["Tier2RoleID"],
-                    Config.CONFIG["Discord"]["Tier3RoleID"],
-                ],
+    async def on_member_update(self, before: Member, after: Member):
+        new_roles = set(after.roles) - set(before.roles)
+        if len(new_roles) == 0:
+            return
+
+        for role in new_roles:
+            if role.id not in PREMIUM_IDS:
+                continue
+
+            return await self.get_channel(STREAM_CHAT_ID).send(
+                f"Thank you {after.mention} for joining {role.name}!"
             )
-
-            role_name = None
-            for role_id in premium_ids:
-                role = discord.utils.get(message.author.roles, id=role_id)
-                if role is not None:
-                    role_name = role.name
-                    break
-
-            if role_name is not None:
-                await self.get_channel(STREAM_CHAT_ID).send(
-                    f"Thank you {message.author.mention} for joining {role_name}!"
-                )
-
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)

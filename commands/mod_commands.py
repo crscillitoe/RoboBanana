@@ -3,16 +3,17 @@ from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.prediction_controller import PredictionController
 from db import DB, RaffleType
-from db.models import PredictionEntry
 from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
+from config import Config
 import logging
 
 
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
+POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 
 
 @app_commands.guild_only()
@@ -163,11 +164,25 @@ class ModCommands(app_commands.Group, name="mod"):
         await PredictionController.payout_prediction(option, interaction)
 
     @app_commands.command(name="give_points")
-    @app_commands.check(check_hooj)
+    @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="User ID to award points")
     @app_commands.describe(points="Number of points to award")
-    async def give_points(self, interaction: Interaction, user: User, points: int):
+    @app_commands.describe(reason="Reason for awarding points")
+    async def give_points(
+        self, interaction: Interaction, user: User, points: int, reason: str = None
+    ):
         """Manually give points to user"""
+        audit_output = f"{interaction.user.mention} gave {user.mention} {points}pts"
+        if reason is not None:
+            audit_output += f': "{reason}"'
+
+        if reason is None and not self.check_hooj(interaction):
+            return await interaction.response.send_message(
+                "Please provide a reason for awarding points", ephemeral=True
+            )
+
+        logging.info(POINTS_AUDIT_CHANNEL)
+        await self.client.get_channel(POINTS_AUDIT_CHANNEL).send(audit_output)
         success, _ = DB().deposit_points(user.id, points)
         if not success:
             return await interaction.response.send_message(

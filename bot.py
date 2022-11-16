@@ -32,10 +32,10 @@ class RaffleBot(Client):
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
-        # guild = discord.Object(id=GUILD_ID)
-        # tree.clear_commands(guild=guild)
-        # tree.copy_global_to(guild=guild)
-        # await tree.sync(guild=guild)
+        guild = discord.Object(id=GUILD_ID)
+        tree.clear_commands(guild=guild)
+        tree.copy_global_to(guild=guild)
+        await tree.sync(guild=guild)
 
     async def on_button_click(self, interaction):
         logging.info(f"button clicked: {interaction}")

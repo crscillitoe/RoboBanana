@@ -36,10 +36,10 @@ def index():
 
 @app.route("/publish-prediction", methods=["POST"])
 @token_required
-def publish():
+def publish_prediction():
     global last_published
     try:
-        to_publish = parse_data_from_request()
+        to_publish = parse_prediction_from_request()
         sse.publish(to_publish, type="publish", channel="predictions")
         last_published = to_publish
         logging.info(f"Published new data: {to_publish}")
@@ -48,7 +48,20 @@ def publish():
         return ("Bad Request", 400)
 
 
-def parse_data_from_request():
+@app.route("/publish-sub", methods=["POST"])
+@token_required
+def publish_sub():
+    global last_published
+    try:
+        to_publish = parse_sub_from_request()
+        sse.publish(to_publish, type="publish", channel="subs")
+        logging.info(f"Published new data: {to_publish}")
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
+
+
+def parse_prediction_from_request():
     logging.info(request.json)
     description = request.json["description"]
     option_one = request.json["optionOne"]
@@ -66,6 +79,12 @@ def parse_data_from_request():
         "endTime": end_time,
         "acceptingEntries": accepting_entries,
     }
+
+
+def parse_sub_from_request():
+    name = request.json["name"]
+    tier = request.json["tier"]
+    return {"name": name, "tier": tier}
 
 
 if __name__ == "__main__":

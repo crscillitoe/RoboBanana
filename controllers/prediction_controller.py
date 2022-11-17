@@ -7,7 +7,7 @@ from config import Config
 import logging
 import requests
 
-PUBLISH_URL = "http://localhost:3000/publish"
+PUBLISH_URL = "http://localhost:3000/publish-prediction"
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 
 LOG = logging.getLogger(__name__)

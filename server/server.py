@@ -34,13 +34,13 @@ def index():
     return jsonify(last_published)
 
 
-@app.route("/publish", methods=["POST"])
+@app.route("/publish-prediction", methods=["POST"])
 @token_required
 def publish():
     global last_published
     try:
         to_publish = parse_data_from_request()
-        sse.publish(to_publish, type="publish")
+        sse.publish(to_publish, type="publish", channel="predictions")
         last_published = to_publish
         logging.info(f"Published new data: {to_publish}")
         return ("OK", 200)

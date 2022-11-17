@@ -11,6 +11,7 @@ from discord import (
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from config import Config
+from controllers.sub_controller import SubController
 from db import DB
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
@@ -53,26 +54,7 @@ class RaffleBot(Client):
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
         if message.channel.id == WELCOME_CHAT_ID:
-            premium_ids = map(
-                int,
-                [
-                    Config.CONFIG["Discord"]["Tier1RoleID"],
-                    Config.CONFIG["Discord"]["Tier2RoleID"],
-                    Config.CONFIG["Discord"]["Tier3RoleID"],
-                ],
-            )
-
-            role_name = None
-            for role_id in premium_ids:
-                role = discord.utils.get(message.author.roles, id=role_id)
-                if role is not None:
-                    role_name = role.name
-                    break
-
-            if role_name is not None:
-                await self.get_channel(STREAM_CHAT_ID).send(
-                    f"Thank you {message.author.mention} for joining {role_name}!"
-                )
+            await SubController.subscribe(message, self)
 
 
 client = RaffleBot()

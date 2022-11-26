@@ -9,6 +9,7 @@ from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
 from config import Config
 import logging
+import random
 
 
 JOEL_DISCORD_ID = 112386674155122688
@@ -40,7 +41,6 @@ class ModCommands(app_commands.Group, name="mod"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="sync")
-    @app_commands.check(check_owner)
     @app_commands.checks.has_role("Mod")
     async def sync(self, interaction: Interaction) -> None:
         """Manually sync slash commands to guild"""
@@ -50,6 +50,36 @@ class ModCommands(app_commands.Group, name="mod"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
+
+    @app_commands.command(name="gift")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(num_winners="num_winners")
+    @app_commands.describe(oprah="Oprah")
+    async def gift(
+        self, interaction: Interaction, oprah: str, num_winners: int
+    ):
+        Tier1 = int(Config.CONFIG["Discord"]["Tier1RoleID"])
+        Tier2 = int(Config.CONFIG["Discord"]["Tier2RoleID"])
+        Tier3 = int(Config.CONFIG["Discord"]["Tier3RoleID"])
+        BotRole = int(Config.CONFIG["Discord"]["BotRoleID"])
+        GiftedTier1 = int(Config.CONFIG["Discord"]["GiftedTier1RoleID"])
+        GiftedTier3 = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
+        Mod = int(Config.CONFIG["Discord"]["ModRoleID"])
+
+        await interaction.response.send_message("Choosing random gifted sub winners...")
+        potential_winners = []
+        for member in interaction.channel.members:
+            can_win = True
+            for role in member.roles:
+                if role.id in [Tier1, Tier2, Tier3, BotRole, GiftedTier1, GiftedTier3, Mod]:
+                    can_win = False
+
+            if can_win:
+                potential_winners.append(member.mention)
+
+        winners = random.choices(potential_winners, k=num_winners)
+        for winner in winners:
+            await interaction.channel.send(f"{oprah} has gifted {winner} a T1 Subscription!")
 
     @app_commands.command(name="start")
     @app_commands.checks.has_role("Mod")

@@ -13,8 +13,11 @@ POINTS_PER_ACCRUAL = 50
 
 ROLE_MULTIPLIERS: dict[str, int] = {
     int(Config.CONFIG["Discord"]["Tier1RoleID"]): 2,
+    int(Config.CONFIG["Discord"]["GiftedTier1RoleID"]): 2,
     int(Config.CONFIG["Discord"]["Tier2RoleID"]): 3,
+    int(Config.CONFIG["Discord"]["GiftedTier2RoleID"]): 3,
     int(Config.CONFIG["Discord"]["Tier3RoleID"]): 4,
+    int(Config.CONFIG["Discord"]["GiftedTier3RoleID"]): 4,
 }
 
 

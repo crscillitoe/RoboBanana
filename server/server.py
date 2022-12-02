@@ -70,6 +70,8 @@ def parse_prediction_from_request():
     option_two_points = int(request.json["optionTwoPoints"])
     end_time = request.json["endTime"]
     accepting_entries = request.json["acceptingEntries"]
+    ended = request.json["ended"]
+
     return {
         "description": description,
         "optionOne": option_one,
@@ -78,6 +80,7 @@ def parse_prediction_from_request():
         "optionTwoPoints": option_two_points,
         "endTime": end_time,
         "acceptingEntries": accepting_entries,
+        "ended": ended,
     }
 
 

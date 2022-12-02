@@ -39,6 +39,8 @@ class PredictionController:
             payout = round(total_points * pot_percentage)
             DB().deposit_points(entry.user_id, payout)
 
+        publish_prediction_end_summary(interaction.guild_id)
+
         DB().complete_prediction(interaction.guild_id)
         await interaction.response.send_message(
             f"Payout complete! {total_points} distributed.", ephemeral=True
@@ -68,6 +70,8 @@ class PredictionController:
         for entry in entries:
             DB().deposit_points(entry.user_id, entry.channel_points)
 
+        publish_prediction_end_summary(interaction.guild_id)
+
         DB().complete_prediction(interaction.guild_id)
         await interaction.response.send_message(
             "Prediction has been refunded!", ephemeral=True
@@ -92,10 +96,7 @@ class PredictionController:
             interaction.guild_id, interaction.user.id, channel_points, guess
         )
 
-        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
-
-        # Fire and forget publish - these do not all have to succeed
-        Thread(target=publish_update, args=(prediction_summary,)).start()
+        publish_prediction_summary(interaction.guild_id)
 
     @staticmethod
     async def create_prediction(
@@ -116,14 +117,12 @@ class PredictionController:
             option_two,
             end_time,
         )
-        prediction_summary = DB().get_prediction_summary(guild_id)
-        Thread(target=publish_update, args=(prediction_summary,)).start()
+        publish_prediction_summary(guild_id)
 
     @staticmethod
     async def close_prediction(guild_id: int):
         DB().close_prediction(guild_id)
-        prediction_summary = DB().get_prediction_summary(guild_id)
-        Thread(target=publish_update, args=(prediction_summary,)).start()
+        publish_prediction_summary(guild_id)
 
 
 def publish_update(prediction_summary: PredictionSummary):
@@ -135,9 +134,21 @@ def publish_update(prediction_summary: PredictionSummary):
         "optionTwoPoints": prediction_summary.option_two_points,
         "endTime": prediction_summary.end_time.astimezone(timezone.utc).isoformat(),
         "acceptingEntries": prediction_summary.accepting_entries,
+        "ended": prediction_summary.ended,
     }
     response = requests.post(
         url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
     )
     if response.status_code != 200:
         LOG.error(f"Failed to publish updated prediction summary: {response.text}")
+
+
+def publish_prediction_summary(guild_id: int):
+    prediction_summary = DB().get_prediction_summary(guild_id)
+    Thread(target=publish_update, args=(prediction_summary,)).start()
+
+
+def publish_prediction_end_summary(guild_id: int):
+    prediction_summary = DB().get_prediction_summary(guild_id)
+    prediction_summary.ended = True
+    Thread(target=publish_update, args=(prediction_summary,)).start()

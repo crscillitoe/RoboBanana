@@ -237,4 +237,5 @@ def get_prediction_summary(guild_id: int, session: sessionmaker) -> PredictionSu
             option_two_points,
             prediction.end_time,
             prediction.accepting_entries,
+            prediction.ended,
         )

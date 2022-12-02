@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from discord import Interaction
+from discord import Interaction, Client
 from db import DB
 from db.models import PredictionEntry, PredictionSummary
 from threading import Thread
@@ -15,7 +15,7 @@ LOG = logging.getLogger(__name__)
 
 class PredictionController:
     @staticmethod
-    async def payout_prediction(option: int, interaction: Interaction):
+    async def payout_prediction(option: int, interaction: Interaction, client: Client):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
@@ -41,13 +41,14 @@ class PredictionController:
 
         publish_prediction_end_summary(interaction.guild_id)
 
+        payout_message = f"Payout complete! {total_points} points distributed."
+        await reply_to_initial_message(interaction.guild_id, client, payout_message)
+
         DB().complete_prediction(interaction.guild_id)
-        await interaction.response.send_message(
-            f"Payout complete! {total_points} distributed.", ephemeral=True
-        )
+        await interaction.response.send_message(payout_message, ephemeral=True)
 
     @staticmethod
-    async def refund_prediction(interaction: Interaction):
+    async def refund_prediction(interaction: Interaction, client: Client):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
@@ -72,10 +73,11 @@ class PredictionController:
 
         publish_prediction_end_summary(interaction.guild_id)
 
+        refund_message = "Prediction has been refunded!"
+        await reply_to_initial_message(interaction.guild_id, client, refund_message)
+
         DB().complete_prediction(interaction.guild_id)
-        await interaction.response.send_message(
-            "Prediction has been refunded!", ephemeral=True
-        )
+        await interaction.response.send_message(refund_message, ephemeral=True)
 
     @staticmethod
     async def create_prediction_entry(
@@ -141,6 +143,15 @@ def publish_update(prediction_summary: PredictionSummary):
     )
     if response.status_code != 200:
         LOG.error(f"Failed to publish updated prediction summary: {response.text}")
+
+
+async def reply_to_initial_message(guild_id: int, client: Client, message: str):
+    prediction_message_id = DB().get_prediction_message_id(guild_id)
+    prediction_channel_id = DB().get_prediction_channel_id(guild_id)
+    prediction_message = await client.get_channel(prediction_channel_id).fetch_message(
+        prediction_message_id
+    )
+    await prediction_message.reply(message)
 
 
 def publish_prediction_summary(guild_id: int):

@@ -4,7 +4,6 @@ from discord.ui import View, Button
 from db import DB
 from config import Config
 
-from .payout_prediction_view import PayoutPredictionView
 from .prediction_embed import PredictionEmbed
 from .prediction_vote_modal import PredictionVoteModal
 

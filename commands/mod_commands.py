@@ -55,9 +55,7 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(num_winners="num_winners")
     @app_commands.describe(oprah="Oprah")
-    async def gift(
-        self, interaction: Interaction, oprah: str, num_winners: int
-    ):
+    async def gift(self, interaction: Interaction, oprah: str, num_winners: int):
         Tier1 = int(Config.CONFIG["Discord"]["Tier1RoleID"])
         Tier2 = int(Config.CONFIG["Discord"]["Tier2RoleID"])
         Tier3 = int(Config.CONFIG["Discord"]["Tier3RoleID"])
@@ -71,7 +69,15 @@ class ModCommands(app_commands.Group, name="mod"):
         for member in interaction.channel.members:
             can_win = True
             for role in member.roles:
-                if role.id in [Tier1, Tier2, Tier3, BotRole, GiftedTier1, GiftedTier3, Mod]:
+                if role.id in [
+                    Tier1,
+                    Tier2,
+                    Tier3,
+                    BotRole,
+                    GiftedTier1,
+                    GiftedTier3,
+                    Mod,
+                ]:
                     can_win = False
 
             if can_win:
@@ -79,7 +85,9 @@ class ModCommands(app_commands.Group, name="mod"):
 
         winners = random.choices(potential_winners, k=num_winners)
         for winner in winners:
-            await interaction.channel.send(f"{oprah} has gifted {winner} a T1 Subscription!")
+            await interaction.channel.send(
+                f"{oprah} has gifted {winner} a T1 Subscription!"
+            )
 
     @app_commands.command(name="start")
     @app_commands.checks.has_role("Mod")
@@ -184,14 +192,14 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
-        await PredictionController.refund_prediction(interaction)
+        await PredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(option="Option to payout")
     async def payout_prediction(self, interaction: Interaction, option: int):
         """Payout predicton to option 0 or 1"""
-        await PredictionController.payout_prediction(option, interaction)
+        await PredictionController.payout_prediction(option, interaction, self.client)
 
     @app_commands.command(name="give_points")
     @app_commands.checks.has_role("Mod")

@@ -45,14 +45,14 @@ class ClosePredictionView(View):
 
         prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
         prediction_channel_id = DB().get_prediction_channel_id(interaction.guild_id)
-        prediction_message = await self.client.get_channel(prediction_channel_id).fetch_message(
-            prediction_message_id
-        )
+        prediction_message = await self.client.get_channel(
+            prediction_channel_id
+        ).fetch_message(prediction_message_id)
         await prediction_message.edit(embed=self.entry_embed, view=self.entry_view)
         await interaction.message.edit(content="", embed=self.parent, view=self)
 
         payout_prediction_view = PayoutPredictionView(
-            self.entry_view.option_one, self.entry_view.option_two
+            self.entry_view.option_one, self.entry_view.option_two, self.client
         )
         await prediction_message.reply("Prediction closed!")
         await interaction.response.send_message("Prediction closed!", ephemeral=True)

@@ -17,11 +17,14 @@ app.register_blueprint(sse, url_prefix="/stream")
 CORS(app, resources={"/stream": {"origins": "*"}})
 
 last_published = {}
+PREDICTIONS_CHANNEL = "predictions"
+SUBS_CHANNEL = "subs"
 
 
 def keep_alive():
     with app.app_context():
-        sse.publish("\n\n", type="keepalive")
+        sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=SUBS_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -40,7 +43,7 @@ def publish_prediction():
     global last_published
     try:
         to_publish = parse_prediction_from_request()
-        sse.publish(to_publish, type="publish", channel="predictions")
+        sse.publish(to_publish, type="publish", channel=PREDICTIONS_CHANNEL)
         last_published = to_publish
         logging.info(f"Published new data: {to_publish}")
         return ("OK", 200)
@@ -54,7 +57,7 @@ def publish_sub():
     global last_published
     try:
         to_publish = parse_sub_from_request()
-        sse.publish(to_publish, type="publish", channel="subs")
+        sse.publish(to_publish, type="publish", channel=SUBS_CHANNEL)
         logging.info(f"Published new data: {to_publish}")
         return ("OK", 200)
     except (KeyError, ValueError):

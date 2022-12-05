@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from discord import Interaction, Client
 from db import DB
-from db.models import PredictionEntry, PredictionSummary
+from db.models import PredictionChoice, PredictionEntry, PredictionSummary
 from threading import Thread
 from config import Config
 import logging
@@ -82,11 +82,11 @@ class PredictionController:
     @staticmethod
     async def create_prediction_entry(
         channel_points: int,
-        point_balance: int,
-        guess: int,
+        guess: PredictionChoice,
         interaction: Interaction,
         client: Client,
     ):
+        point_balance = DB().get_point_balance(interaction.user.id)
         if channel_points > point_balance:
             return await interaction.response.send_message(
                 f"You can only wager up to {point_balance} points", ephemeral=True
@@ -99,7 +99,7 @@ class PredictionController:
             )
 
         DB().create_prediction_entry(
-            interaction.guild_id, interaction.user.id, channel_points, guess
+            interaction.guild_id, interaction.user.id, channel_points, guess.value
         )
 
         channel_id = DB().get_prediction_channel_id(interaction.guild_id)
@@ -111,7 +111,7 @@ class PredictionController:
 
         chosen_option = (
             prediction_summary.option_one
-            if guess == 0
+            if guess == PredictionChoice.pink
             else prediction_summary.option_two
         )
         prediction_message = await client.get_channel(channel_id).fetch_message(

@@ -3,6 +3,7 @@ from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from db import DB
 from config import Config
+from db.models import PredictionChoice
 
 from .prediction_embed import PredictionEmbed
 from .prediction_vote_modal import PredictionVoteModal
@@ -62,12 +63,16 @@ class PredictionView(View):
         if not await self.user_eligible(interaction):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
-        modal = PredictionVoteModal(self.parent, 0, point_balance, self.client)
+        modal = PredictionVoteModal(
+            self.parent, PredictionChoice.pink, point_balance, self.client
+        )
         await interaction.response.send_modal(modal)
 
     async def vote_two_button_onclick(self, interaction: Interaction):
         if not await self.user_eligible(interaction):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
-        modal = PredictionVoteModal(self.parent, 1, point_balance, self.client)
+        modal = PredictionVoteModal(
+            self.parent, PredictionChoice.blue, point_balance, self.client
+        )
         await interaction.response.send_modal(modal)

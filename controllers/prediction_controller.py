@@ -85,7 +85,7 @@ class PredictionController:
         guess: PredictionChoice,
         interaction: Interaction,
         client: Client,
-    ):
+    ) -> bool:
         point_balance = DB().get_point_balance(interaction.user.id)
         if channel_points > point_balance:
             return await interaction.response.send_message(
@@ -98,9 +98,14 @@ class PredictionController:
                 "Unable to cast vote - please try again!", ephemeral=True
             )
 
-        DB().create_prediction_entry(
+        success = DB().create_prediction_entry(
             interaction.guild_id, interaction.user.id, channel_points, guess.value
         )
+        if not success:
+            await interaction.response.send_message(
+                "Unable to cast vote", ephemeral=True
+            )
+            return False
 
         channel_id = DB().get_prediction_channel_id(interaction.guild_id)
         message_id = DB().get_prediction_message_id(interaction.guild_id)
@@ -120,6 +125,7 @@ class PredictionController:
         await prediction_message.reply(
             f"{interaction.user.mention} bet {channel_points} hooj bucks on {chosen_option}"
         )
+        return True
 
     @staticmethod
     async def create_prediction(

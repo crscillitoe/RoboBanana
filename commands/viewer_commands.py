@@ -53,9 +53,13 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         self, interaction: Interaction, choice: PredictionChoice, points: int
     ):
         """Place bet on currently ongoing prediction"""
-        await PredictionController.create_prediction_entry(
+        success = await PredictionController.create_prediction_entry(
             points, choice, interaction, self.client
         )
+
+        if not success:
+            return
+
         await interaction.response.send_message(
             f"Vote cast with {points} points!", ephemeral=True
         )

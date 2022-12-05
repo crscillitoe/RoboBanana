@@ -436,7 +436,7 @@ class DB:
 
     def create_prediction_entry(
         self, guild_id: int, user_id: int, channel_points: int, guess: int
-    ):
+    ) -> bool:
         """Create new prediction entry for user
 
         Args:
@@ -444,6 +444,8 @@ class DB:
             user_id (int): Discord ID of user voting
             channel_points (int): Number of channel points to vote
             guess (int): Option to vote for
+        Returns:
+            bool: True if prediction entry sucessfully created
         """
         return create_prediction_entry(
             guild_id, user_id, channel_points, guess, self.session

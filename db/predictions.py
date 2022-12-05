@@ -31,6 +31,7 @@ def create_prediction(
             )
         )
 
+
 def has_ongoing_prediction(guild_id: int, session: sessionmaker) -> bool:
     with session() as sess:
         stmt = (
@@ -113,6 +114,7 @@ def get_prediction_message_id(guild_id: int, session: sessionmaker) -> Optional[
 
     return result[0]
 
+
 def get_prediction_channel_id(guild_id: int, session: sessionmaker) -> Optional[int]:
     if not has_ongoing_prediction(guild_id, session):
         raise Exception("There is no ongoing prediction! You need to start a new one.")
@@ -134,7 +136,10 @@ def get_prediction_channel_id(guild_id: int, session: sessionmaker) -> Optional[
 
 def create_prediction_entry(
     guild_id: int, user_id: int, channel_points: int, guess: int, session: sessionmaker
-) -> None:
+) -> bool:
+    if not accepting_prediction_entries(guild_id, session):
+        return False
+
     prediction_id = get_prediction_id(guild_id, session)
     with session() as sess:
         sess.execute(
@@ -145,6 +150,7 @@ def create_prediction_entry(
                 guess=guess,
             )
         )
+    return True
 
 
 def get_user_prediction_entry(

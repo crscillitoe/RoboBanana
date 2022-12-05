@@ -21,6 +21,11 @@ class RaffleType(enum.Enum):
     anyone = 2
 
 
+class PredictionChoice(enum.Enum):
+    pink = 0
+    blue = 1
+
+
 class PredictionSummary:
     def __init__(
         self,

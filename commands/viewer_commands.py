@@ -1,5 +1,7 @@
 from discord import app_commands, Interaction, User, Client
+from controllers.prediction_controller import PredictionController
 from db import DB
+from db.models import PredictionChoice
 from views.rewards.redeem_reward_view import RedeemRewardView
 
 
@@ -42,4 +44,22 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         user_points = DB().get_point_balance(interaction.user.id)
         await interaction.response.send_message(
             f"You currently have {user_points} points", ephemeral=True
+        )
+
+    @app_commands.command(name="bet")
+    @app_commands.describe(choice="Choice to bet points on")
+    @app_commands.describe(points="Number of channel points to bet")
+    async def bet(
+        self, interaction: Interaction, choice: PredictionChoice, points: int
+    ):
+        """Place bet on currently ongoing prediction"""
+        success = await PredictionController.create_prediction_entry(
+            points, choice, interaction, self.client
+        )
+
+        if not success:
+            return
+
+        await interaction.response.send_message(
+            f"Vote cast with {points} points!", ephemeral=True
         )

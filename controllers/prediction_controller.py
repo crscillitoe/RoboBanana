@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from discord import Interaction, Client
 from db import DB
-from db.models import PredictionEntry, PredictionSummary
+from db.models import PredictionChoice, PredictionEntry, PredictionSummary
 from threading import Thread
 from config import Config
 import logging
@@ -15,7 +15,9 @@ LOG = logging.getLogger(__name__)
 
 class PredictionController:
     @staticmethod
-    async def payout_prediction(option: int, interaction: Interaction, client: Client):
+    async def payout_prediction(
+        option: PredictionChoice, interaction: Interaction, client: Client
+    ):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
@@ -29,7 +31,7 @@ class PredictionController:
 
         option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)
         total_points = option_one + option_two
-        winning_pot = option_one if option == 0 else option_two
+        winning_pot = option_one if option == PredictionChoice.pink else option_two
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
             interaction.guild_id, option
         )
@@ -81,8 +83,12 @@ class PredictionController:
 
     @staticmethod
     async def create_prediction_entry(
-        channel_points: int, point_balance: int, guess: int, interaction: Interaction
-    ):
+        channel_points: int,
+        guess: PredictionChoice,
+        interaction: Interaction,
+        client: Client,
+    ) -> bool:
+        point_balance = DB().get_point_balance(interaction.user.id)
         if channel_points > point_balance:
             return await interaction.response.send_message(
                 f"You can only wager up to {point_balance} points", ephemeral=True
@@ -94,11 +100,34 @@ class PredictionController:
                 "Unable to cast vote - please try again!", ephemeral=True
             )
 
-        DB().create_prediction_entry(
-            interaction.guild_id, interaction.user.id, channel_points, guess
+        success = DB().create_prediction_entry(
+            interaction.guild_id, interaction.user.id, channel_points, guess.value
         )
+        if not success:
+            await interaction.response.send_message(
+                "Unable to cast vote", ephemeral=True
+            )
+            return False
 
-        publish_prediction_summary(interaction.guild_id)
+        channel_id = DB().get_prediction_channel_id(interaction.guild_id)
+        message_id = DB().get_prediction_message_id(interaction.guild_id)
+
+        # We'll use this prediction summary for the reply message
+        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
+        Thread(target=publish_update, args=(prediction_summary,)).start()
+
+        chosen_option = (
+            prediction_summary.option_one
+            if guess == PredictionChoice.pink
+            else prediction_summary.option_two
+        )
+        prediction_message = await client.get_channel(channel_id).fetch_message(
+            message_id
+        )
+        await prediction_message.reply(
+            f"{interaction.user.mention} bet {channel_points} hooj bucks on {chosen_option}"
+        )
+        return True
 
     @staticmethod
     async def create_prediction(

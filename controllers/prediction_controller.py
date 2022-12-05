@@ -15,7 +15,9 @@ LOG = logging.getLogger(__name__)
 
 class PredictionController:
     @staticmethod
-    async def payout_prediction(option: int, interaction: Interaction, client: Client):
+    async def payout_prediction(
+        option: PredictionChoice, interaction: Interaction, client: Client
+    ):
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "No ongoing prediction!", ephemeral=True
@@ -29,7 +31,7 @@ class PredictionController:
 
         option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)
         total_points = option_one + option_two
-        winning_pot = option_one if option == 0 else option_two
+        winning_pot = option_one if option == PredictionChoice.pink else option_two
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
             interaction.guild_id, option
         )

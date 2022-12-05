@@ -3,6 +3,7 @@ from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.prediction_controller import PredictionController
 from db import DB, RaffleType
+from db.models import PredictionChoice
 from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
@@ -197,7 +198,9 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(option="Option to payout")
-    async def payout_prediction(self, interaction: Interaction, option: int):
+    async def payout_prediction(
+        self, interaction: Interaction, option: PredictionChoice
+    ):
         """Payout predicton to option 0 or 1"""
         await PredictionController.payout_prediction(option, interaction, self.client)
 

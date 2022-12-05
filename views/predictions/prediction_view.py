@@ -62,12 +62,12 @@ class PredictionView(View):
         if not await self.user_eligible(interaction):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
-        modal = PredictionVoteModal(self.parent, 0, point_balance)
+        modal = PredictionVoteModal(self.parent, 0, point_balance, self.client)
         await interaction.response.send_modal(modal)
 
     async def vote_two_button_onclick(self, interaction: Interaction):
         if not await self.user_eligible(interaction):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
-        modal = PredictionVoteModal(self.parent, 1, point_balance)
+        modal = PredictionVoteModal(self.parent, 1, point_balance, self.client)
         await interaction.response.send_modal(modal)

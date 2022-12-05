@@ -81,7 +81,11 @@ class PredictionController:
 
     @staticmethod
     async def create_prediction_entry(
-        channel_points: int, point_balance: int, guess: int, interaction: Interaction
+        channel_points: int,
+        point_balance: int,
+        guess: int,
+        interaction: Interaction,
+        client: Client,
     ):
         if channel_points > point_balance:
             return await interaction.response.send_message(
@@ -98,7 +102,24 @@ class PredictionController:
             interaction.guild_id, interaction.user.id, channel_points, guess
         )
 
-        publish_prediction_summary(interaction.guild_id)
+        channel_id = DB().get_prediction_channel_id(interaction.guild_id)
+        message_id = DB().get_prediction_message_id(interaction.guild_id)
+
+        # We'll use this prediction summary for the reply message
+        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
+        Thread(target=publish_update, args=(prediction_summary,)).start()
+
+        chosen_option = (
+            prediction_summary.option_one
+            if guess == 0
+            else prediction_summary.option_two
+        )
+        prediction_message = await client.get_channel(channel_id).fetch_message(
+            message_id
+        )
+        await prediction_message.reply(
+            f"{interaction.user.mention} bet {channel_points} hooj bucks on {chosen_option}"
+        )
 
     @staticmethod
     async def create_prediction(

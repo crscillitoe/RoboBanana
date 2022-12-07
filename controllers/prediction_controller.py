@@ -14,6 +14,16 @@ LOG = logging.getLogger(__name__)
 
 
 class PredictionController:
+    def get_winning_pot(
+        winning_option: PredictionChoice, option_one: int, option_two: int
+    ):
+        if winning_option == PredictionChoice.pink:
+            return option_one
+        elif winning_option == PredictionChoice.blue:
+            return option_two
+        else:
+            raise ValueError(f"Invalid PredictionChoice provided: {winning_option}")
+
     @staticmethod
     async def payout_prediction(
         option: PredictionChoice, interaction: Interaction, client: Client
@@ -31,7 +41,9 @@ class PredictionController:
 
         option_one, option_two = DB().get_prediction_point_counts(interaction.guild_id)
         total_points = option_one + option_two
-        winning_pot = option_one if option == PredictionChoice.pink else option_two
+        winning_pot = PredictionController.get_winning_pot(
+            option, option_one, option_two
+        )
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
             interaction.guild_id, option
         )

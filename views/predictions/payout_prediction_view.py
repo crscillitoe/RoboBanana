@@ -2,6 +2,7 @@ from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from controllers.prediction_controller import PredictionController
 from db import DB
+from db.models import PredictionChoice
 
 
 class PayoutPredictionView(View):
@@ -37,14 +38,18 @@ class PayoutPredictionView(View):
         self.add_item(self.refund_button)
 
     async def option_one_onclick(self, interaction: Interaction):
-        await PredictionController.payout_prediction(0, interaction, self.client)
+        await PredictionController.payout_prediction(
+            PredictionChoice.pink, interaction, self.client
+        )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
         await interaction.message.edit(content="", view=self)
 
     async def option_two_onclick(self, interaction: Interaction):
-        await PredictionController.payout_prediction(1, interaction, self.client)
+        await PredictionController.payout_prediction(
+            PredictionChoice.blue, interaction, self.client
+        )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True

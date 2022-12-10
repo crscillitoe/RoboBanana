@@ -90,7 +90,8 @@ def parse_prediction_from_request():
 def parse_sub_from_request():
     name = request.json["name"]
     tier = request.json["tier"]
-    return {"name": name, "tier": tier}
+    message = request.json["message"]
+    return {"name": name, "tier": tier, "message": message}
 
 
 if __name__ == "__main__":

@@ -24,7 +24,7 @@ PREMIUM_IDS = list(map(int, [
     Config.CONFIG["Discord"]["Tier2RoleID"],
     Config.CONFIG["Discord"]["Tier3RoleID"],
 ]))
-
+SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 
 class RaffleBot(Client):
     def __init__(self):
@@ -48,7 +48,7 @@ class RaffleBot(Client):
             return
 
         # Server Subscription message
-        if message.channel.id == WELCOME_CHAT_ID and message.type.value == 25:
+        if message.channel.id == WELCOME_CHAT_ID and message.type.value == SERVER_SUBSCRIPTION_MESSAGE_TYPE:
             # fetch extra attached message info
             raw_msg = await self.http.get_message(channel_id=message.channel.id, message_id=message.id)
 

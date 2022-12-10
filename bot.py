@@ -54,13 +54,14 @@ class RaffleBot(Client):
 
             role_sub_data = raw_msg.get("role_subscription_data")
             if role_sub_data is None:
-                logging.error(f"Unable to get role subscription data for message: {message.id}")
-                return
+                return logging.error(f"Unable to get role subscription data for message: {message.id}")
 
             # comes in like this -> 'tier_name': 'THE ONES WHO KNOW membership',
             # trim " membership" and get the actual role
             role_name = role_sub_data.get("tier_name", "").rstrip(" membership")
-            role = next(filter(lambda x: x.name.startswith(role_name), message.guild.roles))
+            role = next(filter(lambda x: x.name.startswith(role_name) and x.id in PREMIUM_IDS, message.guild.roles), None)
+            if role is None:
+                return logging.error(f"Unable to get role starting with: {role_name}")
 
             # create the thank you message
             if role_sub_data.get("is_renewal", False):

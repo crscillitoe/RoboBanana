@@ -45,7 +45,7 @@ class PredictionController:
             option, option_one, option_two
         )
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, option
+            interaction.guild_id, option.value
         )
 
         for entry in entries:

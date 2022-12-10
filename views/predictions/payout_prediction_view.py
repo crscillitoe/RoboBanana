@@ -1,15 +1,17 @@
-from discord import ButtonStyle, Interaction
+from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from controllers.prediction_controller import PredictionController
 from db import DB
+from db.models import PredictionChoice
 
 
 class PayoutPredictionView(View):
-    def __init__(self, option_one: str, option_two: str) -> None:
+    def __init__(self, option_one: str, option_two: str, client: Client) -> None:
         super().__init__(timeout=None)
 
         self.option_one = option_one
         self.option_two = option_two
+        self.client = client
 
         self.option_one_button = Button(
             label=option_one,
@@ -36,21 +38,25 @@ class PayoutPredictionView(View):
         self.add_item(self.refund_button)
 
     async def option_one_onclick(self, interaction: Interaction):
-        await PredictionController.payout_prediction(0, interaction)
+        await PredictionController.payout_prediction(
+            PredictionChoice.pink, interaction, self.client
+        )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
         await interaction.message.edit(content="", view=self)
 
     async def option_two_onclick(self, interaction: Interaction):
-        await PredictionController.payout_prediction(1, interaction)
+        await PredictionController.payout_prediction(
+            PredictionChoice.blue, interaction, self.client
+        )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
         await interaction.message.edit(content="", view=self)
 
     async def refund_onclick(self, interaction: Interaction):
-        await PredictionController.refund_prediction(interaction)
+        await PredictionController.refund_prediction(interaction, self.client)
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True

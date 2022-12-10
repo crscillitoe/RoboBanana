@@ -1,17 +1,25 @@
-from discord import TextStyle, Interaction
+from discord import TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
 from controllers.prediction_controller import PredictionController
 from db import DB
+from db.models import PredictionChoice
 
 from .prediction_embed import PredictionEmbed
 
 
 class PredictionVoteModal(Modal, title="Cast your vote!"):
-    def __init__(self, parent: PredictionEmbed, guess: int, point_balance: int):
+    def __init__(
+        self,
+        parent: PredictionEmbed,
+        guess: PredictionChoice,
+        point_balance: int,
+        client: Client,
+    ):
         super().__init__(timeout=None)
         self.guess = guess
         self.parent = parent
         self.point_balance = point_balance
+        self.client = client
         self.channel_points = TextInput(
             label=f"Channel Points ({point_balance})",
             placeholder="50",
@@ -31,7 +39,7 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
             return
 
         await PredictionController.create_prediction_entry(
-            channel_points, self.point_balance, self.guess, interaction
+            channel_points, self.guess, interaction, self.client
         )
         self.parent.update_fields()
 

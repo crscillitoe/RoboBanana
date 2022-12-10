@@ -17,11 +17,14 @@ app.register_blueprint(sse, url_prefix="/stream")
 CORS(app, resources={"/stream": {"origins": "*"}})
 
 last_published = {}
+PREDICTIONS_CHANNEL = "predictions"
+SUBS_CHANNEL = "subs"
 
 
 def keep_alive():
     with app.app_context():
-        sse.publish("\n\n", type="keepalive")
+        sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=SUBS_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -34,13 +37,13 @@ def index():
     return jsonify(last_published)
 
 
-@app.route("/publish", methods=["POST"])
+@app.route("/publish-prediction", methods=["POST"])
 @token_required
-def publish():
+def publish_prediction():
     global last_published
     try:
-        to_publish = parse_data_from_request()
-        sse.publish(to_publish, type="publish")
+        to_publish = parse_prediction_from_request()
+        sse.publish(to_publish, type="publish", channel=PREDICTIONS_CHANNEL)
         last_published = to_publish
         logging.info(f"Published new data: {to_publish}")
         return ("OK", 200)
@@ -48,7 +51,20 @@ def publish():
         return ("Bad Request", 400)
 
 
-def parse_data_from_request():
+@app.route("/publish-sub", methods=["POST"])
+@token_required
+def publish_sub():
+    global last_published
+    try:
+        to_publish = parse_sub_from_request()
+        sse.publish(to_publish, type="publish", channel=SUBS_CHANNEL)
+        logging.info(f"Published new data: {to_publish}")
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
+
+
+def parse_prediction_from_request():
     logging.info(request.json)
     description = request.json["description"]
     option_one = request.json["optionOne"]
@@ -57,6 +73,8 @@ def parse_data_from_request():
     option_two_points = int(request.json["optionTwoPoints"])
     end_time = request.json["endTime"]
     accepting_entries = request.json["acceptingEntries"]
+    ended = request.json["ended"]
+
     return {
         "description": description,
         "optionOne": option_one,
@@ -65,7 +83,14 @@ def parse_data_from_request():
         "optionTwoPoints": option_two_points,
         "endTime": end_time,
         "acceptingEntries": accepting_entries,
+        "ended": ended,
     }
+
+
+def parse_sub_from_request():
+    name = request.json["name"]
+    tier = request.json["tier"]
+    return {"name": name, "tier": tier}
 
 
 if __name__ == "__main__":

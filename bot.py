@@ -11,6 +11,7 @@ from discord import (
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from config import Config
+from controllers.sub_controller import SubController
 from db import DB
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
@@ -49,6 +50,8 @@ class RaffleBot(Client):
 
         # Server Subscription message
         if message.channel.id == WELCOME_CHAT_ID and message.type.value == SERVER_SUBSCRIPTION_MESSAGE_TYPE:
+            await SubController.subscribe(message, self)
+
             # fetch extra attached message info
             raw_msg = await self.http.get_message(channel_id=message.channel.id, message_id=message.id)
 

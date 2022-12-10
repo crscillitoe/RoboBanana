@@ -25,23 +25,3 @@ class PredictionEmbed(Embed):
         self.add_field(
             name="Prediction End", value=f"<t:{self.end_time}:R>", inline=True
         )
-        option_one_points, option_two_points = DB().get_prediction_point_counts(
-            self.guild_id
-        )
-        total_points = option_one_points + option_two_points
-        if total_points == 0:
-            total_points = 1
-
-        option_one_percent = round((option_one_points / total_points) * 100, 1)
-        option_two_percent = 100 - option_one_percent
-
-        self.add_field(
-            name="Option One Points",
-            value=f"{option_one_points} ({option_one_percent}%)",
-            inline=True,
-        )
-        self.add_field(
-            name="Option Two Points",
-            value=f"{option_two_points} ({option_two_percent}%)",
-            inline=True,
-        )

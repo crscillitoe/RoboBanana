@@ -25,14 +25,14 @@ class SubController:
 
         role_sub_data = raw_msg.get("role_subscription_data")
         if role_sub_data is None:
-            return logging.error(f"Unable to get role subscription data for message: {message.id}")
+            return LOG.error(f"Unable to get role subscription data for message: {message.id}")
 
         # comes in like this -> 'tier_name': 'THE ONES WHO KNOW membership',
         # trim " membership" and get the actual role
         membership_name = role_sub_data.get("tier_name", "").rstrip(" membership")
         role = next(filter(lambda x: x.name.startswith(membership_name) and x.id in PREMIUM_IDS, message.guild.roles), None)
         if role is None:
-            return logging.error(f"Unable to get role starting with: {membership_name}")
+            return LOG.error(f"Unable to get role starting with: {membership_name}")
 
         role_name = role.name
 

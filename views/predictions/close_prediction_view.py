@@ -43,8 +43,9 @@ class ClosePredictionView(View):
         self.entry_view.vote_one_button.disabled = True
         self.entry_view.vote_two_button.disabled = True
 
-        prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
-        prediction_channel_id = DB().get_prediction_channel_id(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        prediction_message_id = DB().get_prediction_message_id(prediction_id)
+        prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
         prediction_message = await self.client.get_channel(
             prediction_channel_id
         ).fetch_message(prediction_message_id)
@@ -58,6 +59,6 @@ class ClosePredictionView(View):
         await interaction.response.send_message("Prediction closed!", ephemeral=True)
 
         await self.client.get_channel(PENDING_REWARDS_CHAT_ID).send(
-            f"Payout Prediction!",
+            "Payout Prediction!",
             view=payout_prediction_view,
         )

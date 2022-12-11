@@ -43,7 +43,8 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
         )
         self.parent.update_fields()
 
-        prediction_message_id = DB().get_prediction_message_id(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        prediction_message_id = DB().get_prediction_message_id(prediction_id)
         prediction_message = await interaction.channel.fetch_message(
             prediction_message_id
         )

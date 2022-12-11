@@ -67,13 +67,13 @@ def close_prediction(guild_id: int, session: sessionmaker):
         )
 
 
-def complete_prediction(guild_id: int, session: sessionmaker):
+def complete_prediction(guild_id: int, winning_option: int, session: sessionmaker):
     with session() as sess:
         sess.execute(
             update(Prediction)
             .where(Prediction.guild_id == guild_id)
             .where(Prediction.ended == False)
-            .values(ended=True, accepting_entries=False)
+            .values(ended=True, accepting_entries=False, winning_option=winning_option)
         )
 
 
@@ -172,13 +172,15 @@ def get_user_prediction_entry(
 
 
 def get_prediction_point_counts(
-    guild_id: int, session: sessionmaker
+    guild_id: int, session: sessionmaker, prediction_id: Optional[int] = None
 ) -> tuple[int, int]:
     # special case for immediately after prediction is created
-    if not has_ongoing_prediction(guild_id, session):
-        return (0, 0)
+    if prediction_id is None:
+        if not has_ongoing_prediction(guild_id, session):
+            return (0, 0)
 
-    prediction_id = get_prediction_id(guild_id, session)
+        prediction_id = get_prediction_id(guild_id, session)
+
     with session() as sess:
         stmt = (
             select(func.sum(PredictionEntry.channel_points))
@@ -204,9 +206,14 @@ def get_prediction_point_counts(
 
 
 def get_prediction_entries_for_guess(
-    guild_id: int, guess: int, session: sessionmaker
+    guild_id: int,
+    guess: int,
+    session: sessionmaker,
+    prediction_id: Optional[int] = None,
 ) -> list[PredictionEntry]:
-    prediction_id = get_prediction_id(guild_id, session)
+    if prediction_id is None:
+        prediction_id = get_prediction_id(guild_id, session)
+
     with session() as sess:
         results = sess.execute(
             select(PredictionEntry)
@@ -217,6 +224,21 @@ def get_prediction_entries_for_guess(
             return results
 
         return list(map(lambda result: result[0], results))
+
+
+def get_last_prediction(guild_id: int, session: sessionmaker) -> Prediction:
+    with session() as sess:
+        stmt = (
+            select(Prediction)
+            .where(Prediction.guild_id == guild_id)
+            .order_by(Prediction.id.desc())
+        )
+
+        result = sess.execute(stmt).first()[0]
+        if result is None:
+            raise Exception(f"There are no previous predictions for {guild_id=}")
+
+        return result
 
 
 def get_prediction_summary(guild_id: int, session: sessionmaker) -> PredictionSummary:

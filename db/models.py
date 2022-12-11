@@ -2,6 +2,7 @@ from datetime import datetime
 import enum
 from sqlalchemy import (
     BigInteger,
+    SmallInteger,
     Boolean,
     Column,
     DateTime,
@@ -22,6 +23,12 @@ class RaffleType(enum.Enum):
 
 
 class PredictionChoice(enum.Enum):
+    pink = 0
+    blue = 1
+
+
+class PredictionOutcome(enum.Enum):
+    refund = -1
     pink = 0
     blue = 1
 
@@ -137,11 +144,12 @@ class Prediction(Base):
     description = Column(VARCHAR(100), nullable=False)
     option_one = Column(VARCHAR(100), nullable=False)
     option_two = Column(VARCHAR(100), nullable=False)
+    winning_option = Column(SmallInteger, nullable=True)
 
     entries = relationship("PredictionEntry", back_populates="prediction")
 
     def __repr__(self):
-        return f"Prediction(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
+        return f"Prediction(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r}, winning_option={self.winning_option!r})"
 
 
 class PredictionEntry(Base):

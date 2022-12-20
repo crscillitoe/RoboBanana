@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Optional
 from discord import Interaction, Client
 from db import DB
 from db.models import PredictionChoice, PredictionEntry, PredictionSummary
@@ -53,9 +54,18 @@ class PredictionController:
             payout = round(total_points * pot_percentage)
             DB().deposit_points(entry.user_id, payout)
 
-        publish_prediction_end_summary(interaction.guild_id)
+        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
+        publish_prediction_end_summary(interaction.guild_id, prediction_summary)
 
-        payout_message = f"Payout complete! {total_points} points distributed."
+        paid_option = (
+            prediction_summary.option_one
+            if option == PredictionChoice.pink
+            else prediction_summary.option_two
+        )
+
+        payout_message = (
+            f"Payout complete! {total_points} points distributed to {paid_option}."
+        )
         await reply_to_initial_message(interaction.guild_id, client, payout_message)
 
         DB().complete_prediction(interaction.guild_id)
@@ -200,7 +210,10 @@ def publish_prediction_summary(guild_id: int):
     Thread(target=publish_update, args=(prediction_summary,)).start()
 
 
-def publish_prediction_end_summary(guild_id: int):
-    prediction_summary = DB().get_prediction_summary(guild_id)
+def publish_prediction_end_summary(
+    guild_id: int, prediction_summary: Optional[PredictionSummary] = None
+):
+    if prediction_summary is None:
+        prediction_summary = DB().get_prediction_summary(guild_id)
     prediction_summary.ended = True
     Thread(target=publish_update, args=(prediction_summary,)).start()

@@ -11,13 +11,11 @@ from controllers.raffle_controller import RaffleController
 from config import Config
 import logging
 import random
-from nltk.corpus import wordnet as wn
+
 
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
 POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
-nouns = list(wn.all_synsets(wn.NOUN))
-adjectives = list(wn.all_synsets(wn.ADJ))
 
 
 @app_commands.guild_only()
@@ -53,14 +51,6 @@ class ModCommands(app_commands.Group, name="mod"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
-
-    @app_commands.command(name="art")
-    @app_commands.checks.has_role("Mod")
-    async def art(self, interaction: Interaction) -> None:
-        """Generate some random art prompts"""
-
-        await interaction.channel.send(get_random_options(nouns, adjectives))
-        await interaction.response.send_message("Enjoy your art gamer", ephemeral=True)
 
     @app_commands.command(name="gift")
     @app_commands.checks.has_role("Mod")
@@ -242,24 +232,3 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
         )
-
-def get_random_options(noun_list, adj_list):
-    num_options = 3
-
-    noun_choices = random.sample(noun_list, num_options)
-    adjective_choices = random.sample(adj_list, num_options)
-
-    to_return = '```\n'
-
-    for i in range(num_options):
-        noun_name = (noun_choices[i].name()).split('.')[0]
-        adjective_name = (adjective_choices[i].name()).split('.')[0]
-
-        to_return += f'Option {i + 1}: {adjective_name} {noun_name}\n'
-        to_return += f'{adjective_name} Definition: {adjective_choices[i].definition()}\n'
-        to_return += f'{noun_name} Definition: {noun_choices[i].definition()}\n'
-        to_return += '\n'
-
-    to_return += '```'
-
-    return to_return

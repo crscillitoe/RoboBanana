@@ -46,17 +46,15 @@ class PredictionController:
 
     @staticmethod
     def get_payout_for_option(
-        option: int, guild_id: int, prediction_id: Optional[int] = None
+        option: int, prediction_id: int
     ) -> Generator[Tuple[int, int], None, int]:
-        option_one, option_two = DB().get_prediction_point_counts(
-            guild_id, prediction_id
-        )
+        option_one, option_two = DB().get_prediction_point_counts(prediction_id)
         total_points = option_one + option_two
         winning_pot = PredictionController.get_winning_pot(
             option, option_one, option_two
         )
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
-            guild_id, option, prediction_id
+            prediction_id, option
         )
 
         for entry in entries:
@@ -81,22 +79,9 @@ class PredictionController:
                 ephemeral=True,
             )
 
-<<<<<<< HEAD
-        payout_generator = ReturnableGenerator(
-            PredictionController.get_payout_for_option(
-                option.value, interaction.guild_id
-            )
-=======
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
-
-        option_one, option_two = DB().get_prediction_point_counts(prediction_id)
-        total_points = option_one + option_two
-        winning_pot = PredictionController.get_winning_pot(
-            option, option_one, option_two
-        )
-        entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
-            prediction_id, option.value
->>>>>>> origin/main
+        payout_generator = ReturnableGenerator(
+            PredictionController.get_payout_for_option(option.value, prediction_id)
         )
 
         for user_id, payout in payout_generator:

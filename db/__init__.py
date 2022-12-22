@@ -18,7 +18,7 @@ from .predictions import (
     create_prediction_entry,
     get_last_prediction,
     get_prediction_entries_for_guess,
-    get_prediction_id,
+    get_ongoing_prediction_id,
     get_prediction_point_counts,
     get_prediction_message_id,
     get_prediction_channel_id,
@@ -425,19 +425,27 @@ class DB:
         """
         return has_ongoing_prediction(guild_id, self.session)
 
-    def get_prediction_point_counts(
-        self, guild_id: int, prediction_id: Optional[int] = None
-    ) -> tuple[int, int]:
+    def get_ongoing_prediction_id(self, guild_id: int) -> int:
+        """Get ID for ongoing Prediction
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            int: ID of incomplete Prediction
+        """
+        return get_ongoing_prediction_id(guild_id, self.session)
+
+    def get_prediction_point_counts(self, prediction_id: int) -> tuple[int, int]:
         """Get the total points predicted on each option
 
         Args:
-            guild_id (int):Discord Guild ID which started prediction
-            prediction_id (Optional[int]): None to use ongoing prediction, otherwise specified ID
+            prediction_id (int): ID of Prediction to get point totals for
 
         Returns:
             tuple[int, int]: The total points voted for each option
         """
-        return get_prediction_point_counts(guild_id, self.session, prediction_id)
+        return get_prediction_point_counts(prediction_id, self.session)
 
     def create_prediction_entry(
         self, guild_id: int, user_id: int, channel_points: int, guess: int
@@ -456,27 +464,27 @@ class DB:
             guild_id, user_id, channel_points, guess, self.session
         )
 
-    def get_prediction_message_id(self, guild_id: int) -> Optional[int]:
+    def get_prediction_message_id(self, prediction_id: int) -> Optional[int]:
         """Get message ID of initial prediction start
 
         Args:
-            guild_id (int): Discord Guild ID which initiated prediction
+            prediction_id (int): ID of Prediction to retrieve starting message for
 
         Returns:
             Optional(int): ID of message which started prediction
         """
-        return get_prediction_message_id(guild_id, self.session)
+        return get_prediction_message_id(prediction_id, self.session)
 
-    def get_prediction_channel_id(self, guild_id: int) -> Optional[int]:
+    def get_prediction_channel_id(self, prediction_id: int) -> Optional[int]:
         """Get channel ID of an ongoing prediction
 
         Args:
-            guild_id (int): Discord Guild ID which initiated prediction
+            prediction_id (int): ID of Prediction to retrieve channel for
 
         Returns:
             Optional(int): ID of channel that the prediction belongs to
         """
-        return get_prediction_channel_id(guild_id, self.session)
+        return get_prediction_channel_id(prediction_id, self.session)
 
     def get_user_prediction_entry(self, guild_id: int, user_id: int):
         """Gets user prediction entry for given user id
@@ -520,32 +528,30 @@ class DB:
         return complete_prediction(guild_id, winning_option, self.session)
 
     def get_prediction_entries_for_guess(
-        self, guild_id: int, guess: int, prediction_id: Optional[int] = None
+        self, prediction_id: int, guess: int
     ) -> list[PredictionEntry]:
         """Get all PredictionEntries that voted for an option
 
         Args:
-            guild_id (int): Discord Guild ID which initiated prediction
+            prediction_id (int): ID of Prediction to get entries for
             guess (int): Option to retrieve entries for
             prediction_id (Optional[int]): None to use ongoing prediction, otherwise specified ID
 
         Returns:
             list[PredictionEntry]: All entries cast for given option
         """
-        return get_prediction_entries_for_guess(
-            guild_id, guess, self.session, prediction_id
-        )
+        return get_prediction_entries_for_guess(prediction_id, guess, self.session)
 
-    def get_prediction_summary(self, guild_id: int) -> PredictionSummary:
+    def get_prediction_summary(self, prediction_id: int) -> PredictionSummary:
         """Get prediction sumamry for ongoing prediction
 
         Args:
-            guild_id (int): Discord Guild ID which initiated prediction
+            prediction_id (int): ID of Prediction to get summary for
 
         Returns:
             PredictionSummary: Summary about the current state of the ongoing prediction
         """
-        return get_prediction_summary(guild_id, self.session)
+        return get_prediction_summary(prediction_id, self.session)
 
     def get_last_prediction(self, guild_id: int) -> Prediction:
         """Gets the last prediction run for a guild

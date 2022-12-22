@@ -77,7 +77,7 @@ def complete_prediction(guild_id: int, winning_option: int, session: sessionmake
         )
 
 
-def get_prediction_id(guild_id: int, session: sessionmaker) -> Optional[int]:
+def get_ongoing_prediction_id(guild_id: int, session: sessionmaker) -> Optional[int]:
     if not has_ongoing_prediction(guild_id, session):
         raise Exception("There is no ongoing prediction! You need to start a new one.")
 
@@ -96,16 +96,12 @@ def get_prediction_id(guild_id: int, session: sessionmaker) -> Optional[int]:
     return result[0]
 
 
-def get_prediction_message_id(guild_id: int, session: sessionmaker) -> Optional[int]:
-    if not has_ongoing_prediction(guild_id, session):
-        raise Exception("There is no ongoing prediction! You need to start a new one.")
-
+def get_prediction_message_id(
+    prediction_id: int, session: sessionmaker
+) -> Optional[int]:
     with session() as sess:
         stmt = (
-            select(Prediction.message_id)
-            .where(Prediction.guild_id == guild_id)
-            .where(Prediction.ended == False)
-            .limit(1)
+            select(Prediction.message_id).where(Prediction.id == prediction_id).limit(1)
         )
         result = sess.execute(stmt).one()
 
@@ -115,16 +111,12 @@ def get_prediction_message_id(guild_id: int, session: sessionmaker) -> Optional[
     return result[0]
 
 
-def get_prediction_channel_id(guild_id: int, session: sessionmaker) -> Optional[int]:
-    if not has_ongoing_prediction(guild_id, session):
-        raise Exception("There is no ongoing prediction! You need to start a new one.")
-
+def get_prediction_channel_id(
+    prediction_id: int, session: sessionmaker
+) -> Optional[int]:
     with session() as sess:
         stmt = (
-            select(Prediction.channel_id)
-            .where(Prediction.guild_id == guild_id)
-            .where(Prediction.ended == False)
-            .limit(1)
+            select(Prediction.channel_id).where(Prediction.id == prediction_id).limit(1)
         )
         result = sess.execute(stmt).one()
 
@@ -140,7 +132,7 @@ def create_prediction_entry(
     if not accepting_prediction_entries(guild_id, session):
         return False
 
-    prediction_id = get_prediction_id(guild_id, session)
+    prediction_id = get_ongoing_prediction_id(guild_id, session)
     with session() as sess:
         sess.execute(
             insert(PredictionEntry).values(
@@ -156,7 +148,7 @@ def create_prediction_entry(
 def get_user_prediction_entry(
     guild_id: int, user_id: int, session: sessionmaker
 ) -> Optional[PredictionEntry]:
-    prediction_id = get_prediction_id(guild_id, session)
+    prediction_id = get_ongoing_prediction_id(guild_id, session)
     with session() as sess:
         stmt = (
             select(PredictionEntry)
@@ -172,15 +164,8 @@ def get_user_prediction_entry(
 
 
 def get_prediction_point_counts(
-    guild_id: int, session: sessionmaker, prediction_id: Optional[int] = None
+    prediction_id: int, session: sessionmaker
 ) -> tuple[int, int]:
-    # special case for immediately after prediction is created
-    if prediction_id is None:
-        if not has_ongoing_prediction(guild_id, session):
-            return (0, 0)
-
-        prediction_id = get_prediction_id(guild_id, session)
-
     with session() as sess:
         stmt = (
             select(func.sum(PredictionEntry.channel_points))
@@ -206,14 +191,8 @@ def get_prediction_point_counts(
 
 
 def get_prediction_entries_for_guess(
-    guild_id: int,
-    guess: int,
-    session: sessionmaker,
-    prediction_id: Optional[int] = None,
+    prediction_id: int, guess: int, session: sessionmaker
 ) -> list[PredictionEntry]:
-    if prediction_id is None:
-        prediction_id = get_prediction_id(guild_id, session)
-
     with session() as sess:
         results = sess.execute(
             select(PredictionEntry)
@@ -241,13 +220,11 @@ def get_last_prediction(guild_id: int, session: sessionmaker) -> Prediction:
         return result
 
 
-def get_prediction_summary(guild_id: int, session: sessionmaker) -> PredictionSummary:
+def get_prediction_summary(
+    prediction_id: int, session: sessionmaker
+) -> PredictionSummary:
     with session() as sess:
-        stmt = (
-            select(Prediction)
-            .where(Prediction.guild_id == guild_id)
-            .where(Prediction.ended == False)
-        )
+        stmt = select(Prediction).where(Prediction.id == prediction_id)
         result = sess.execute(stmt).all()
         if len(result) == 0:
             raise Exception(
@@ -255,7 +232,7 @@ def get_prediction_summary(guild_id: int, session: sessionmaker) -> PredictionSu
             )
         prediction: Prediction = result[0][0]
         option_one_points, option_two_points = get_prediction_point_counts(
-            guild_id, session
+            prediction_id, session
         )
         return PredictionSummary(
             prediction.description,

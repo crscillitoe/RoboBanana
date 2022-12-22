@@ -81,10 +81,22 @@ class PredictionController:
                 ephemeral=True,
             )
 
+<<<<<<< HEAD
         payout_generator = ReturnableGenerator(
             PredictionController.get_payout_for_option(
                 option.value, interaction.guild_id
             )
+=======
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+
+        option_one, option_two = DB().get_prediction_point_counts(prediction_id)
+        total_points = option_one + option_two
+        winning_pot = PredictionController.get_winning_pot(
+            option, option_one, option_two
+        )
+        entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
+            prediction_id, option.value
+>>>>>>> origin/main
         )
 
         for user_id, payout in payout_generator:
@@ -92,8 +104,8 @@ class PredictionController:
 
         total_points = payout_generator.return_value
 
-        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
-        publish_prediction_end_summary(interaction.guild_id, prediction_summary)
+        prediction_summary = DB().get_prediction_summary(prediction_id)
+        publish_prediction_end_summary(prediction_id, prediction_summary)
 
         paid_option = (
             prediction_summary.option_one
@@ -104,7 +116,7 @@ class PredictionController:
         payout_message = (
             f"Payout complete! {total_points} points distributed to {paid_option}."
         )
-        await reply_to_initial_message(interaction.guild_id, client, payout_message)
+        await reply_to_initial_message(prediction_id, client, payout_message)
 
         DB().complete_prediction(interaction.guild_id, option.value)
         await interaction.response.send_message(payout_message, ephemeral=True)
@@ -121,22 +133,20 @@ class PredictionController:
                 "Please close prediction from entries before refunding!", ephemeral=True
             )
 
-        option_one_entries = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, 0
-        )
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
 
-        option_two_entries = DB().get_prediction_entries_for_guess(
-            interaction.guild_id, 1
-        )
+        option_one_entries = DB().get_prediction_entries_for_guess(prediction_id, 0)
+
+        option_two_entries = DB().get_prediction_entries_for_guess(prediction_id, 1)
 
         entries = option_one_entries + option_two_entries
         for entry in entries:
             DB().deposit_points(entry.user_id, entry.channel_points)
 
-        publish_prediction_end_summary(interaction.guild_id)
+        publish_prediction_end_summary(prediction_id)
 
         refund_message = "Prediction has been refunded!"
-        await reply_to_initial_message(interaction.guild_id, client, refund_message)
+        await reply_to_initial_message(prediction_id, client, refund_message)
 
         DB().complete_prediction(interaction.guild_id, PredictionOutcome.refund.value)
         await interaction.response.send_message(refund_message, ephemeral=True)
@@ -213,11 +223,13 @@ class PredictionController:
             )
             return False
 
-        channel_id = DB().get_prediction_channel_id(interaction.guild_id)
-        message_id = DB().get_prediction_message_id(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+
+        channel_id = DB().get_prediction_channel_id(prediction_id)
+        message_id = DB().get_prediction_message_id(prediction_id)
 
         # We'll use this prediction summary for the reply message
-        prediction_summary = DB().get_prediction_summary(interaction.guild_id)
+        prediction_summary = DB().get_prediction_summary(prediction_id)
         Thread(target=publish_update, args=(prediction_summary,)).start()
 
         chosen_option = (
@@ -252,12 +264,14 @@ class PredictionController:
             option_two,
             end_time,
         )
-        publish_prediction_summary(guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(guild_id)
+        publish_prediction_summary(prediction_id)
 
     @staticmethod
     async def close_prediction(guild_id: int):
         DB().close_prediction(guild_id)
-        publish_prediction_summary(guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(guild_id)
+        publish_prediction_summary(prediction_id)
 
 
 def publish_update(prediction_summary: PredictionSummary):
@@ -278,24 +292,24 @@ def publish_update(prediction_summary: PredictionSummary):
         LOG.error(f"Failed to publish updated prediction summary: {response.text}")
 
 
-async def reply_to_initial_message(guild_id: int, client: Client, message: str):
-    prediction_message_id = DB().get_prediction_message_id(guild_id)
-    prediction_channel_id = DB().get_prediction_channel_id(guild_id)
+async def reply_to_initial_message(prediction_id: int, client: Client, message: str):
+    prediction_message_id = DB().get_prediction_message_id(prediction_id)
+    prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
     prediction_message = await client.get_channel(prediction_channel_id).fetch_message(
         prediction_message_id
     )
     await prediction_message.reply(message)
 
 
-def publish_prediction_summary(guild_id: int):
-    prediction_summary = DB().get_prediction_summary(guild_id)
+def publish_prediction_summary(prediction_id: int):
+    prediction_summary = DB().get_prediction_summary(prediction_id)
     Thread(target=publish_update, args=(prediction_summary,)).start()
 
 
 def publish_prediction_end_summary(
-    guild_id: int, prediction_summary: Optional[PredictionSummary] = None
+    prediction_id: int, prediction_summary: Optional[PredictionSummary] = None
 ):
     if prediction_summary is None:
-        prediction_summary = DB().get_prediction_summary(guild_id)
+        prediction_summary = DB().get_prediction_summary(prediction_id)
     prediction_summary.ended = True
     Thread(target=publish_update, args=(prediction_summary,)).start()

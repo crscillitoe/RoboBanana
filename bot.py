@@ -10,6 +10,7 @@ from discord import (
 )
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
+from commands.manager_commands import ManagerCommands
 from config import Config
 from controllers.sub_controller import SubController
 from db import DB
@@ -66,6 +67,7 @@ async def main():
     async with client:
         tree.add_command(ModCommands(tree, client))
         tree.add_command(ViewerCommands(tree, client))
+        tree.add_command(ManagerCommands(tree, client))
         await client.start(Config.CONFIG["Discord"]["Token"])
 
 

@@ -35,12 +35,19 @@ from .channel_rewards import (
 )
 from .models import (
     Base,
+    Users,
+    TempRoles,
+    TempRoleManagement,
     PredictionEntry,
     PredictionSummary,
     Raffle,
     RaffleEntry,
     RoleModifier,
     RaffleType,
+)
+
+from .temp_roles import (
+    add_temp_role
 )
 from config import Config
 
@@ -548,3 +555,13 @@ class DB:
             PredictionSummary: Summary about the current state of the ongoing prediction
         """
         return get_prediction_summary(prediction_id, self.session)
+
+    def add_temp_role(self, user_id: int, roles: list[Role]) -> bool:
+        """Add temporary role to user
+
+        Args:
+        
+        Returns:
+        
+        """
+        return add_temp_role(user_id, roles, self.session)

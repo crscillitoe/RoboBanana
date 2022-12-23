@@ -220,6 +220,17 @@ def get_last_prediction(guild_id: int, session: sessionmaker) -> Prediction:
         return result
 
 
+def set_prediction_outcome(
+    prediction_id: int, winning_option: int, session: sessionmaker
+):
+    with session() as sess:
+        sess.execute(
+            update(Prediction)
+            .where(Prediction.id == prediction_id)
+            .values(ended=True, accepting_entries=False, winning_option=winning_option)
+        )
+
+
 def get_prediction_summary(
     prediction_id: int, session: sessionmaker
 ) -> PredictionSummary:

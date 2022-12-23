@@ -25,6 +25,7 @@ from .predictions import (
     get_prediction_summary,
     get_user_prediction_entry,
     has_ongoing_prediction,
+    set_prediction_outcome,
 )
 from .channel_rewards import (
     add_channel_reward,
@@ -563,3 +564,12 @@ class DB:
             Prediction: The Prediction which was last run
         """
         return get_last_prediction(guild_id, self.session)
+
+    def set_prediction_outcome(self, prediction_id: int, winning_outcome: int):
+        """Sets winning_option of prediction to the specified outcome
+
+        Args:
+            prediction_id (int): ID of prediction to alter outcome for
+            winning_outcome (int): New outcome of prediction
+        """
+        return set_prediction_outcome(prediction_id, winning_outcome, self.session)

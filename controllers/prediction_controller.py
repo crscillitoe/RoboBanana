@@ -3,6 +3,7 @@ from typing import Generator, Optional, Tuple
 from discord import Interaction, Client
 from db import DB
 from db.models import (
+    Prediction,
     PredictionChoice,
     PredictionOutcome,
     PredictionEntry,
@@ -45,6 +46,19 @@ class PredictionController:
         return round(total_points * pot_percentage)
 
     @staticmethod
+    def get_entries_for_prediction(
+        prediction_id: int,
+    ) -> Generator[PredictionEntry, None, int]:
+        option_one_entries = DB().get_prediction_entries_for_guess(prediction_id, 0)
+        option_two_entries = DB().get_prediction_entries_for_guess(prediction_id, 1)
+        entries = option_one_entries + option_two_entries
+        total_points = 0
+        for entry in entries:
+            total_points += entry.channel_points
+            yield entry
+        return total_points
+
+    @staticmethod
     def get_payout_for_option(
         option: int, prediction_id: int
     ) -> Generator[Tuple[int, int], None, int]:
@@ -65,21 +79,12 @@ class PredictionController:
         return total_points
 
     @staticmethod
-    async def payout_prediction(
-        option: PredictionChoice, interaction: Interaction, client: Client
+    async def _perform_payout(
+        prediction_id: int,
+        option: PredictionChoice,
+        interaction: Interaction,
+        client: Client,
     ):
-        if not DB().has_ongoing_prediction(interaction.guild_id):
-            return await interaction.response.send_message(
-                "No ongoing prediction!", ephemeral=True
-            )
-
-        if DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.response.send_message(
-                "Please close prediction from entries before paying out!",
-                ephemeral=True,
-            )
-
-        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
         payout_generator = ReturnableGenerator(
             PredictionController.get_payout_for_option(option.value, prediction_id)
         )
@@ -102,9 +107,43 @@ class PredictionController:
             f"Payout complete! {total_points} points distributed to {paid_option}."
         )
         await reply_to_initial_message(prediction_id, client, payout_message)
+        return payout_message
+
+    @staticmethod
+    async def payout_prediction(
+        option: PredictionChoice, interaction: Interaction, client: Client
+    ):
+        if not DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "No ongoing prediction!", ephemeral=True
+            )
+
+        if DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Please close prediction from entries before paying out!",
+                ephemeral=True,
+            )
+
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        payout_message = await PredictionController._perform_payout(
+            prediction_id, option, interaction, client
+        )
 
         DB().complete_prediction(interaction.guild_id, option.value)
         await interaction.response.send_message(payout_message, ephemeral=True)
+
+    @staticmethod
+    async def _perform_refund(
+        prediction_id: int, interaction: Interaction, client: Client
+    ):
+        for entry in PredictionController.get_entries_for_prediction(prediction_id):
+            DB().deposit_points(entry.user_id, entry.channel_points)
+
+        publish_prediction_end_summary(prediction_id)
+
+        refund_message = "Prediction has been refunded!"
+        await reply_to_initial_message(prediction_id, client, refund_message)
+        return refund_message
 
     @staticmethod
     async def refund_prediction(interaction: Interaction, client: Client):
@@ -119,22 +158,34 @@ class PredictionController:
             )
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
-
-        option_one_entries = DB().get_prediction_entries_for_guess(prediction_id, 0)
-
-        option_two_entries = DB().get_prediction_entries_for_guess(prediction_id, 1)
-
-        entries = option_one_entries + option_two_entries
-        for entry in entries:
-            DB().deposit_points(entry.user_id, entry.channel_points)
-
-        publish_prediction_end_summary(prediction_id)
-
-        refund_message = "Prediction has been refunded!"
-        await reply_to_initial_message(prediction_id, client, refund_message)
+        refund_message = await PredictionController._perform_refund(
+            prediction_id, interaction, client
+        )
 
         DB().complete_prediction(interaction.guild_id, PredictionOutcome.refund.value)
         await interaction.response.send_message(refund_message, ephemeral=True)
+
+    @staticmethod
+    def reset_points_from_payout(prediction: Prediction):
+        """
+        Resets points to the state they were in immediately prior to payout.
+        This means that everyone's balance will return to what it was immediately
+        after entering into the prediction.
+        """
+        if prediction.winning_option != PredictionOutcome.refund.value:
+            # Withdraw points from previous winners
+            payout_generator = PredictionController.get_payout_for_option(
+                prediction.winning_option, prediction.id
+            )
+
+            for user_id, payout in payout_generator:
+                DB().withdraw_points(user_id, payout)
+        else:
+            entry_generator = PredictionController.get_entries_for_prediction(
+                prediction.id
+            )
+            for entry in entry_generator:
+                DB().withdraw_points(entry.user_id, entry.channel_points)
 
     @staticmethod
     async def redo_payout(
@@ -151,34 +202,25 @@ class PredictionController:
                 f"Prediction outcome is already {option.name}", ephemeral=True
             )
 
-        if prediction.winning_option != PredictionOutcome.refund.value:
-            # Withdraw points from previous winners
-            payout_generator = PredictionController.get_payout_for_option(
-                prediction.winning_option, interaction.guild_id, prediction.id
-            )
+        PredictionController.reset_points_from_payout(prediction)
 
-            for user_id, payout in payout_generator:
-                DB().withdraw_points(user_id, payout)
-
+        reply_message = ""
         if option != PredictionOutcome.refund:
-            payout_generator = ReturnableGenerator(
-                PredictionController.get_payout_for_option(
-                    option.value, interaction.guild_id, prediction.id
-                )
+            payout_option = (
+                PredictionChoice.pink
+                if option == PredictionOutcome.pink
+                else PredictionChoice.blue
+            )
+            reply_message = await PredictionController._perform_payout(
+                prediction.id, payout_option, interaction, client
+            )
+        else:
+            reply_message = await PredictionController._perform_refund(
+                prediction.id, interaction, client
             )
 
-            for user_id, payout in payout_generator:
-                DB().deposit_points(user_id, payout)
-
-            total_points = payout_generator.return_value
-
-            payout_message = (
-                f"Payout complete! {total_points} points distributed to {option.name}."
-            )
-            # await reply_to_initial_message(interaction.guild_id, client, payout_message)
-            return await interaction.response.send_message(
-                payout_message, ephemeral=True
-            )
+        DB().set_prediction_outcome(prediction.id, option.value)
+        await interaction.response.send_message(reply_message, ephemeral=True)
 
     @staticmethod
     async def create_prediction_entry(

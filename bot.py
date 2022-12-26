@@ -23,12 +23,16 @@ PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
 GUILD_ID = int(Config.CONFIG["Discord"]["GuildID"])
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 
+
 class RaffleBot(Client):
     def __init__(self):
         intents = Intents.default()
         intents.members = True
         intents.message_content = True
         intents.guilds = True
+
+        # initialize DB for the first time
+        DB()
 
         super().__init__(intents=intents)
 
@@ -45,12 +49,16 @@ class RaffleBot(Client):
             return
 
         # Server Subscription message
-        if message.channel.id == WELCOME_CHAT_ID and message.type.value == SERVER_SUBSCRIPTION_MESSAGE_TYPE:
+        if (
+            message.channel.id == WELCOME_CHAT_ID
+            and message.type.value == SERVER_SUBSCRIPTION_MESSAGE_TYPE
+        ):
             await SubController.subscribe(message, self)
 
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             DB().accrue_channel_points(message.author.id, message.author.roles)
+
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)

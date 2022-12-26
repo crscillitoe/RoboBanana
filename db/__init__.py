@@ -46,14 +46,20 @@ from config import Config
 
 
 class DB:
-    _instance = None
+    __instance = None
 
     def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(DB, cls).__new__(cls)
-        return cls._instance
+        if cls.__instance is None:
+            cls.__instance = super(DB, cls).__new__(cls)
+            cls.__instance.__initialized = False
+        return cls.__instance
 
     def __init__(self):
+        if self.__initialized:
+            return
+
+        self.__initialized = True
+
         username = Config.CONFIG["MySQL"]["Username"]
         password = Config.CONFIG["MySQL"]["Password"]
         db_host = Config.CONFIG["MySQL"]["Host"]

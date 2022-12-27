@@ -1,6 +1,13 @@
-from discord import Interaction, Member
+import discord
+from datetime import datetime, timedelta
+from typing import Optional
+from discord import Interaction, Member, User
 from db import DB, RaffleEntry, RaffleType
+from config import Config
 import random
+
+VOD_APPROVED_ROLE_ID = int(Config.CONFIG["Discord"]["VODApprovedRoleID"])
+VOD_SUBMISSION_CHANNEL_ID = Config.CONFIG["Discord"]["VODSubmissionChannelID"]
 
 
 class RaffleController:
@@ -88,3 +95,27 @@ class RaffleController:
             tickets += 5 * loss_streak
 
         return tickets
+
+    @staticmethod
+    def eligible_for_raffle(guild_id: int, user: User) -> tuple[bool, Optional[str]]:
+        vod_approved_role = discord.utils.get(user.roles, id=VOD_APPROVED_ROLE_ID)
+        if vod_approved_role is None:
+            return (
+                False,
+                f"VODs must be submitted to <#{VOD_SUBMISSION_CHANNEL_ID}> and approved ahead of entering a raffle.",
+            )
+
+        one_week_ago = datetime.now().date() - timedelta(days=6)
+        weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(
+            guild_id=guild_id, user_id=user.id, after=one_week_ago
+        )
+        if weekly_wins > 0 and last_win_entry_dt is not None:
+            next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
+            next_eligible_ts = int(
+                datetime.combine(next_eligible_date, datetime.min.time()).timestamp()
+            )
+            return (
+                False,
+                f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
+            )
+        return True, None

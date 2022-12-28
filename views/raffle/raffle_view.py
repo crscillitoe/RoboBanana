@@ -1,6 +1,6 @@
 from discord import ButtonStyle, Interaction
 from discord.ui import Button, View
-from datetime import datetime, timedelta
+from datetime import datetime
 from controllers.raffle_controller import RaffleController
 from db import DB, RaffleType
 import discord
@@ -68,19 +68,12 @@ class RaffleView(View):
             not self.has_role("Mod", interaction)
             and self.raffle_type == RaffleType.normal
         ):
-            one_week_ago = datetime.now().date() - timedelta(days=6)
-            weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(
-                guild_id=guild_id, user_id=user.id, after=one_week_ago
+            eligible, ineligibility_message = RaffleController.eligible_for_raffle(
+                guild_id, user
             )
-            if weekly_wins > 0 and last_win_entry_dt is not None:
-                next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
-                next_eligible_ts = int(
-                    datetime.combine(
-                        next_eligible_date, datetime.min.time()
-                    ).timestamp()
-                )
+            if not eligible:
                 await interaction.followup.send(
-                    f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
+                    ineligibility_message,
                     ephemeral=True,
                 )
                 return

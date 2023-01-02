@@ -47,26 +47,6 @@ class PredictionSummary:
         self.accepting_entries = accepting_entries
         self.ended = ended
 
-class Users(Base):
-    __tablename__ = "Users"
-    user_id = Column(BigInteger, primary_key=True)
-    user_name = Column(str, nullable=False)
-
-class TempRoles(Base):
-    __tablename__ = "temp_roles"
-    user_id = Column(BigInteger, primary_key=True)
-    temp_role_id = Column(BigInteger, primary_key=True)
-    temp_role_name = Column(str, nullable=False)
-    created_at = Column(DateTime, default=func.now())
-
-class TempRoleManagement(Base):
-    __tablename__ = "temp_role_management"
-    user_id = Column(BigInteger, primary_key=True)
-    temp_role_id = Column(BigInteger, primary_key=True)
-    assigned_at = Column(DateTime, default=func.now())
-    temp_role_duration = Column(DateTime, default=func.now())
-    temp_role_expiration = Column(DateTime, default=assigned_at + temp_role_duration)
-
 
 class Raffle(Base):
     __tablename__ = "raffles"

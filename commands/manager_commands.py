@@ -2,9 +2,6 @@ from discord import app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord import Object
 from config import Config
-from controllers.role_controller import RoleController
-from db import DB
-from db.models import Users, TempRoles, TempRoleManagement
 import enum
 import logging
 
@@ -13,7 +10,6 @@ class VODType(enum.Enum):
     approved = 1
     rejected = 2
     complete = 3
-
 
 @app_commands.guild_only()
 class ManagerCommands(app_commands.Group, name="manager"):
@@ -46,12 +42,3 @@ class ManagerCommands(app_commands.Group, name="manager"):
 
         await interaction.channel.add_tags(Object(id=tag_id))
         await interaction.response.send_message("Applied tag.", ephemeral=True)
-
-
-    @app_commands.command(name="flag_vod")
-    @app_commands.checks.has_role("Community Manager")
-    @app_commands.describe(vod_type="VOD Type (Approved/Rejected/Complete)")
-    async def assignTempRole(user_id: int, temp_role_id: int, temp_role_duration: str) -> int:
-
-        await DB().add_temp_role(user_id, temp_role_id, temp_role_duration)
-        await RoleController.add_temp_role_discord(user_id, temp_role_id)

@@ -1,19 +1,16 @@
-import json
 from discord import Embed
 
 import discord
 
-with open('./files/vod_submission/vs_party_requirements.json', 'r') as f:
-    data = json.load(f)
-
-class VsPartyRequirementsEmbed(Embed):
+class VsGenericEmbed(Embed):
     def __init__(
         self,
         guild_id: int,
+        json: any,
     ):
         super().__init__(
-            title=data['title'],
-            description=data['description'],
+            title=json['title'],
+            description=json['description'],
             color=discord.Colour.yellow(),
             type='rich'
         )

@@ -1,9 +1,9 @@
 from discord.ui import View
-from .vs_background_info_embed import VsBackgroundInfoEmbed
+from .vs_generic_embed import VsGenericEmbed
 
-class VsBackgroundInfoView(View):
+class VsGenericView(View):
     def __init__(
-        self, parent: VsBackgroundInfoEmbed
+        self, parent: VsGenericEmbed
     ) -> None:
         super().__init__(timeout=None)
 

@@ -8,6 +8,9 @@ from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
+
+from controllers.rule_controller import RuleController
+
 from config import Config
 import logging
 import random
@@ -232,3 +235,13 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
         )
+
+    @app_commands.command(name="vod_submission_rules")
+    @app_commands.checks.has_role("Mod")
+    async def post_vod_submission_rules(self, interaction: Interaction):
+        
+        await RuleController.post_vod_submission_rules(interaction, self.client)
+
+
+        
+

@@ -241,7 +241,7 @@ class ModCommands(app_commands.Group, name="mod"):
     ):
         one_week_ago = datetime.now() - timedelta(days=7)
 
-        if not DB().remove_raffle_winner(user.id, one_week_ago):
+        if not DB().remove_raffle_winner(interaction.guild_id, user.id, one_week_ago):
             await interaction.response.send_message("This user has not recently won a raffle!")
             return
         

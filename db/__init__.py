@@ -290,21 +290,33 @@ class DB:
                 .execution_options(synchronize_session="fetch")
             )
 
-    def remove_raffle_winner(self, user_id: int, after: datetime) -> None:
+    def remove_raffle_winner(self, guild_id: int, user_id: int, after: datetime) -> None:
         with self.session() as sess:
             # removes winner from raffle entry within last week, so winner can win again
             
-            raffle_id_lookup = sess.query(RaffleEntry.raffle_id).filter(
-            RaffleEntry.user_id == user_id, RaffleEntry.winner == 1, RaffleEntry.timestamp > after).scalar()
-        
-            if raffle_id_lookup is None:
+            stmt = (
+                select(Raffle.id)
+                .select_from(RaffleEntry)
+                .join(Raffle)
+                .where(Raffle.guild_id == guild_id)
+                .where(Raffle.ended == True)
+                .where(Raffle.raffle_type == RaffleType.normal)
+                .where(RaffleEntry.winner == True)
+                .where(RaffleEntry.user_id == user_id)
+                .where(Raffle.end_time > after)
+                .limit(1)
+            )
+
+            last_win_raffle_id = sess.execute(stmt).scalar()
+
+            if last_win_raffle_id is None:
                 return False
 
             sess.execute(
                 update(RaffleEntry)
                 .values(winner=False)
                 .where(RaffleEntry.user_id == user_id)
-                .where(RaffleEntry.raffle_id == raffle_id_lookup)
+                .where(RaffleEntry.raffle_id == last_win_raffle_id)
                 .where(RaffleEntry.winner == True)
                 .execution_options(synchronize_session="fetch")
             )

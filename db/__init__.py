@@ -298,7 +298,7 @@ class DB:
             RaffleEntry.user_id == user_id, RaffleEntry.winner == 1, RaffleEntry.timestamp > after).scalar()
         
             if raffle_id_lookup is None:
-                raise Exception("This user has not recently won a raffle!")
+                return False
 
             sess.execute(
                 update(RaffleEntry)
@@ -308,6 +308,8 @@ class DB:
                 .where(RaffleEntry.winner == True)
                 .execution_options(synchronize_session="fetch")
             )
+
+            return True
        
     def get_role_modifiers(self, guild_id: int) -> dict[int, int]:
         with self.session() as sess:

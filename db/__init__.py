@@ -290,6 +290,25 @@ class DB:
                 .execution_options(synchronize_session="fetch")
             )
 
+    def remove_raffle_winner(self, user_id: int, after: datetime) -> None:
+        with self.session() as sess:
+            # removes winner from raffle entry within last week, so winner can win again
+            
+            raffle_id_lookup = sess.query(RaffleEntry.raffle_id).filter(
+            RaffleEntry.user_id == user_id, RaffleEntry.winner == 1, RaffleEntry.timestamp > after).scalar()
+        
+            if raffle_id_lookup is None:
+                raise Exception("This user has not recently won a raffle!")
+
+            sess.execute(
+                update(RaffleEntry)
+                .values(winner=False)
+                .where(RaffleEntry.user_id == user_id)
+                .where(RaffleEntry.raffle_id == raffle_id_lookup)
+                .where(RaffleEntry.winner == True)
+                .execution_options(synchronize_session="fetch")
+            )
+       
     def get_role_modifiers(self, guild_id: int) -> dict[int, int]:
         with self.session() as sess:
             stmt = select(RoleModifier).where(RoleModifier.guild_id == guild_id)

@@ -348,16 +348,6 @@ class DB:
             int: Number of points currently accrued
         """
         return get_point_balance(user_id, self.session)
-    def get_point_balance(self, user_id: int) -> int:
-        """Get the number of points a user has accrued
-
-        Args:
-            user_id (int): Discord user ID to give points to
-
-        Returns:
-            int: Number of points currently accrued
-        """
-        return get_point_balance(user_id, self.session)
 
     def withdraw_points(self, user_id: int, point_amount: int) -> tuple[bool, int]:
         """Withdraw points from user's current balance

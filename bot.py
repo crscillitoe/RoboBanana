@@ -61,9 +61,8 @@ class RaffleBot(Client):
                 accrued = DB().accrue_morning_points(message.author.id)
                 if accrued:
                     points = DB().get_morning_points(message.author.id)
-                    response = f"Good morning {message.author.mention}! Your current weekly count is {points}!"
-                    await message.channel.send(response)
-
+                    response = f"Good morning {message.author.mention}! Your current weekly count is {points}! What's this message? <#1064317660084584619>"
+                    await message.reply(response)
 
             DB().accrue_channel_points(message.author.id, message.author.roles)
 

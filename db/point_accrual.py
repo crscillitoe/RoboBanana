@@ -87,11 +87,11 @@ def get_morning_points(user_id: int, session: sessionmaker) -> int:
             select(MorningPoints).where(MorningPoints.user_id == user_id)
         ).first()
 
-        if result is None:
-            return 0
+    if result is None:
+        return 0
 
-        morning_points: MorningPoints = result[0]
-        return morning_points.weekly_count
+    morning_points: MorningPoints = result[0]
+    return morning_points.weekly_count
 
 def get_point_balance(user_id: int, session: sessionmaker) -> int:
     """Get the number of points a user has accrued

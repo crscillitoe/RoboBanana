@@ -100,7 +100,7 @@ class RoleModifier(Base):
         return f"RoleModifier(id={self.id!r}, guild_id={self.guild_id!r}, role_id={self.role_id!r}, modifier={self.modifier!r})"
 
 class MorningPoints(Base):
-    __tablename__ = "good_morning"
+    __tablename__ = "morning_points"
     user_id = Column(BigInteger, primary_key=True)
     timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
     weekly_count = Column(Integer, nullable=False, default=0)

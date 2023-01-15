@@ -6,6 +6,8 @@ from typing import Optional
 
 from .point_accrual import (
     accrue_channel_points,
+    accrue_morning_points,
+    get_morning_points,
     deposit_points,
     get_point_balance,
     withdraw_points,
@@ -312,6 +314,40 @@ class DB:
         """
         return accrue_channel_points(user_id, roles, self.session)
 
+    def accrue_morning_points(self, user_id: int) -> bool:
+        """Accrues morning greeting points for a given user
+
+        Args:
+            user_id (int): Discord user ID to give points to
+            session (sessionmaker): Open DB session
+
+        Returns:
+            bool: True if points were awarded to the user
+        """
+        return accrue_morning_points(user_id, self.session)
+
+    def get_morning_points(self, user_id: int) -> int:
+        """Get the number of morning greetings a user has accrued
+
+        Args:
+            user_id (int): Discord user ID to give a morning greeting to
+            session (sessionmaker): Open DB session
+
+        Returns:
+            int: Number of morning greetings currently awarded
+        """
+        return get_morning_points(user_id, self.session)
+
+    def get_point_balance(self, user_id: int) -> int:
+        """Get the number of points a user has accrued
+
+        Args:
+            user_id (int): Discord user ID to give points to
+
+        Returns:
+            int: Number of points currently accrued
+        """
+        return get_point_balance(user_id, self.session)
     def get_point_balance(self, user_id: int) -> int:
         """Get the number of points a user has accrued
 

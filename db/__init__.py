@@ -304,6 +304,7 @@ class DB:
                 .where(RaffleEntry.winner == True)
                 .where(RaffleEntry.user_id == user_id)
                 .where(Raffle.end_time > after)
+                .order_by(Raffle.id.desc())
                 .limit(1)
             )
 

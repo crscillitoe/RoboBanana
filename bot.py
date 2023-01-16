@@ -57,6 +57,13 @@ class RaffleBot(Client):
 
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
+            if "good morning" in message.content.lower():
+                accrued = DB().accrue_morning_points(message.author.id)
+                if accrued:
+                    points = DB().get_morning_points(message.author.id)
+                    response = f"Good morning {message.author.mention}! Your current weekly count is {points}! What's this message? <#1064317660084584619>"
+                    await message.reply(response)
+
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
 

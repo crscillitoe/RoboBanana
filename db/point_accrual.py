@@ -66,7 +66,7 @@ def accrue_morning_points(
             update(MorningPoints)
             .where(MorningPoints.user_id == user_id)
             .values(
-                points=morning_points.weekly_count + 1,
+                weekly_count=morning_points.weekly_count + 1,
                 timestamp=updated_timestamp,
             )
         )

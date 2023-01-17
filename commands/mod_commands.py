@@ -248,7 +248,7 @@ class ModCommands(app_commands.Group, name="mod"):
         count = DB().get_today_morning_count()
         await interaction.response.send_message(
             (
-                f"{count} users have said good morning today!\n\n"
+                f"{count} users have said good morning today! "
                 + GoodMorningController.get_good_morning_explanation()
             )
         )

@@ -37,7 +37,7 @@ class GoodMorningController:
         await interaction.response.send_message(
             (
                 f"Good morning {interaction.user.mention}! "
-                f"Your current weekly count is {points}!\n\n"
+                f"Your current weekly count is {points}! "
                 f"{GOOD_MORNING_EXPLANATION}"
             )
         )

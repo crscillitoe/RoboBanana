@@ -12,7 +12,6 @@ from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
 from config import Config
-from controllers.good_morning_controller import GoodMorningController
 from controllers.sub_controller import SubController
 from db import DB
 

@@ -58,7 +58,6 @@ class RaffleBot(Client):
 
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
-            await GoodMorningController.handle_response(message)
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
 

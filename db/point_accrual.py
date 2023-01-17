@@ -10,6 +10,7 @@ import discord
 MIN_ACCRUAL_TIME = timedelta(minutes=15)
 MAX_ACCRUAL_WINDOW = timedelta(minutes=30)
 MORNING_DELTA = timedelta(hours=10)
+MORNING_GRACE_PERIOD = timedelta(hours=30)
 POINTS_PER_ACCRUAL = 50
 
 ROLE_MULTIPLIERS: dict[str, int] = {
@@ -21,6 +22,8 @@ ROLE_MULTIPLIERS: dict[str, int] = {
     int(Config.CONFIG["Discord"]["GiftedTier3RoleID"]): 4,
 }
 
+SIX_AM_PST = 14  # 6am PST in UTC
+
 
 def get_multiplier_for_user(roles: list[Role]) -> int:
     for role_id, multiplier in ROLE_MULTIPLIERS.items():
@@ -29,9 +32,8 @@ def get_multiplier_for_user(roles: list[Role]) -> int:
             return multiplier
     return 1
 
-def accrue_morning_points(
-    user_id: int, session: sessionmaker
-) -> bool:
+
+def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
     """Accrues morning greeting points for a given user
 
     Args:
@@ -46,9 +48,7 @@ def accrue_morning_points(
             select(MorningPoints).where(MorningPoints.user_id == user_id)
         ).first()
         if result is None:
-            sess.execute(
-                insert(MorningPoints).values(user_id=user_id, weekly_count=1)
-            )
+            sess.execute(insert(MorningPoints).values(user_id=user_id, weekly_count=1))
             return True
 
         # Ensure points are not accruing on every message
@@ -60,6 +60,10 @@ def accrue_morning_points(
 
         if time_difference < MORNING_DELTA:
             return False
+
+        if time_difference > MORNING_GRACE_PERIOD:
+            morning_points.weekly_count = 0
+
         updated_timestamp = now
 
         sess.execute(
@@ -71,6 +75,7 @@ def accrue_morning_points(
             )
         )
         return True
+
 
 def get_morning_points(user_id: int, session: sessionmaker) -> int:
     """Get the number of morning greetings a user has accrued
@@ -91,7 +96,34 @@ def get_morning_points(user_id: int, session: sessionmaker) -> int:
         return 0
 
     morning_points: MorningPoints = result[0]
+    last_accrued: datetime = morning_points.timestamp
+    now = datetime.now()
+    time_difference = now - last_accrued
+
+    if time_difference > MORNING_GRACE_PERIOD:
+        return 0
+
     return morning_points.weekly_count
+
+
+def get_today_morning_count(session: sessionmaker) -> int:
+    """Get the number of users which have said good morning today
+
+    Args:
+        session (sessionmaker): Open DB session
+
+    Returns:
+        int: Number of users who have said good morning today
+    """
+    stream_start = datetime.utcnow().replace(hour=SIX_AM_PST, minute=0, second=0)
+    with session() as sess:
+        count = (
+            sess.query(MorningPoints)
+            .filter(MorningPoints.timestamp > stream_start)
+            .count()
+        )
+        return count
+
 
 def get_point_balance(user_id: int, session: sessionmaker) -> int:
     """Get the number of points a user has accrued

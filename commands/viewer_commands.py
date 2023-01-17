@@ -1,4 +1,5 @@
 from discord import app_commands, Interaction, User, Client
+from controllers.good_morning_controller import GoodMorningController
 from controllers.prediction_controller import PredictionController
 from db import DB
 from db.models import PredictionChoice
@@ -63,3 +64,13 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         await interaction.response.send_message(
             f"Vote cast with {points} points!", ephemeral=True
         )
+
+    @app_commands.command(name="good_morning")
+    async def good_morning(self, interaction: Interaction):
+        """Say good morning! Check #good-morning-faq for details"""
+        await GoodMorningController.accrue_good_morning(interaction)
+
+    @app_commands.command(name="good_morning_points")
+    async def good_morning_points(self, interaction: Interaction):
+        """Check your current good morning points! Check #good-morning-faq for details"""
+        await GoodMorningController.get_morning_points(interaction)

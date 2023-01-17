@@ -1,60 +1,43 @@
-from datetime import datetime, timedelta
-from typing import Optional
-from discord import Message
+from discord import Interaction
 from db import DB
 from config import Config
 
-MESSAGE_BATCH_SIZE = int(Config.CONFIG["Discord"]["GoodMorningBatchSize"])
-MAX_TIME_BETWEEN_RESPONSE = timedelta(seconds=5)
-MESSAGE_EXPLANATION = "\n\nWhat's this message? <#1064317660084584619>"
+STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
+GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
 
 
 class GoodMorningController:
-    current_accruals = list()
-    last_response: Optional[datetime] = None
+    def get_good_morning_explanation():
+        return GOOD_MORNING_EXPLANATION
 
-    async def _send_accrual_responses(message: Message):
-        response = "\n".join(GoodMorningController.current_accruals)
-        response += MESSAGE_EXPLANATION
-        await message.channel.send(response)
-        GoodMorningController.last_response = message.created_at
-        GoodMorningController.current_accruals = list()
+    async def get_morning_points(interaction: Interaction):
+        points = DB().get_morning_points(interaction.user.id)
+        await interaction.response.send_message(
+            f"Your current weekly count is {points}!", ephemeral=True
+        )
 
-    def _should_respond(message: Message):
-        if GoodMorningController.last_response is None:
-            GoodMorningController.last_response = message.created_at
-
-        if len(GoodMorningController.current_accruals) == 0:
-            return False
-
-        if len(GoodMorningController.current_accruals) >= MESSAGE_BATCH_SIZE:
-            return True
-
-        time_passed = message.created_at - GoodMorningController.last_response
-        if time_passed >= MAX_TIME_BETWEEN_RESPONSE:
-            return True
-
-        return False
-
-    async def handle_response(message: Message):
-        """Respond to good morning messages if requirements met
-
-        Args:
-            message (Message): Message in stream chat
-        """
-        if GoodMorningController._should_respond(message):
-            await GoodMorningController._send_accrual_responses(message)
-
-    async def accrue_good_morning(message: Message):
+    async def accrue_good_morning(interaction: Interaction):
         """Accrue good morning message point
 
         Args:
             message (Message): "good morning" stream chat message
         """
-        accrued = DB().accrue_morning_points(message.author.id)
-        if not accrued:
-            return
+        if interaction.channel.id != STREAM_CHAT_ID:
+            return await interaction.response.send_message(
+                f"You can only say good morning in <#{STREAM_CHAT_ID}>!", ephemeral=True
+            )
 
-        points = DB().get_morning_points(message.author.id)
-        response = f"Good morning {message.author.mention}! Your current weekly count is {points}!"
-        GoodMorningController.current_accruals.append(response)
+        accrued = DB().accrue_morning_points(interaction.user.id)
+        if not accrued:
+            return await interaction.response.send_message(
+                "You've already said good morning today!", ephemeral=True
+            )
+
+        points = DB().get_morning_points(interaction.user.id)
+        await interaction.response.send_message(
+            (
+                f"Good morning {interaction.user.mention}! "
+                f"Your current weekly count is {points}!\n\n"
+                f"{GOOD_MORNING_EXPLANATION}"
+            )
+        )

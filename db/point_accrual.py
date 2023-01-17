@@ -10,7 +10,6 @@ import discord
 MIN_ACCRUAL_TIME = timedelta(minutes=15)
 MAX_ACCRUAL_WINDOW = timedelta(minutes=30)
 MORNING_DELTA = timedelta(hours=10)
-MORNING_GRACE_PERIOD = timedelta(hours=30)
 POINTS_PER_ACCRUAL = 50
 
 ROLE_MULTIPLIERS: dict[str, int] = {
@@ -61,9 +60,6 @@ def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
         if time_difference < MORNING_DELTA:
             return False
 
-        if time_difference > MORNING_GRACE_PERIOD:
-            morning_points.weekly_count = 0
-
         updated_timestamp = now
 
         sess.execute(
@@ -96,13 +92,6 @@ def get_morning_points(user_id: int, session: sessionmaker) -> int:
         return 0
 
     morning_points: MorningPoints = result[0]
-    last_accrued: datetime = morning_points.timestamp
-    now = datetime.now()
-    time_difference = now - last_accrued
-
-    if time_difference > MORNING_GRACE_PERIOD:
-        return 0
-
     return morning_points.weekly_count
 
 

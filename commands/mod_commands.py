@@ -69,6 +69,8 @@ class ModCommands(app_commands.Group, name="mod"):
         GiftedTier3 = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
         Mod = int(Config.CONFIG["Discord"]["ModRoleID"])
 
+        giftedRole = interaction.guild.get_role(1064721228662845480)
+
         await interaction.response.send_message("Choosing random gifted sub winners...")
         potential_winners = []
         for member in interaction.channel.members:
@@ -86,12 +88,13 @@ class ModCommands(app_commands.Group, name="mod"):
                     can_win = False
 
             if can_win:
-                potential_winners.append(member.mention)
+                potential_winners.append(member)
 
         winners = random.choices(potential_winners, k=num_winners)
         for winner in winners:
+            await winner.add_roles(giftedRole)
             await interaction.channel.send(
-                f"{oprah} has gifted {winner} a T1 Subscription!"
+                f"{oprah} has gifted {winner.mention} a T1 Subscription!"
             )
 
     @app_commands.command(name="start")

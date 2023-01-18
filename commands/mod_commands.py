@@ -1,7 +1,10 @@
 from datetime import datetime
 from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
-from controllers.good_morning_controller import GoodMorningController
+from controllers.good_morning_controller import (
+    GoodMorningController,
+    GOOD_MORNING_EXPLANATION,
+)
 from controllers.prediction_controller import PredictionController
 from db import DB, RaffleType
 from db.models import PredictionChoice, PredictionOutcome
@@ -247,8 +250,5 @@ class ModCommands(app_commands.Group, name="mod"):
         """Check how many users have said good morning today!"""
         count = DB().get_today_morning_count()
         await interaction.response.send_message(
-            (
-                f"{count} users have said good morning today! "
-                + GoodMorningController.get_good_morning_explanation()
-            )
+            f"{count} users have said good morning today! {GOOD_MORNING_EXPLANATION}"
         )

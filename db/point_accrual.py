@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import timedelta, datetime
 from config import Config
 from discord import Role
+from zoneinfo import ZoneInfo
 
 import discord
 
@@ -20,8 +21,6 @@ ROLE_MULTIPLIERS: dict[str, int] = {
     int(Config.CONFIG["Discord"]["Tier3RoleID"]): 4,
     int(Config.CONFIG["Discord"]["GiftedTier3RoleID"]): 4,
 }
-
-SIX_AM_PST = 14  # 6am PST in UTC
 
 
 def get_multiplier_for_user(roles: list[Role]) -> int:
@@ -104,7 +103,9 @@ def get_today_morning_count(session: sessionmaker) -> int:
     Returns:
         int: Number of users who have said good morning today
     """
-    stream_start = datetime.utcnow().replace(hour=SIX_AM_PST, minute=0, second=0)
+    stream_start = datetime.utcnow().replace(
+        hour=6, minute=0, second=0, tzinfo=ZoneInfo("America/Los_Angeles")
+    )
     with session() as sess:
         count = (
             sess.query(MorningPoints)

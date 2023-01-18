@@ -7,9 +7,6 @@ GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
 
 
 class GoodMorningController:
-    def get_good_morning_explanation():
-        return GOOD_MORNING_EXPLANATION
-
     async def get_morning_points(interaction: Interaction):
         points = DB().get_morning_points(interaction.user.id)
         await interaction.response.send_message(

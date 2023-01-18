@@ -6,6 +6,8 @@ from typing import Optional
 
 from .point_accrual import (
     accrue_channel_points,
+    accrue_morning_points,
+    get_morning_points,
     deposit_points,
     get_point_balance,
     withdraw_points,
@@ -16,6 +18,7 @@ from .predictions import (
     complete_prediction,
     create_prediction,
     create_prediction_entry,
+    get_last_prediction,
     get_prediction_entries_for_guess,
     get_ongoing_prediction_id,
     get_prediction_point_counts,
@@ -24,6 +27,7 @@ from .predictions import (
     get_prediction_summary,
     get_user_prediction_entry,
     has_ongoing_prediction,
+    set_prediction_outcome,
 )
 from .channel_rewards import (
     add_channel_reward,
@@ -35,6 +39,7 @@ from .channel_rewards import (
 )
 from .models import (
     Base,
+    Prediction,
     PredictionEntry,
     PredictionSummary,
     Raffle,
@@ -343,6 +348,30 @@ class DB:
         """
         return accrue_channel_points(user_id, roles, self.session)
 
+    def accrue_morning_points(self, user_id: int) -> bool:
+        """Accrues morning greeting points for a given user
+
+        Args:
+            user_id (int): Discord user ID to give points to
+            session (sessionmaker): Open DB session
+
+        Returns:
+            bool: True if points were awarded to the user
+        """
+        return accrue_morning_points(user_id, self.session)
+
+    def get_morning_points(self, user_id: int) -> int:
+        """Get the number of morning greetings a user has accrued
+
+        Args:
+            user_id (int): Discord user ID to give a morning greeting to
+            session (sessionmaker): Open DB session
+
+        Returns:
+            int: Number of morning greetings currently awarded
+        """
+        return get_morning_points(user_id, self.session)
+
     def get_point_balance(self, user_id: int) -> int:
         """Get the number of points a user has accrued
 
@@ -556,13 +585,14 @@ class DB:
         """
         return close_prediction(guild_id, self.session)
 
-    def complete_prediction(self, guild_id: int):
+    def complete_prediction(self, guild_id: int, winning_option: int):
         """Complete prediction, indicating points have been paid out
 
         Args:
             guild_id (int): Discord Guild ID which initiated prediction
+            winning_option (int): Prediction option which was paid out
         """
-        return complete_prediction(guild_id, self.session)
+        return complete_prediction(guild_id, winning_option, self.session)
 
     def get_prediction_entries_for_guess(
         self, prediction_id: int, guess: int
@@ -572,6 +602,7 @@ class DB:
         Args:
             prediction_id (int): ID of Prediction to get entries for
             guess (int): Option to retrieve entries for
+            prediction_id (Optional[int]): None to use ongoing prediction, otherwise specified ID
 
         Returns:
             list[PredictionEntry]: All entries cast for given option
@@ -588,3 +619,23 @@ class DB:
             PredictionSummary: Summary about the current state of the ongoing prediction
         """
         return get_prediction_summary(prediction_id, self.session)
+
+    def get_last_prediction(self, guild_id: int) -> Prediction:
+        """Gets the last prediction run for a guild
+
+        Args:
+            guild_id (int): Discord Guild ID which initiated prediction
+
+        Returns:
+            Prediction: The Prediction which was last run
+        """
+        return get_last_prediction(guild_id, self.session)
+
+    def set_prediction_outcome(self, prediction_id: int, winning_outcome: int):
+        """Sets winning_option of prediction to the specified outcome
+
+        Args:
+            prediction_id (int): ID of prediction to alter outcome for
+            winning_outcome (int): New outcome of prediction
+        """
+        return set_prediction_outcome(prediction_id, winning_outcome, self.session)

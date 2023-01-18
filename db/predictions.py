@@ -67,13 +67,13 @@ def close_prediction(guild_id: int, session: sessionmaker):
         )
 
 
-def complete_prediction(guild_id: int, session: sessionmaker):
+def complete_prediction(guild_id: int, winning_option: int, session: sessionmaker):
     with session() as sess:
         sess.execute(
             update(Prediction)
             .where(Prediction.guild_id == guild_id)
             .where(Prediction.ended == False)
-            .values(ended=True, accepting_entries=False)
+            .values(ended=True, accepting_entries=False, winning_option=winning_option)
         )
 
 
@@ -203,6 +203,32 @@ def get_prediction_entries_for_guess(
             return results
 
         return list(map(lambda result: result[0], results))
+
+
+def get_last_prediction(guild_id: int, session: sessionmaker) -> Prediction:
+    with session() as sess:
+        stmt = (
+            select(Prediction)
+            .where(Prediction.guild_id == guild_id)
+            .order_by(Prediction.id.desc())
+        )
+
+        result = sess.execute(stmt).first()[0]
+        if result is None:
+            raise Exception(f"There are no previous predictions for {guild_id=}")
+
+        return result
+
+
+def set_prediction_outcome(
+    prediction_id: int, winning_option: int, session: sessionmaker
+):
+    with session() as sess:
+        sess.execute(
+            update(Prediction)
+            .where(Prediction.id == prediction_id)
+            .values(ended=True, accepting_entries=False, winning_option=winning_option)
+        )
 
 
 def get_prediction_summary(

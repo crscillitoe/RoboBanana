@@ -10,6 +10,7 @@ from .point_accrual import (
     get_morning_points,
     deposit_points,
     get_point_balance,
+    get_today_morning_count,
     withdraw_points,
 )
 from .predictions import (
@@ -371,6 +372,14 @@ class DB:
             int: Number of morning greetings currently awarded
         """
         return get_morning_points(user_id, self.session)
+
+    def get_today_morning_count(self) -> int:
+        """Get the number of users which have said good morning today
+
+        Returns:
+            int: Number of users who have said good morning today
+        """
+        return get_today_morning_count(self.session)
 
     def get_point_balance(self, user_id: int) -> int:
         """Get the number of points a user has accrued

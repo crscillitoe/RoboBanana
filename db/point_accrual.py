@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from datetime import timedelta, datetime
 from config import Config
 from discord import Role
+from zoneinfo import ZoneInfo
 
 import discord
 
@@ -29,9 +30,8 @@ def get_multiplier_for_user(roles: list[Role]) -> int:
             return multiplier
     return 1
 
-def accrue_morning_points(
-    user_id: int, session: sessionmaker
-) -> bool:
+
+def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
     """Accrues morning greeting points for a given user
 
     Args:
@@ -46,9 +46,7 @@ def accrue_morning_points(
             select(MorningPoints).where(MorningPoints.user_id == user_id)
         ).first()
         if result is None:
-            sess.execute(
-                insert(MorningPoints).values(user_id=user_id, weekly_count=1)
-            )
+            sess.execute(insert(MorningPoints).values(user_id=user_id, weekly_count=1))
             return True
 
         # Ensure points are not accruing on every message
@@ -60,6 +58,7 @@ def accrue_morning_points(
 
         if time_difference < MORNING_DELTA:
             return False
+
         updated_timestamp = now
 
         sess.execute(
@@ -71,6 +70,7 @@ def accrue_morning_points(
             )
         )
         return True
+
 
 def get_morning_points(user_id: int, session: sessionmaker) -> int:
     """Get the number of morning greetings a user has accrued
@@ -92,6 +92,28 @@ def get_morning_points(user_id: int, session: sessionmaker) -> int:
 
     morning_points: MorningPoints = result[0]
     return morning_points.weekly_count
+
+
+def get_today_morning_count(session: sessionmaker) -> int:
+    """Get the number of users which have said good morning today
+
+    Args:
+        session (sessionmaker): Open DB session
+
+    Returns:
+        int: Number of users who have said good morning today
+    """
+    stream_start = datetime.utcnow().replace(
+        hour=6, minute=0, second=0, tzinfo=ZoneInfo("America/Los_Angeles")
+    )
+    with session() as sess:
+        count = (
+            sess.query(MorningPoints)
+            .filter(MorningPoints.timestamp > stream_start)
+            .count()
+        )
+        return count
+
 
 def get_point_balance(user_id: int, session: sessionmaker) -> int:
     """Get the number of points a user has accrued

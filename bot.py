@@ -12,7 +12,6 @@ from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
 from config import Config
-from controllers.good_morning_controller import GoodMorningController
 from controllers.sub_controller import SubController
 from db import DB
 
@@ -58,10 +57,6 @@ class RaffleBot(Client):
 
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
-            if "good morning" in message.content.lower():
-                await GoodMorningController.accrue_good_morning(message)
-
-            await GoodMorningController.handle_response(message)
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
 

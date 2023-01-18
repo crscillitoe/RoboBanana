@@ -30,7 +30,7 @@ class RaffleController:
 
         raffle_entries = DB().get_raffle_entries(guild_id)
         if len(raffle_entries) == 0:
-            await interaction.followup.send("No one is elligble to win the raffle.")
+            await interaction.followup.send("No one is elligible to win the raffle.")
             return
 
         winner_ids = RaffleController.choose_winners(raffle_entries, num_winners)

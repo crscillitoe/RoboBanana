@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.prediction_controller import PredictionController
@@ -238,4 +238,20 @@ class ModCommands(app_commands.Group, name="mod"):
             )
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
+        )
+
+    @app_commands.command(name="remove_raffle_winner")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="User ID to remove win from")
+    async def remove_raffle_winner(
+        self, interaction: Interaction, user: User
+    ):
+        one_week_ago = datetime.now().date() - timedelta(days=6)
+
+        if not DB().remove_raffle_winner(interaction.guild_id, user.id, one_week_ago):
+            await interaction.response.send_message("This user has not recently won a raffle!")
+            return
+        
+        await interaction.response.send_message(
+            "Winner removed!"
         )

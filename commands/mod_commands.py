@@ -94,7 +94,7 @@ class ModCommands(app_commands.Group, name="mod"):
         for winner in winners:
             await winner.add_roles(giftedRole)
             await interaction.channel.send(
-                f"{oprah} has gifted {winner.mention} a T1 Subscription!"
+                f"{oprah} has gifted {winner.mention} a T1 Subscription! Redeem at <#1064720916971536514>!"
             )
 
     @app_commands.command(name="start")

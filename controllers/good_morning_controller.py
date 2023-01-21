@@ -43,26 +43,6 @@ class GoodMorningController:
             )
         )
 
-    def _build_reward_message(
-        successfully_rewarded: list[str], unsuccessfully_rewarded: list[int]
-    ) -> str:
-        reward_message = ""
-        if len(unsuccessfully_rewarded) > 0:
-            unsuccessfully_rewarded = [
-                str(user_id) for user_id in unsuccessfully_rewarded
-            ]
-            unsuccessfully_rewarded_list = "\n".join(unsuccessfully_rewarded)
-            reward_message += f"Unable to reward the following user ids:\n {unsuccessfully_rewarded_list}\n\n"
-
-        if len(successfully_rewarded) > 0:
-            successfully_rewarded_list = "\n".join(successfully_rewarded)
-            reward_message += f"Congrats to everyone who earned the good morning reward!\n {successfully_rewarded_list}\n"
-
-        reward_message += (
-            f"\n Head over to <#{REWARD_REDEMPTION_CHANNEL_ID}> to redeem your reward!"
-        )
-        return reward_message
-
     async def reward_users(interaction: Interaction):
         rewarded_user_ids = DB().get_morning_reward_winners()
         if len(rewarded_user_ids) == 0:
@@ -83,7 +63,8 @@ class GoodMorningController:
             await member.add_roles(reward_role)
             successfully_rewarded.append(member.mention)
 
-        reward_message = GoodMorningController._build_reward_message(
-            successfully_rewarded, unsuccessfully_rewarded
+        reward_message = (
+            f"Congrats {reward_role.mention}!"
+            f" Head over to <#{REWARD_REDEMPTION_CHANNEL_ID}> to redeem your reward!"
         )
         await interaction.response.send_message(reward_message)

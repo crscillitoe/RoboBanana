@@ -15,7 +15,8 @@ Tier3RoleID = 1036807951484203099
 GuildID = 82969926125490176
 VODApprovedRoleID = 1056991497821626458
 VODSubmissionChannelID = 1055308028603269140
-GoodMorningBatchSize = 10
+GoodMorningRewardRequirement = 5
+GoodMorningRewardRoleID = 
 
 [Server]
 AuthToken =

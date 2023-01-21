@@ -253,6 +253,12 @@ class ModCommands(app_commands.Group, name="mod"):
             f"{count} users have said good morning today! {GOOD_MORNING_EXPLANATION}"
         )
 
+    @app_commands.command(name="good_morning_reward")
+    @app_commands.checks.has_role("Mod")
+    async def good_morning_reward(self, interaction: Interaction):
+        """Reward users who have met the 'Good Morning' threshold"""
+        await GoodMorningController.reward_users(interaction)
+
     @app_commands.command(name="remove_raffle_winner")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="User ID to remove win from")

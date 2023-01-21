@@ -1,17 +1,16 @@
-from db.models import ChannelPoints, MorningPoints
+from db.models import ChannelPoints
 from sqlalchemy import select, update, insert
 from sqlalchemy.orm import sessionmaker
 from datetime import timedelta, datetime
 from config import Config
 from discord import Role
-from zoneinfo import ZoneInfo
 
 import discord
 
 MIN_ACCRUAL_TIME = timedelta(minutes=15)
 MAX_ACCRUAL_WINDOW = timedelta(minutes=30)
-MORNING_DELTA = timedelta(hours=10)
 POINTS_PER_ACCRUAL = 50
+
 
 ROLE_MULTIPLIERS: dict[str, int] = {
     int(Config.CONFIG["Discord"]["Tier1RoleID"]): 2,
@@ -29,90 +28,6 @@ def get_multiplier_for_user(roles: list[Role]) -> int:
         if role is not None:
             return multiplier
     return 1
-
-
-def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
-    """Accrues morning greeting points for a given user
-
-    Args:
-        user_id (int): Discord user ID to give points to
-        session (sessionmaker): Open DB session
-
-    Returns:
-        bool: True if points were awarded to the user
-    """
-    with session() as sess:
-        result = sess.execute(
-            select(MorningPoints).where(MorningPoints.user_id == user_id)
-        ).first()
-        if result is None:
-            sess.execute(insert(MorningPoints).values(user_id=user_id, weekly_count=1))
-            return True
-
-        # Ensure points are not accruing on every message
-        # Only award points once per stream
-        morning_points: MorningPoints = result[0]
-        last_accrued: datetime = morning_points.timestamp
-        now = datetime.now()
-        time_difference = now - last_accrued
-
-        if time_difference < MORNING_DELTA:
-            return False
-
-        updated_timestamp = now
-
-        sess.execute(
-            update(MorningPoints)
-            .where(MorningPoints.user_id == user_id)
-            .values(
-                weekly_count=morning_points.weekly_count + 1,
-                timestamp=updated_timestamp,
-            )
-        )
-        return True
-
-
-def get_morning_points(user_id: int, session: sessionmaker) -> int:
-    """Get the number of morning greetings a user has accrued
-
-    Args:
-        user_id (int): Discord user ID to give a morning greeting to
-        session (sessionmaker): Open DB session
-
-    Returns:
-        int: Number of morning greetings currently awarded
-    """
-    with session() as sess:
-        result = sess.execute(
-            select(MorningPoints).where(MorningPoints.user_id == user_id)
-        ).first()
-
-    if result is None:
-        return 0
-
-    morning_points: MorningPoints = result[0]
-    return morning_points.weekly_count
-
-
-def get_today_morning_count(session: sessionmaker) -> int:
-    """Get the number of users which have said good morning today
-
-    Args:
-        session (sessionmaker): Open DB session
-
-    Returns:
-        int: Number of users who have said good morning today
-    """
-    stream_start = datetime.utcnow().replace(
-        hour=6, minute=0, second=0, tzinfo=ZoneInfo("America/Los_Angeles")
-    )
-    with session() as sess:
-        count = (
-            sess.query(MorningPoints)
-            .filter(MorningPoints.timestamp > stream_start)
-            .count()
-        )
-        return count
 
 
 def get_point_balance(user_id: int, session: sessionmaker) -> int:

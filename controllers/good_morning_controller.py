@@ -50,18 +50,14 @@ class GoodMorningController:
                 "No users to reward!", ephemeral=True
             )
 
-        successfully_rewarded = []
-        unsuccessfully_rewarded = []
         reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
 
         # Assign roles
         for user_id in rewarded_user_ids:
             member = interaction.guild.get_member(user_id)
             if member is None:
-                unsuccessfully_rewarded.append(user_id)
                 continue
             await member.add_roles(reward_role)
-            successfully_rewarded.append(member.mention)
 
         reward_message = (
             f"Congrats {reward_role.mention}!"

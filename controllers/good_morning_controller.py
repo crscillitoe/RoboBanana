@@ -1,6 +1,7 @@
 from discord import Interaction
 from db import DB
 from config import Config
+import asyncio
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 REWARD_ROLE_ID = int(Config.CONFIG["Discord"]["GoodMorningRewardRoleID"])
@@ -50,6 +51,8 @@ class GoodMorningController:
                 "No users to reward!", ephemeral=True
             )
 
+        print(len(rewarded_user_ids))
+
         reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
 
         # Assign roles
@@ -58,6 +61,9 @@ class GoodMorningController:
             if member is None:
                 continue
             await member.add_roles(reward_role)
+
+            # Rate limit
+            await asyncio.sleep(1)
 
         reward_message = (
             f"Congrats {reward_role.mention}!"

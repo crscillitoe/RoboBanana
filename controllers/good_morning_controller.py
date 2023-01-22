@@ -3,6 +3,10 @@ from db import DB
 from config import Config
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
+REWARD_ROLE_ID = int(Config.CONFIG["Discord"]["GoodMorningRewardRoleID"])
+REWARD_REDEMPTION_CHANNEL_ID = int(
+    Config.CONFIG["Discord"]["GoodMorningRewardRedemptionChannelID"]
+)
 GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
 
 
@@ -38,3 +42,25 @@ class GoodMorningController:
                 f"{GOOD_MORNING_EXPLANATION}"
             )
         )
+
+    async def reward_users(interaction: Interaction):
+        rewarded_user_ids = DB().get_morning_reward_winners()
+        if len(rewarded_user_ids) == 0:
+            return await interaction.response.send_message(
+                "No users to reward!", ephemeral=True
+            )
+
+        reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
+
+        # Assign roles
+        for user_id in rewarded_user_ids:
+            member = interaction.guild.get_member(user_id)
+            if member is None:
+                continue
+            await member.add_roles(reward_role)
+
+        reward_message = (
+            f"Congrats {reward_role.mention}!"
+            f" Head over to <#{REWARD_REDEMPTION_CHANNEL_ID}> to redeem your reward!"
+        )
+        await interaction.response.send_message(reward_message)

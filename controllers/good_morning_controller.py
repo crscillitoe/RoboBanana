@@ -19,11 +19,6 @@ class GoodMorningController:
         )
 
     async def accrue_good_morning(interaction: Interaction):
-        """Accrue good morning message point
-
-        Args:
-            message (Message): "good morning" stream chat message
-        """
         if interaction.channel.id != STREAM_CHAT_ID:
             return await interaction.response.send_message(
                 f"You can only say good morning in <#{STREAM_CHAT_ID}>!", ephemeral=True
@@ -51,8 +46,6 @@ class GoodMorningController:
                 "No users to reward!", ephemeral=True
             )
 
-        print(len(rewarded_user_ids))
-
         reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
 
         # Assign roles
@@ -70,3 +63,9 @@ class GoodMorningController:
             f" Head over to <#{REWARD_REDEMPTION_CHANNEL_ID}> to redeem your reward!"
         )
         await interaction.response.send_message(reward_message)
+
+    async def reset_all_morning_points(interaction: Interaction):
+        DB().reset_all_morning_points()
+        await interaction.response.send_message(
+            "Successfully reset weekly good morning points!", ephemeral=True
+        )

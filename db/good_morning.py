@@ -28,7 +28,11 @@ def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
             select(MorningPoints).where(MorningPoints.user_id == user_id)
         ).first()
         if result is None:
-            sess.execute(insert(MorningPoints).values(user_id=user_id, weekly_count=1))
+            sess.execute(
+                insert(MorningPoints).values(
+                    user_id=user_id, weekly_count=1, total_count=1
+                )
+            )
             return True
 
         # Ensure points are not accruing on every message
@@ -48,6 +52,7 @@ def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
             .where(MorningPoints.user_id == user_id)
             .values(
                 weekly_count=morning_points.weekly_count + 1,
+                total_count=morning_points.total_count + 1,
                 timestamp=updated_timestamp,
             )
         )
@@ -117,3 +122,17 @@ def get_morning_reward_winners(session: sessionmaker) -> list[int]:
         return []
 
     return [row[0] for row in result]
+
+
+def reset_all_morning_points(session: sessionmaker):
+    """Set weekly_count to 0 for all users
+
+    Args:
+        session (sessionmaker): Open DB session
+    """
+    with session() as sess:
+        sess.execute(
+            update(MorningPoints).values(
+                weekly_count=0,
+            )
+        )

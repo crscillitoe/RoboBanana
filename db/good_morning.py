@@ -122,3 +122,17 @@ def get_morning_reward_winners(session: sessionmaker) -> list[int]:
         return []
 
     return [row[0] for row in result]
+
+
+def reset_all_morning_points(session: sessionmaker):
+    """Set weekly_count to 0 for all users
+
+    Args:
+        session (sessionmaker): Open DB session
+    """
+    with session() as sess:
+        sess.execute(
+            update(MorningPoints).values(
+                weekly_count=0,
+            )
+        )

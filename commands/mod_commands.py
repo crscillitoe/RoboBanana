@@ -259,6 +259,12 @@ class ModCommands(app_commands.Group, name="mod"):
         """Reward users who have met the 'Good Morning' threshold"""
         await GoodMorningController.reward_users(interaction)
 
+    @app_commands.command(name="good_morning_reset")
+    @app_commands.checks.has_role("Mod")
+    async def good_morning_reset(self, interaction: Interaction):
+        """Reset all weekly good morning points to 0"""
+        await GoodMorningController.reset_all_morning_points(interaction)
+
     @app_commands.command(name="remove_raffle_winner")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="User ID to remove win from")

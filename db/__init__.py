@@ -15,6 +15,7 @@ from .good_morning import (
     get_morning_points,
     get_morning_reward_winners,
     get_today_morning_count,
+    reset_all_morning_points,
 )
 from .predictions import (
     accepting_prediction_entries,
@@ -393,6 +394,10 @@ class DB:
             list[int]: Discord User IDs of users to reward
         """
         return get_morning_reward_winners(self.session)
+
+    def reset_all_morning_points(self):
+        """Set weekly_count to 0 for all users"""
+        return reset_all_morning_points(self.session)
 
     def get_point_balance(self, user_id: int) -> int:
         """Get the number of points a user has accrued

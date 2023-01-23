@@ -51,8 +51,6 @@ class GoodMorningController:
                 "No users to reward!", ephemeral=True
             )
 
-        print(len(rewarded_user_ids))
-
         reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
 
         # Assign roles

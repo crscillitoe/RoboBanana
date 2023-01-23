@@ -99,14 +99,17 @@ class RoleModifier(Base):
     def __repr__(self):
         return f"RoleModifier(id={self.id!r}, guild_id={self.guild_id!r}, role_id={self.role_id!r}, modifier={self.modifier!r})"
 
+
 class MorningPoints(Base):
     __tablename__ = "morning_points"
     user_id = Column(BigInteger, primary_key=True)
     timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
     weekly_count = Column(Integer, nullable=False, default=0)
+    total_count = Column(Integer, nullable=False, default=0)
 
     def __repr__(self):
-        return f"MorningPoints(user_id={self.user_id!r}, weekly_count={self.weekly_count!r}, timestamp={self.timestamp!r})"
+        return f"MorningPoints(user_id={self.user_id!r}, weekly_count={self.weekly_count!r}, total_count={self.total_count!r}, timestamp={self.timestamp!r})"
+
 
 class ChannelPoints(Base):
     __tablename__ = "channel_points"

@@ -137,13 +137,15 @@ def parse_poll_answer_from_request():
     """
     Option Number is 1-indexed
     {
+        "userID": 12938123,
         "optionNumber": 1,
         "userRoleIDs": [123, 823, 231, 293]
     }
     """
+    user_id = request.json["userID"]
     option_number = request.json["optionNumber"]
     user_roles = request.json["userRoleIDs"]
-    return {"optionNumber": option_number, "userRoleIDs": user_roles}
+    return {"userID": user_id, "optionNumber": option_number, "userRoleIDs": user_roles}
 
 
 if __name__ == "__main__":

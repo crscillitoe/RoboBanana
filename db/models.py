@@ -103,7 +103,7 @@ class RoleModifier(Base):
 class MorningPoints(Base):
     __tablename__ = "morning_points"
     user_id = Column(BigInteger, primary_key=True)
-    timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
+    timestamp = Column(DateTime, default=func.now())
     weekly_count = Column(Integer, nullable=False, default=0)
     total_count = Column(Integer, nullable=False, default=0)
 

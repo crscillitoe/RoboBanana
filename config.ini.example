@@ -16,7 +16,8 @@ GuildID = 82969926125490176
 VODApprovedRoleID = 1056991497821626458
 VODSubmissionChannelID = 1055308028603269140
 GoodMorningRewardRequirement = 5
-GoodMorningRewardRoleID = 
+GoodMorningRewardRoleID =
+GoodMorningRewardRedemptionChannelID =
 
 [Server]
 AuthToken =

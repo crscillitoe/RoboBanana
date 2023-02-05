@@ -111,6 +111,12 @@ class ModCommands(app_commands.Group, name="mod"):
         modal = NewRaffleModal(raffle_type=raffle_type)
         await interaction.response.send_modal(modal)
 
+    @app_commands.command(name="sub_only_chat")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(enable="True will enable sub-only chat, false will disable.")
+    async def sub_only_chat(self, interaction: Interaction, enable: bool):
+        """Toggle discord subscriber only chat for the channel interacted with"""
+        await ChatController.sub_only_chat(interaction, enable)
     @app_commands.command(name="end")
     @app_commands.checks.has_role("Mod")
     async def end(

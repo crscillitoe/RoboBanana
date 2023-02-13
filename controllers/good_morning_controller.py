@@ -69,3 +69,9 @@ class GoodMorningController:
         await interaction.response.send_message(
             "Successfully reset weekly good morning points!", ephemeral=True
         )
+
+    async def good_morning_increment(points: int, interaction: Interaction):
+        DB().manual_increment_morning_points(points)
+        await interaction.response.send_message(
+            f"Successfully gave all users {points} good morning points!", ephemeral=True
+        )

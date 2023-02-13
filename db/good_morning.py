@@ -135,3 +135,25 @@ def reset_all_morning_points(session: sessionmaker):
         sess.execute(
             update(MorningPoints).values(weekly_count=0, timestamp=RESET_TIMESTAMP)
         )
+
+
+def manual_increment_morning_points(value: int, session: sessionmaker):
+    """Manually increment ALL USERS' morning points totals
+
+    Args:
+        value (int): Amount to increment users' morning points total by
+        session (sessionmaker): Open DB session
+    """
+    update_vals = []
+    with session() as sess:
+        all_morning_points: list[MorningPoints] = sess.query(MorningPoints).all()
+        for morning_points in all_morning_points:
+            update_vals.append(
+                dict(
+                    user_id=morning_points.user_id,
+                    weekly_count=morning_points.weekly_count + value,
+                    total_count=morning_points.total_count + value,
+                    timestamp=datetime.now(),
+                )
+            )
+        sess.bulk_update_mappings(MorningPoints, update_vals)

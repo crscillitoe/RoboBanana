@@ -11,6 +11,7 @@ MORNING_DELTA = timedelta(hours=10)
 MORNING_REWARD_REQUIREMENT = int(
     Config.CONFIG["Discord"]["GoodMorningRewardRequirement"]
 )
+RESET_TIMESTAMP = datetime(year=1970, month=1, day=1)
 
 
 def accrue_morning_points(user_id: int, session: sessionmaker) -> bool:
@@ -132,7 +133,5 @@ def reset_all_morning_points(session: sessionmaker):
     """
     with session() as sess:
         sess.execute(
-            update(MorningPoints).values(
-                weekly_count=0,
-            )
+            update(MorningPoints).values(weekly_count=0, timestamp=RESET_TIMESTAMP)
         )

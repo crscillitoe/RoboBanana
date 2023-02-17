@@ -229,6 +229,11 @@ class PredictionController:
         interaction: Interaction,
         client: Client,
     ) -> bool:
+        if channel_points <= 0:
+            return await interaction.response.send_message(
+                "You must wager a positive number of points!", ephemeral=True
+            )
+
         point_balance = DB().get_point_balance(interaction.user.id)
         if channel_points > point_balance:
             return await interaction.response.send_message(

@@ -238,7 +238,7 @@ class ModCommands(app_commands.Group, name="mod"):
         success, _ = DB().deposit_points(user.id, points)
         if not success:
             return await interaction.response.send_message(
-                f"Failed to award points - please try again.", ephemeral=True
+                "Failed to award points - please try again.", ephemeral=True
             )
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
@@ -264,6 +264,13 @@ class ModCommands(app_commands.Group, name="mod"):
     async def good_morning_reset(self, interaction: Interaction):
         """Reset all weekly good morning points to 0"""
         await GoodMorningController.reset_all_morning_points(interaction)
+
+    @app_commands.command(name="good_morning_increment")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(points="Number of points to award")
+    async def good_morning_increment(self, interaction: Interaction, points: int):
+        """Give all users a fixed number of good morning points"""
+        await GoodMorningController.good_morning_increment(points, interaction)
 
     @app_commands.command(name="remove_raffle_winner")
     @app_commands.checks.has_role("Mod")

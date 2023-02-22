@@ -3,7 +3,6 @@ from discord import Message, Client
 from config import Config
 import logging
 from discord.ext import tasks
-import discord.utils
 import requests
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])

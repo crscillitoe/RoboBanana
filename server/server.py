@@ -19,6 +19,7 @@ CORS(app, resources={"/stream": {"origins": "*"}})
 last_published = {}
 PREDICTIONS_CHANNEL = "predictions"
 SUBS_CHANNEL = "subs"
+SUBS_COUNT_CHANNEL = "subs-count"
 
 # User responses to current active poll
 POLL_ANSWERS_CHANNEL = "poll-answers"
@@ -110,6 +111,27 @@ def parse_prediction_from_request():
         "ended": ended,
     }
 
+@app.route("/publish-sub-count", methods=["POST"])
+@token_required
+def publish_sub():
+    try:
+        to_publish = parse_sub_count_from_request()
+        sse.publish(to_publish, type="publish", channel=SUBS_COUNT_CHANNEL)
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
+
+
+def parse_sub_count_from_request():
+    tier_1_count = request.json["tier1Count"]
+    tier_2_count = request.json["tier2Count"]
+    tier_3_count = request.json["tier3Count"]
+
+    return {
+        "tier1Count": tier_1_count,
+        "tier2Count": tier_2_count,
+        "tier3Count": tier_3_count
+    }
 
 def parse_sub_from_request():
     name = request.json["name"]

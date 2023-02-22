@@ -42,6 +42,7 @@ class RaffleBot(Client):
         # tree.clear_commands(guild=guild)
         # tree.copy_global_to(guild=guild)
         # await tree.sync(guild=guild)
+        SubController(self).send_count.start()
 
     async def on_message(self, message: Message):
         # Don't respond to ourselves

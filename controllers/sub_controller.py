@@ -107,6 +107,7 @@ def publish_update(name: str, role_name: str, message: str):
     if response.status_code != 200:
         LOG.error(f"Failed to publish sub summary: {response.text}")
 
+
 def publish_count(tier_1_count: int, tier_2_count: int, tier_3_count: int):
     payload = {
         "tier1Count": tier_1_count,

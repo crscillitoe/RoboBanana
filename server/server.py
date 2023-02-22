@@ -56,6 +56,7 @@ def publish_poll():
     except (KeyError, ValueError):
         return ("Bad Request", 400)
 
+
 @app.route("/publish-poll-answer", methods=["POST"])
 @token_required
 def publish_poll_answer():
@@ -65,6 +66,7 @@ def publish_poll_answer():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
+
 
 @app.route("/publish-prediction", methods=["POST"])
 @token_required
@@ -111,6 +113,7 @@ def parse_prediction_from_request():
         "ended": ended,
     }
 
+
 @app.route("/publish-sub-count", methods=["POST"])
 @token_required
 def publish_sub():
@@ -130,14 +133,16 @@ def parse_sub_count_from_request():
     return {
         "tier1Count": tier_1_count,
         "tier2Count": tier_2_count,
-        "tier3Count": tier_3_count
+        "tier3Count": tier_3_count,
     }
+
 
 def parse_sub_from_request():
     name = request.json["name"]
     tier = request.json["tier"]
     message = request.json["message"]
     return {"name": name, "tier": tier, "message": message}
+
 
 def parse_poll_from_request():
     """
@@ -154,6 +159,7 @@ def parse_poll_from_request():
     title = request.json["title"]
     options = request.json["options"]
     return {"title": title, "options": options}
+
 
 def parse_poll_answer_from_request():
     """

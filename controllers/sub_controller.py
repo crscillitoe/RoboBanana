@@ -1,8 +1,9 @@
 from threading import Thread
 from discord import Message, Client
+from discord.ext import tasks
+import discord.utils
 from config import Config
 import logging
-from discord.ext import tasks
 import requests
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
@@ -84,9 +85,15 @@ class SubController:
     @tasks.loop(minutes=1.0)
     async def send_count(self):
         guild = await self.client.fetch_guild(Config.CONFIG["Discord"]["GuildID"])
-        tier_1_count, tier_2_count, tier_3_count = [
-            len(guild.get_role(role_id).members) for role_id in PREMIUM_IDS
-        ]
+        guild_members = guild.fetch_members(limit=None)
+
+        premium_id_count = {}
+        async for member in guild_members:
+            for role_id in PREMIUM_IDS:
+                if discord.utils.get(member.roles, id=role_id):
+                    premium_id_count[role_id] = premium_id_count.get(role_id, 0) + 1
+
+        tier_1_count, tier_2_count, tier_3_count = [premium_id_count[role_id] for role_id in PREMIUM_IDS]
 
         Thread(
             target=publish_count,

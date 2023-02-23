@@ -116,7 +116,7 @@ def parse_prediction_from_request():
 
 @app.route("/publish-sub-count", methods=["POST"])
 @token_required
-def publish_sub():
+def publish_sub_count():
     try:
         to_publish = parse_sub_count_from_request()
         sse.publish(to_publish, type="publish", channel=SUBS_COUNT_CHANNEL)

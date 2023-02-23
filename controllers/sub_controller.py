@@ -93,7 +93,9 @@ class SubController:
                 if discord.utils.get(member.roles, id=role_id):
                     premium_id_count[role_id] = premium_id_count.get(role_id, 0) + 1
 
-        tier_1_count, tier_2_count, tier_3_count = [premium_id_count[role_id] for role_id in PREMIUM_IDS]
+        tier_1_count, tier_2_count, tier_3_count = [
+            premium_id_count[role_id] for role_id in PREMIUM_IDS
+        ]
 
         Thread(
             target=publish_count,

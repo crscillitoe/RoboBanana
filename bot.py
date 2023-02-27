@@ -1,12 +1,16 @@
 from __future__ import annotations
 import asyncio
+from datetime import timedelta
 import logging
 import discord
 from discord import (
+    Member,
+    User,
     app_commands,
     Client,
     Intents,
     Message,
+    Reaction,
 )
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
@@ -21,6 +25,9 @@ STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
 PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
 GUILD_ID = int(Config.CONFIG["Discord"]["GuildID"])
+CROWD_MUTE_EMOJI_ID = int(Config.CONFIG["Discord"]["CrowdMuteEmojiID"])
+CROWD_MUTE_THRESHOLD = int(Config.CONFIG["Discord"]["CrowdMuteThreshold"])
+CROWD_MUTE_DURATION = int(Config.CONFIG["Discord"]["CrowdMuteDuration"])
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 
 
@@ -59,6 +66,22 @@ class RaffleBot(Client):
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             DB().accrue_channel_points(message.author.id, message.author.roles)
+
+    async def on_reaction_add(self, reaction: Reaction, user: Member | User):
+        if reaction.emoji.id != CROWD_MUTE_EMOJI_ID:
+            return
+        if reaction.count < CROWD_MUTE_THRESHOLD:
+            return
+
+        mute_reason = (
+            "been crowd muted, likely due to asking"
+            " an easily Googleable question OR a question answered"
+            " directly within our <#1035739990413545492>."
+        )
+        await user.timeout(
+            timedelta(minutes=CROWD_MUTE_DURATION), reason=f"You have {mute_reason}"
+        )
+        await reaction.message.reply(f"This user has {mute_reason}")
 
 
 client = RaffleBot()

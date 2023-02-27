@@ -18,6 +18,9 @@ VODSubmissionChannelID = 1055308028603269140
 GoodMorningRewardRequirement = 5
 GoodMorningRewardRoleID =
 GoodMorningRewardRedemptionChannelID =
+CrowdMuteEmojiID = 1037105216371314758
+CrowdMuteThreshold = 30
+CrowdMuteDuration = 1
 
 [Server]
 AuthToken =

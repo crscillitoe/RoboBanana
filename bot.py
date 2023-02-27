@@ -74,9 +74,13 @@ class RaffleBot(Client):
             return
 
         mute_reason = (
-            "been crowd muted, likely due to asking"
-            " an easily Googleable question OR a question answered"
-            " directly within our <#1035739990413545492>."
+            "been crowd muted for 10 minutes, likely due to asking:"
+            ""
+            " 1. An easily Googleable question
+            ""
+            " 2. A question about aim (see <#1056639643443007659>)"
+            ""
+            " 3. A question answered directly within our <#1035739990413545492>."
         )
         await user.timeout(
             timedelta(minutes=CROWD_MUTE_DURATION), reason=f"You have {mute_reason}"

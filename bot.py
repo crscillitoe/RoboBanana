@@ -5,7 +5,6 @@ import logging
 import discord
 from discord import (
     Member,
-    Permissions,
     User,
     app_commands,
     Client,
@@ -50,7 +49,7 @@ class RaffleBot(Client):
         # tree.clear_commands(guild=guild)
         # tree.copy_global_to(guild=guild)
         # await tree.sync(guild=guild)
-        # SubController(self).send_count.start()
+        SubController(self).send_count.start()
 
     async def on_message(self, message: Message):
         # Don't respond to ourselves
@@ -79,8 +78,6 @@ class RaffleBot(Client):
             " an easily Googleable question OR a question answered"
             " directly within our <#1035739990413545492>."
         )
-        permissions = reaction.message.guild.me.guild_permissions.value
-        flag = Permissions.moderate_members.flag
         await user.timeout(
             timedelta(minutes=CROWD_MUTE_DURATION), reason=f"You have {mute_reason}"
         )

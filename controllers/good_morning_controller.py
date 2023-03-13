@@ -1,4 +1,4 @@
-from discord import Interaction
+from discord import Interaction, Message, Thread
 from db import DB
 from config import Config
 import asyncio
@@ -48,12 +48,31 @@ class GoodMorningController:
 
         reward_role = interaction.guild.get_role(REWARD_ROLE_ID)
 
+        await interaction.response.send_message("Good Morning Reward Progress")
+        response_message = await interaction.original_response()
+
+        thread: Thread = await response_message.create_thread(
+            name="Good Morning Reward Progress"
+        )
+
+        reward_count = len(rewarded_user_ids)
+
+        await thread.send(f"Distributing good morning rewards to {reward_count} users.")
+
+        progress_threshold = 0.25
+
         # Assign roles
-        for user_id in rewarded_user_ids:
+        for idx, user_id in enumerate(rewarded_user_ids):
             member = interaction.guild.get_member(user_id)
             if member is None:
                 continue
+
             await member.add_roles(reward_role)
+
+            num_rewarded = idx + 1
+            if (num_rewarded / reward_count) > progress_threshold:
+                await thread.send(f"{num_rewarded}/{reward_count} rewarded...")
+                progress_threshold += 0.25
 
             # Rate limit
             await asyncio.sleep(1)
@@ -62,7 +81,7 @@ class GoodMorningController:
             f"Congrats {reward_role.mention}!"
             f" Head over to <#{REWARD_REDEMPTION_CHANNEL_ID}> to redeem your reward!"
         )
-        await interaction.response.send_message(reward_message)
+        await interaction.followup.send(reward_message)
 
     async def reset_all_morning_points(interaction: Interaction):
         DB().reset_all_morning_points()

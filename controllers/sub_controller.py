@@ -35,6 +35,9 @@ class SubController:
             channel_id=message.channel.id, message_id=message.id
         )
 
+        # 6 Month T3
+        t3_6_month_role = message.guild.get_role(1087797719919235123)
+
         role_sub_data = raw_msg.get("role_subscription_data")
         if role_sub_data is None:
             return LOG.error(
@@ -71,6 +74,9 @@ class SubController:
         )
         mention_thankyou = thankyou_message.format(name=message.author.mention)
         name_thankyou = thankyou_message.format(name=author_name)
+
+        if "6 months" in mention_thankyou and "THE ONES WHO" in mention_thankyou:
+            await message.author.add_roles(t3_6_month_role)
 
         await client.get_channel(STREAM_CHAT_ID).send(mention_thankyou)
         Thread(

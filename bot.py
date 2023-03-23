@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 from datetime import timedelta
 import logging
+import requests
 import discord
 from discord import (
     Member,
@@ -18,9 +19,15 @@ from commands.manager_commands import ManagerCommands
 from config import Config
 from controllers.sub_controller import SubController
 from db import DB
+from threading import Thread
+
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
+COOL_URL = "http://localhost:3000/publish-cool"
+COOL_ID = Config.CONFIG["Discord"]["CoolEmojiID"]
+AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+UNCOOL_ID = Config.CONFIG["Discord"]["UncoolEmojiID"]
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
 PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
@@ -66,6 +73,18 @@ class RaffleBot(Client):
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             DB().accrue_channel_points(message.author.id, message.author.roles)
+            cool = COOL_ID in message.content
+            uncool = UNCOOL_ID in message.content
+            if cool and not uncool:
+                Thread(
+                    target=publish_cool,
+                    args=(1,),
+                ).start()
+            elif uncool and not cool:
+                Thread(
+                    target=publish_cool,
+                    args=(-1,),
+                ).start()
 
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
         if isinstance(reaction.emoji, str):
@@ -101,6 +120,14 @@ async def on_guild_join(guild):
     tree.copy_global_to(guild=guild)
     await tree.sync(guild=guild)
 
+
+def publish_cool(cool: int):
+    payload = {"cool": cool}
+    response = requests.post(
+        url=COOL_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish sub summary: {response.text}")
 
 async def main():
     async with client:

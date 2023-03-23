@@ -68,6 +68,8 @@ class RaffleBot(Client):
             DB().accrue_channel_points(message.author.id, message.author.roles)
 
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
+        if isinstance(reaction.emoji, str):
+            return
         if reaction.emoji.id != CROWD_MUTE_EMOJI_ID:
             return
         if reaction.count < CROWD_MUTE_THRESHOLD:

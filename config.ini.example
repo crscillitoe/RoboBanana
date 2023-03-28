@@ -19,7 +19,9 @@ GoodMorningRewardRequirement = 5
 GoodMorningRewardRoleID =
 GoodMorningRewardRedemptionChannelID =
 CrowdMuteEmojiID = 1037105216371314758
-CrowdMuteThreshold = 30
+CoolEmojiID = 1076744568818647103
+UncoolEmojiID = 1087887812923232266
+CrowdMuteThreshold = 15
 CrowdMuteDuration = 1
 
 [Server]

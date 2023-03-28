@@ -27,6 +27,9 @@ POLL_ANSWERS_CHANNEL = "poll-answers"
 # New poll information
 POLLS_CHANNEL = "polls"
 
+# Track the cool level of current VOD
+COOL_CHANNEL = "cool"
+
 
 def keep_alive():
     with app.app_context():
@@ -34,6 +37,7 @@ def keep_alive():
         sse.publish("\n\n", type="keepalive", channel=SUBS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=POLL_ANSWERS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -45,6 +49,16 @@ sched.start()
 def index():
     return jsonify(last_published)
 
+
+@app.route("/publish-cool", methods=["POST"])
+@token_required
+def publish_cool():
+    try:
+        to_publish = parse_cool_from_request()
+        sse.publish(to_publish, type="publish", channel=COOL_CHANNEL)
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
 
 @app.route("/publish-poll", methods=["POST"])
 @token_required
@@ -159,6 +173,15 @@ def parse_poll_from_request():
     title = request.json["title"]
     options = request.json["options"]
     return {"title": title, "options": options}
+
+def parse_cool_from_request():
+    """
+    {
+        cool: -1 | 1,
+    }
+    """
+    cool = request.json["cool"]
+    return {"cool": cool}
 
 
 def parse_poll_answer_from_request():

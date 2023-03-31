@@ -9,6 +9,7 @@ def create_prediction(
     guild_id: int,
     channel_id: int,
     message_id: int,
+    thread_id: str,
     description: str,
     option_one: str,
     option_two: str,
@@ -24,6 +25,7 @@ def create_prediction(
                 guild_id=guild_id,
                 channel_id=channel_id,
                 message_id=message_id,
+                thread_id=thread_id,
                 description=description,
                 option_one=option_one,
                 option_two=option_two,
@@ -102,6 +104,20 @@ def get_prediction_message_id(
     with session() as sess:
         stmt = (
             select(Prediction.message_id).where(Prediction.id == prediction_id).limit(1)
+        )
+        result = sess.execute(stmt).one()
+
+    if len(result) == 0:
+        return None
+
+    return result[0]
+
+def get_prediction_thread_id(
+    prediction_id: int, session: sessionmaker
+) -> Optional[int]:
+    with session() as sess:
+        stmt = (
+            select(Prediction.thread_id).where(Prediction.id == prediction_id).limit(1)
         )
         result = sess.execute(stmt).one()
 

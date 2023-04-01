@@ -8,18 +8,21 @@ RoboBanana is a simple Twitch/Discord bot for managing and redeeming channel rew
 Redeemable channel rewards with point cost and name.
 Pending rewards that can be completed or refunded by moderators.
 Automatic reward redemption with no need for a moderator to manually complete a reward.
-Technologies
+
+
 
 
 ## Installation
 To run RoboBanana, you will need to create a config.ini file in the root directory and fill in the values exampled in the congif.ini.example
 
-###After setting up the .ini file, you can install the necessary Python packages using:
+After setting up the .ini file, you can install the necessary Python packages using:
 
 pip install -r requirements.txt
 
 Run the bot using:
 python bot.py
+
+Instalation and configuration of a SQL database will be required
 
 
 ## Usage

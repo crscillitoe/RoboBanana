@@ -1,17 +1,17 @@
 Made for [Woohoojin](https://twitch.tv/woohoojin).
 
 
-#RoboBanana
+# RoboBanana
 RoboBanana is a simple Twitch/Discord bot for managing and redeeming channel rewards using channel points.
 
-##Features
+## Features
 Redeemable channel rewards with point cost and name.
 Pending rewards that can be completed or refunded by moderators.
 Automatic reward redemption with no need for a moderator to manually complete a reward.
 Technologies
 
 
-#Installation
+## Installation
 To run RoboBanana, you will need to create a config.ini file in the root directory and fill in the values exampled in the congif.ini.example
 
 ###After setting up the .ini file, you can install the necessary Python packages using:
@@ -22,9 +22,9 @@ Run the bot using:
 python bot.py
 
 
-Usage
-Commands
-##Mod Commands
+## Usage
+### Commands
+### Mod Commands
     sync: This command can be used to synchronize the database with any external system, ensuring that all data is up-to-date.
 
     gift: This command is used to gift a reward or points to a user.
@@ -63,7 +63,7 @@ Commands
 
     remove_raffle_winner: This command can be used to remove a winner from a raffle.
 
-##User Commands
+### User Commands
 
     redeem_reward: This command allows a user to redeem an available channel reward. It first checks if reward redemptions are allowed, and if not, it sends a message indicating that redemptions are currently paused. If redemptions are allowed, it retrieves the available rewards and the user's current point balance from the database, and sends a RedeemRewardView containing the rewards and point balance to the user.
 
@@ -77,15 +77,15 @@ Commands
 
     good_morning_points: This command allows a user to check their current number of "good morning points". It retrieves the user's good morning points from the database and sends a message indicating the user's current good morning points to the user.
 
-##Manager Commands 
+### Manager Commands 
 
     flag_vod: Flags a VOD (video on demand) as approved, rejected, or complete. It takes one argument vod_type which is of type VODType (an enum with three possible values - approved, rejected, or complete). The command can only be executed by users with the "Community Manager" role. 
 
 
 
 
-#Project Structure
-##The project is structured as follows:
+## Project Structure
+### The project is structured as follows:
 
     commands/: This directory contains files defining all the bot's commands, separated by role.
 

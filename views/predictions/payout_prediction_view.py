@@ -44,7 +44,7 @@ class PayoutPredictionView(View):
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
-        await interaction.message.edit(content="", view=self)
+        await interaction.response.edit_message(content="", view=self)
 
     async def option_two_onclick(self, interaction: Interaction):
         await PredictionController.payout_prediction(
@@ -53,11 +53,11 @@ class PayoutPredictionView(View):
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
-        await interaction.message.edit(content="", view=self)
+        await interaction.response.edit_message(content="", view=self)
 
     async def refund_onclick(self, interaction: Interaction):
         await PredictionController.refund_prediction(interaction, self.client)
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
         self.refund_button.disabled = True
-        await interaction.message.edit(content="", view=self)
+        await interaction.response.edit_message(content="", view=self)

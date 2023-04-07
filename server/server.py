@@ -38,6 +38,7 @@ def keep_alive():
         sse.publish("\n\n", type="keepalive", channel=POLL_ANSWERS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=SUBS_COUNT_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -104,7 +105,6 @@ def publish_sub():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
-
 
 def parse_prediction_from_request():
     description = request.json["description"]

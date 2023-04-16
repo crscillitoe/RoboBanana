@@ -1,5 +1,5 @@
 from db.models import ChannelReward, AllowRedemption
-from sqlalchemy import select, update, insert, delete
+from sqlalchemy import update, insert, delete
 from sqlalchemy.orm import sessionmaker
 
 

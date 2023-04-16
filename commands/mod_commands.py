@@ -285,3 +285,31 @@ class ModCommands(app_commands.Group, name="mod"):
             return
 
         await interaction.response.send_message("Winner removed!")
+
+
+    """
+    \/ Start Giveaway commands
+    """
+
+    @app_commands.command(name="log_giveaway")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(type="The giveaway type (i.e. emote, funday friday, etc.)")
+    @app_commands.describe(amount="The amount of wins associated to the giveaway log")
+    @app_commands.describe(user="The user that won the giveaway")
+    async def good_morning_count(self, type: str, amount: int, user: User, interaction: Interaction):
+        """Log a giveaway :)"""
+        id = DB().insert_giveaway_log(giveaway_type=type, amount=amount, user_id=user.id)
+        await interaction.response.send_message(
+            f"Giveaway log `{id}` has been successfully created!"
+        )
+        if interaction.guild:
+            role_rewards = DB().get_giveaway_role_rewards()
+            if type in role_rewards:
+                for role_reward in role_rewards[type]:
+                    # TODO: actually add the role to the user lol
+                    # interaction.guild.role_reward.role_id
+                    pass
+
+    """
+    ^ End Giveaway commands
+    """

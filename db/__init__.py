@@ -1,6 +1,6 @@
 from datetime import datetime
 from discord import Role
-from sqlalchemy import create_engine, select, update, insert, func
+from sqlalchemy import create_engine, select, update, insert, func, delete
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
@@ -52,6 +52,8 @@ from .models import (
     RaffleEntry,
     RoleModifier,
     RaffleType,
+    GiveawayLog,
+    GiveawayRoleReward,
 )
 from config import Config
 
@@ -675,3 +677,98 @@ class DB:
             winning_outcome (int): New outcome of prediction
         """
         return set_prediction_outcome(prediction_id, winning_outcome, self.session)
+
+
+    """
+    \/ Begin Giveaway Methods \/
+    """
+
+    def insert_giveaway_log(self, giveaway_type: str, amount: int, user_id: int) -> int:
+        """Add a new giveaway log to the database.
+
+        Args:
+            giveaway_type (str): The type of giveaway being logged (i.e. emote, funday friday)
+            amount (int): The amount won from the giveaway
+            user_id (int): The user who won the giveaway
+            session (sessionmaker): Open DB session
+
+        Returns:
+            The ID of the newly inserted giveaway log
+        """
+        with self.session() as sess:
+            result = sess.execute(insert(GiveawayLog).values(giveaway_type=giveaway_type, amount=amount, user_id=user_id))
+            return result.inserted_primary_key()
+
+
+    def delete_giveaway_log(self, id: int):
+        """Delete the giveaway log matching the provided id.
+
+        Args:
+            id (int): The ID of the giveaway log to delete
+            session (sessionmaker): Open DB session
+        """
+        with self.session() as sess:
+            sess.execute(delete(GiveawayLog).where(GiveawayLog.id == id))
+
+
+    def get_giveaway_logs(self, user_id: int) -> list[GiveawayLog]:
+        """Get all giveaway logs associated with the specified user.
+
+        Args:
+            user_id (int): The user to collect all giveaway logs for (if any)
+            session (sessionmaker): Open DB session
+
+        Returns:
+            list[GiveawayLog]: All currently available giveaway logs for the requested user
+        """
+        with self.session() as sess:
+            return sess.query(GiveawayLog).filter(GiveawayLog.user_id == user_id).all()
+
+
+    def add_giveaway_role_reward(self, giveaway_type: str, role_id: int):
+        """Add a new role reward for a specific giveaway type.
+
+        Args:
+            giveaway_type (str): The type of giveaway to associate a role reward with (i.e. emote, funday friday, etc.).
+            role_id (int): The role to give to users upon winning said giveaway type.
+            session (sessionmaker): Open DB session
+        """
+        with self.session() as sess:
+            sess.execute(insert(GiveawayRoleReward).values(giveaway_type=giveaway_type, role_id=role_id))
+
+
+    def delete_giveaway_role_reward(self, giveaway_type: str, role_id: int):
+        """Delete an existing role reward for a specific giveaway type.
+
+        Args:
+            giveaway_type (str): The type of giveaway to delete a role reward from (i.e. emote, funday friday, etc.).
+            role_id (int): The role to remove as a reward.
+            session (sessionmaker): Open DB session
+        """
+        with self.session() as sess:
+            sess.execute(delete(GiveawayRoleReward).where(GiveawayRoleReward.giveaway_type == giveaway_type, GiveawayRoleReward.role_id == role_id))
+
+
+    def get_giveaway_role_rewards(self) -> dict[str, set[GiveawayRoleReward]]:
+        """Get all giveaway role rewards as a map of giveaway_type to set[GiveawayRoleReward]
+
+        Args:
+            session (sessionmaker): Open DB session
+
+        Returns:
+            dict[str, set[GiveawayRoleReward]]: All currently available giveaway role rewards, with the giveaway type as the key
+        """
+        with self.session() as sess:
+            results: list[GiveawayRoleReward] = sess.query(GiveawayRoleReward).all()
+            output_dict = {}
+            for item in results:
+                if item.giveaway_type in output_dict:
+                    output_dict[item.giveaway_type].add(item)
+                else:
+                    output_dict[item.giveaway_type] = {item}
+            return output_dict
+    
+
+    """
+    ^ End Giveaway Methods ^
+    """

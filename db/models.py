@@ -177,3 +177,58 @@ class PredictionEntry(Base):
 
     def __repr__(self):
         return f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r}, user_id={self.user_id!r}, channel_points={self.channel_points!r}, guess={self.guess!r})"
+
+
+class GiveawayLog(Base):
+    """
+    A table used to log giveaway wins for different types of giveaways.
+    """
+    __tablename__ = "giveaway_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    """
+    The ID of the giveaway log entry.
+    This will allow us to easily remove giveaway logs if we'd like.
+    """
+    user_id = Column(BigInteger, nullable=False)
+    """
+    The user id of the winner of the giveaway.
+    """
+    giveaway_type = Column(VARCHAR(100), nullable=False)
+    """
+    The type of giveaway being logged (i.e. emote, funday friday, etc.).
+    """
+    amount = Column(Integer, nullable=False, default=1)
+    """
+    The amount of wins being logged.
+    """
+    timestamp = Column(DateTime, default=func.now())
+    """
+    The time at which the giveaway was logged. Command users can optionally specify a different timestamp to force this to be a certain
+    value (as opposed to "now").
+    """
+
+    def __repr__(self):
+        return (
+            f"GiveawayLog(id={repr(self.log_id)}, user_id={repr(self.winner_id)}, giveaway_type={repr(self.giveaway_type)}, "
+            f"amount={repr(self.amount)}, timestamp={repr(self.timestamp)})"
+        )
+
+
+class GiveawayRoleReward(Base):
+    """
+    A table to associate specific giveaway types with Discord server role rewards.
+    """
+    __tablename__ = "giveaway_role_rewards"
+
+    giveaway_type = Column(VARCHAR(100), nullable=False, primary_key=True)
+    """
+    The type of giveaway to associate a role reward with (i.e. emote, funday friday, etc.).
+    """
+    role_id = Column(BigInteger, nullable=False, primary_key=True)
+    """
+    The role to give to users upon winning said giveaway type.
+    """
+
+    def __repr__(self):
+        return f"GiveawayRoleReward(giveaway_type={repr(self.giveaway_type)}, role_id={repr(self.role_id)})"

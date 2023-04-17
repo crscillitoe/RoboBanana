@@ -7,6 +7,7 @@ import logging
 import requests
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
+BOT_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 PUBLISH_URL = "http://localhost:3000/publish-sub"
 PUBLISH_COUNT_URL = "http://localhost:3000/publish-sub-count"
@@ -78,7 +79,7 @@ class SubController:
         if "6 months" in mention_thankyou and "THE ONES WHO" in mention_thankyou:
             await message.author.add_roles(t3_6_month_role)
 
-        await client.get_channel(STREAM_CHAT_ID).send(mention_thankyou)
+        await client.get_channel(BOT_AUDIT_CHANNEL).send(mention_thankyou)
         Thread(
             target=publish_update,
             args=(

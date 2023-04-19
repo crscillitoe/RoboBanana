@@ -6,6 +6,7 @@ from controllers.good_morning_controller import (
     GOOD_MORNING_EXPLANATION,
 )
 from controllers.prediction_controller import PredictionController
+from controllers.chat_controller import ChatController
 from db import DB, RaffleType
 from db.models import PredictionChoice, PredictionOutcome
 from views.predictions.create_predictions_modal import CreatePredictionModal
@@ -110,6 +111,13 @@ class ModCommands(app_commands.Group, name="mod"):
 
         modal = NewRaffleModal(raffle_type=raffle_type)
         await interaction.response.send_modal(modal)
+
+    @app_commands.command(name="set_chat_mode")
+    @app_commands.checks.has_role("Mod")
+    async def set_chat_mode(self, interaction: Interaction, mode: str):
+        """Set chat mode for the channel interacted with"""
+        await ChatController.set_chat_mode(interaction, mode)
+
 
     @app_commands.command(name="end")
     @app_commands.checks.has_role("Mod")

@@ -36,6 +36,7 @@ CROWD_MUTE_EMOJI_ID = int(Config.CONFIG["Discord"]["CrowdMuteEmojiID"])
 CROWD_MUTE_THRESHOLD = int(Config.CONFIG["Discord"]["CrowdMuteThreshold"])
 CROWD_MUTE_DURATION = int(Config.CONFIG["Discord"]["CrowdMuteDuration"])
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
+MAX_CHARACTER_LENGTH = 200
 
 
 class RaffleBot(Client):
@@ -58,6 +59,21 @@ class RaffleBot(Client):
         # await tree.sync(guild=guild)
         SubController(self).send_count.start()
 
+    async def on_message_edit(self, before: Message, message: Message):
+        # Don't respond to ourselves
+        if message.author == self.user:
+            return
+
+        # Only look in the active stream channel
+        if message.channel.id == STREAM_CHAT_ID:
+            await self.check_message_length(message)
+
+    async def check_message_length(self, message: Message):
+        length = len(message.content)
+        if length > MAX_CHARACTER_LENGTH:
+            await message.delete()
+            await message.author.send(f"Hey! Keep your messages in the stream chat under {MAX_CHARACTER_LENGTH} characters please! Your message was {length} characters long! Thanks!")
+
     async def on_message(self, message: Message):
         # Don't respond to ourselves
         if message.author == self.user:
@@ -72,6 +88,8 @@ class RaffleBot(Client):
 
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
+            await self.check_message_length(message)
+
             DB().accrue_channel_points(message.author.id, message.author.roles)
             cool = COOL_ID in message.content
             uncool = UNCOOL_ID in message.content

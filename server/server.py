@@ -30,6 +30,8 @@ POLLS_CHANNEL = "polls"
 # Track the cool level of current VOD
 COOL_CHANNEL = "cool"
 
+VOD_REVIEW_CHANNEL = "vod-reviews"
+
 
 def keep_alive():
     with app.app_context():
@@ -39,6 +41,7 @@ def keep_alive():
         sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=SUBS_COUNT_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=VOD_REVIEW_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -50,6 +53,15 @@ sched.start()
 def index():
     return jsonify(last_published)
 
+@app.route("/publish-vod", methods=["POST"])
+@token_required
+def publish_vod():
+    try:
+        to_publish = parse_vod_from_request()
+        sse.publish(to_publish, type="publish", channel=VOD_REVIEW_CHANNEL)
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
 
 @app.route("/publish-cool", methods=["POST"])
 @token_required
@@ -173,6 +185,17 @@ def parse_poll_from_request():
     title = request.json["title"]
     options = request.json["options"]
     return {"title": title, "options": options}
+
+def parse_vod_from_request():
+    """
+    {
+        complete: true | false,
+        username: string
+    }
+    """
+    complete = request.json["complete"]
+    username = request.json["username"]
+    return {"complete": complete, "username": username}
 
 def parse_cool_from_request():
     """

@@ -15,11 +15,15 @@ from controllers.raffle_controller import RaffleController
 from config import Config
 import logging
 import random
-
+from threading import Thread
+import requests
 
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
 POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
+
+AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+PUBLISH_URL = "http://localhost:3000/publish-vod"
 
 
 @app_commands.guild_only()
@@ -55,6 +59,23 @@ class ModCommands(app_commands.Group, name="mod"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
+
+    @app_commands.command(name="vod")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(username="username")
+    async def vod(self, interaction: Interaction, username: str) -> None:
+        """Start a VOD review for the given username"""
+        Thread(target=publish_update, args=(username, False,)).start()
+
+        await interaction.response.send_message("Username event sent!", ephemeral=True)
+
+    @app_commands.command(name="complete")
+    @app_commands.checks.has_role("Mod")
+    async def complete(self, interaction: Interaction) -> None:
+        """Start a VOD review for the given username"""
+        Thread(target=publish_update, args=("", True,)).start()
+
+        await interaction.response.send_message("VOD Complete Event sent!", ephemeral=True)
 
     @app_commands.command(name="gift")
     @app_commands.checks.has_role("Mod")
@@ -285,3 +306,17 @@ class ModCommands(app_commands.Group, name="mod"):
             return
 
         await interaction.response.send_message("Winner removed!")
+
+
+def publish_update(username, complete):
+    payload = {
+        "username": username,
+        "complete": complete,
+    }
+
+    response = requests.post(
+        url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish updated prediction summary: {response.text}")

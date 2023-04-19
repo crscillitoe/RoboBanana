@@ -63,9 +63,11 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="vod")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(username="username")
-    async def vod(self, interaction: Interaction, username: str) -> None:
+    @app_commands.describe(riotid="riotid")
+    @app_commands.describe(rank="rank")
+    async def vod(self, interaction: Interaction, username: str, riotid: str, rank: str) -> None:
         """Start a VOD review for the given username"""
-        Thread(target=publish_update, args=(username, False,)).start()
+        Thread(target=publish_update, args=(username, riotid, rank, False,)).start()
 
         await interaction.response.send_message("Username event sent!", ephemeral=True)
 
@@ -73,7 +75,7 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def complete(self, interaction: Interaction) -> None:
         """Start a VOD review for the given username"""
-        Thread(target=publish_update, args=("", True,)).start()
+        Thread(target=publish_update, args=("", "", "", True,)).start()
 
         await interaction.response.send_message("VOD Complete Event sent!", ephemeral=True)
 
@@ -308,9 +310,11 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Winner removed!")
 
 
-def publish_update(username, complete):
+def publish_update(username, riotid, rank, complete):
     payload = {
         "username": username,
+        "riotid": riotid,
+        "rank": rank,
         "complete": complete,
     }
 

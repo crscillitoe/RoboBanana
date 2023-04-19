@@ -190,12 +190,16 @@ def parse_vod_from_request():
     """
     {
         complete: true | false,
-        username: string
+        username: string,
+        rank: string,
+        riotid: string
     }
     """
+    rank = request.json["rank"]
+    riotid = request.json["riotid"]
     complete = request.json["complete"]
     username = request.json["username"]
-    return {"complete": complete, "username": username}
+    return {"complete": complete, "username": username, "rank": rank, "riotid": riotid}
 
 def parse_cool_from_request():
     """

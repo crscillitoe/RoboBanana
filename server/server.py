@@ -33,6 +33,7 @@ COOL_CHANNEL = "cool"
 VOD_REVIEW_CHANNEL = "vod-reviews"
 
 
+
 def keep_alive():
     with app.app_context():
         sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
@@ -77,8 +78,8 @@ def publish_cool():
 @token_required
 def publish_poll():
     try:
-        to_publish = parse_poll_answer_from_request()
-        sse.publish(to_publish, type="publish", channel=POLL_ANSWERS_CHANNEL)
+        to_publish = parse_poll_from_request()
+        sse.publish(to_publish, type="publish", channel=POLLS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -88,8 +89,8 @@ def publish_poll():
 @token_required
 def publish_poll_answer():
     try:
-        to_publish = parse_poll_from_request()
-        sse.publish(to_publish, type="publish", channel=POLLS_CHANNEL)
+        to_publish = parse_poll_answer_from_request()
+        sse.publish(to_publish, type="publish", channel=POLL_ANSWERS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)

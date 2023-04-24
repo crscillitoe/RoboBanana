@@ -1,10 +1,18 @@
 from discord import app_commands, Interaction, User, Client
+from discord.app_commands import Choice
 from controllers.good_morning_controller import GoodMorningController
 from controllers.prediction_controller import PredictionController
 from db import DB
 from db.models import PredictionChoice
 from views.rewards.redeem_reward_view import RedeemRewardView
+from threading import Thread
+import requests
+import logging
+from config import Config
 
+LOG = logging.getLogger(__name__)
+PUBLISH_POLL_URL = "http://localhost:3000/publish-poll-answer"
+AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 
 @app_commands.guild_only()
 class ViewerCommands(app_commands.Group, name="hooj"):
@@ -47,6 +55,21 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             f"You currently have {user_points} points", ephemeral=True
         )
 
+    @app_commands.command(name="vote")
+    @app_commands.choices(option_number=[
+        Choice(name='1', value=1),
+        Choice(name='2', value=2),
+        Choice(name='3', value=3),
+        Choice(name='4', value=4),
+    ])
+    async def vote(
+        self, interaction: Interaction, option_number: int
+    ):
+        """Places your vote on the thing, if you revote it updates your choice"""
+        Thread(target=publish_poll_answer, args=(interaction.user.id, option_number, [r.id for r in interaction.user.roles],)).start()
+
+        await interaction.response.send_message("Poll answer sent!", ephemeral=True)
+
     @app_commands.command(name="bet")
     @app_commands.describe(choice="Choice to bet points on")
     @app_commands.describe(points="Number of channel points to bet")
@@ -74,3 +97,26 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     async def good_morning_points(self, interaction: Interaction):
         """Check your current good morning points! Check #good-morning-faq for details"""
         await GoodMorningController.get_morning_points(interaction)
+
+
+def publish_poll_answer(user_id, choice, roles):
+    """
+    Option Number is 1-indexed
+    {
+        "userID": 12938123,
+        "optionNumber": 1,
+        "userRoleIDs": [123, 823, 231, 293]
+    }
+    """
+    payload = {
+        "userID": user_id,
+        "optionNumber": choice,
+        "userRoleIDs": roles,
+    }
+
+    response = requests.post(
+        url=PUBLISH_POLL_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish poll answer: {response.text}")

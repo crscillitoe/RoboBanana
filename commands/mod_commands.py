@@ -18,12 +18,14 @@ import random
 from threading import Thread
 import requests
 
+LOG = logging.getLogger(__name__)
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
 POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 PUBLISH_URL = "http://localhost:3000/publish-vod"
+PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 
 
 @app_commands.guild_only()
@@ -59,6 +61,19 @@ class ModCommands(app_commands.Group, name="mod"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
+
+    @app_commands.command(name="poll")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(title="title")
+    @app_commands.describe(option_one="option_one")
+    @app_commands.describe(option_two="option_two")
+    @app_commands.describe(option_three="option_three")
+    @app_commands.describe(option_four="option_four")
+    async def poll(self, interaction: Interaction, title: str, option_one: str, option_two: str, option_three: str="", option_four: str="") -> None:
+        """Run the given poll, 2-4 options"""
+        Thread(target=publish_poll, args=(title, option_one, option_two, option_three, option_four,)).start()
+
+        await interaction.response.send_message("Poll created!", ephemeral=True)
 
     @app_commands.command(name="vod")
     @app_commands.checks.has_role("Mod")
@@ -324,3 +339,16 @@ def publish_update(username, riotid, rank, complete):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish updated prediction summary: {response.text}")
+
+def publish_poll(title, option_one, option_two, option_three, option_four):
+    payload = {
+        "title": title,
+        "options": [option_one, option_two, option_three, option_four],
+    }
+
+    response = requests.post(
+        url=PUBLISH_POLL_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish poll: {response.text}")

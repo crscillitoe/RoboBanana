@@ -35,6 +35,7 @@ GUILD_ID = int(Config.CONFIG["Discord"]["GuildID"])
 CROWD_MUTE_EMOJI_ID = int(Config.CONFIG["Discord"]["CrowdMuteEmojiID"])
 CROWD_MUTE_THRESHOLD = int(Config.CONFIG["Discord"]["CrowdMuteThreshold"])
 CROWD_MUTE_DURATION = int(Config.CONFIG["Discord"]["CrowdMuteDuration"])
+FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
 
@@ -76,7 +77,7 @@ class RaffleBot(Client):
 
     async def on_message(self, message: Message):
         # Don't respond to ourselves
-        if message.author == self.user:
+        if message.author == self.user or message.author.id == FOSSA_BOT_ID:
             return
 
         # Server Subscription message

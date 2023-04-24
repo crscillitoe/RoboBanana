@@ -5,7 +5,6 @@ WelcomeChannel = 1026538706443718656
 PendingRewardChannel =
 PointsAuditChannel =
 BotRoleID = 1037842934629924964
-defaultRoleID = 
 GiftedTier1RoleID = 1038174011034710128
 GiftedTier2RoleID = 1046887679465373836
 GiftedTier3RoleID = 1045466382470484040

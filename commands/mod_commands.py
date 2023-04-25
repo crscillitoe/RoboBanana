@@ -26,6 +26,7 @@ POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 PUBLISH_URL = "http://localhost:3000/publish-vod"
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
+PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
 
 
 @app_commands.guild_only()
@@ -61,6 +62,15 @@ class ModCommands(app_commands.Group, name="mod"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
+
+    @app_commands.command(name="timer")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(time="Time in seconds")
+    async def timer(self, interaction: Interaction, time: int) -> None:
+        """Display a timer on stream of the given length"""
+        Thread(target=publish_timer, args=(time,)).start()
+
+        await interaction.response.send_message("Timer created!", ephemeral=True)
 
     @app_commands.command(name="poll")
     @app_commands.checks.has_role("Mod")
@@ -352,3 +362,15 @@ def publish_poll(title, option_one, option_two, option_three, option_four):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish poll: {response.text}")
+
+def publish_timer(time):
+    payload = {
+        "time": time,
+    }
+
+    response = requests.post(
+        url=PUBLISH_TIMER_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish timer: {response.text}")

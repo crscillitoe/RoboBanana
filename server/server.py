@@ -32,7 +32,9 @@ COOL_CHANNEL = "cool"
 
 VOD_REVIEW_CHANNEL = "vod-reviews"
 
+TIMER_CHANNEL = "timer"
 
+TAMAGACHI_CHANNEL = "tamagachi"
 
 def keep_alive():
     with app.app_context():
@@ -42,7 +44,9 @@ def keep_alive():
         sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=SUBS_COUNT_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=TIMER_CHANNEL)
         sse.publish("\n\n", type="keepalive", channel=VOD_REVIEW_CHANNEL)
+        sse.publish("\n\n", type="keepalive", channel=TAMAGACHI_CHANNEL)
 
 
 sched = BackgroundScheduler(daemon=True)
@@ -53,6 +57,26 @@ sched.start()
 @app.route("/")
 def index():
     return jsonify(last_published)
+
+@app.route("/publish-tamagachi", methods=["POST"])
+@token_required
+def publish_tamagachi():
+    try:
+        to_publish = parse_tamagachi_from_request()
+        sse.publish(to_publish, type="publish", channel=TAMAGACHI_CHANNEL)
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
+
+@app.route("/publish-timer", methods=["POST"])
+@token_required
+def publish_timer():
+    try:
+        to_publish = parse_timer_from_request()
+        sse.publish(to_publish, type="publish", channel=TIMER_CHANNEL)
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
 
 @app.route("/publish-vod", methods=["POST"])
 @token_required
@@ -225,6 +249,29 @@ def parse_poll_answer_from_request():
     option_number = request.json["optionNumber"]
     user_roles = request.json["userRoleIDs"]
     return {"userID": user_id, "optionNumber": option_number, "userRoleIDs": user_roles}
+
+def parse_timer_from_request():
+    """
+    {
+        // Seconds
+        "time": 50
+    }
+    """
+    time = request.json["time"]
+    return {"time": time}
+
+def parse_tamagachi_from_request():
+    """
+    {
+        "feederName": "Woohoojin",
+        "numFed": 10,
+        "fruit": "Watermelon"
+    }
+    """
+    feeder_name = request.json["feederName"]
+    num_fed = request.json["numFed"]
+    fruit = request.json["fruit"]
+    return {"feederName": feeder_name, "numFed": num_fed, "fruit": fruit}
 
 
 if __name__ == "__main__":

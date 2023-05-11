@@ -45,7 +45,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         # Paragraph
         self.i_agree = TextInput(
             label="Please type 'I have read all the rules'",
-            placeholder="Description",
+            placeholder="I HAVE READ ALL THE RULES",
             style=TextStyle.paragraph,
             required=True,
         )

@@ -4,6 +4,11 @@ from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
+from .vod_submissions import (
+    get_latest_timestamp,
+    update_timestamp,
+)
+
 from .point_accrual import (
     accrue_channel_points,
     deposit_points,
@@ -52,6 +57,7 @@ from .models import (
     RaffleEntry,
     RoleModifier,
     RaffleType,
+    VodSubmission,
 )
 from config import Config
 
@@ -675,3 +681,9 @@ class DB:
             winning_outcome (int): New outcome of prediction
         """
         return set_prediction_outcome(prediction_id, winning_outcome, self.session)
+
+    def get_latest_timestamp(self, user_id: int):
+        return get_latest_timestamp(user_id, self.session)
+
+    def update_timestamp(self, user_id: int):
+        return update_timestamp(user_id, self.session)

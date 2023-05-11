@@ -72,8 +72,9 @@ class RaffleBot(Client):
     async def check_message_length(self, message: Message):
         length = len(message.content)
         if length > MAX_CHARACTER_LENGTH:
+            content = message.content
             await message.delete()
-            await message.author.send(f"Hey! Keep your messages in the stream chat under {MAX_CHARACTER_LENGTH} characters please! Your message was {length} characters long! Thanks!")
+            await message.author.send(f"Hey! Keep your messages in the stream chat under {MAX_CHARACTER_LENGTH} characters please! Your message was {length} characters long! Thanks! Here's your message: {content}.")
 
     async def on_message(self, message: Message):
         # Don't respond to ourselves

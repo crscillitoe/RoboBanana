@@ -110,6 +110,13 @@ class MorningPoints(Base):
     def __repr__(self):
         return f"MorningPoints(user_id={self.user_id!r}, weekly_count={self.weekly_count!r}, total_count={self.total_count!r}, timestamp={self.timestamp!r})"
 
+class VodSubmission(Base):
+    __tablename__ = "vod_submissions"
+    user_id = Column(BigInteger, primary_key=True)
+    timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    def __repr__(self):
+        return f"VodSubmission(user_id={self.user_id!r}, timestamp={self.timestamp!r})"
 
 class ChannelPoints(Base):
     __tablename__ = "channel_points"

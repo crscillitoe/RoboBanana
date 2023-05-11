@@ -10,6 +10,8 @@ import requests
 import logging
 from config import Config
 
+from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
+
 LOG = logging.getLogger(__name__)
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll-answer"
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
@@ -69,6 +71,15 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         Thread(target=publish_poll_answer, args=(interaction.user.id, option_number, [r.id for r in interaction.user.roles],)).start()
 
         await interaction.response.send_message("Poll answer sent!", ephemeral=True)
+
+    @app_commands.command(name="submit_vod")
+    async def start(
+        self, interaction: Interaction
+    ):
+        """Opens the VOD Submission Prompt"""
+
+        modal = NewVodSubmissionModal(self.client)
+        await interaction.response.send_modal(modal)
 
     @app_commands.command(name="bet")
     @app_commands.describe(choice="Choice to bet points on")

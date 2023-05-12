@@ -11,6 +11,14 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         super().__init__(timeout=None)
         self.client = client
 
+        self.title_input = TextInput(
+            label="AGENT | MAP | RANK",
+            placeholder="Brimstone | Bind | Ascendant 3",
+            style=TextStyle.short,
+            required=True,
+            min_length=1,
+        )
+
         self.tracker_game_url = TextInput(
             label="Tracker.gg Account + Game + Heatmap Images",
             placeholder="tracker.gg/account\ntracker.gg/match\nimgur.com/heatmap.png",
@@ -19,18 +27,10 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             min_length=1,
         )
 
-        self.positivity_timestamp = TextInput(
-            label="Positivity Timestamp",
-            placeholder="00:00",
-            style=TextStyle.short,
-            required=True,
-            min_length=1,
-        )
-
         self.vod_url = TextInput(
-            label="VOD Link",
-            placeholder="youtube.com/my_awesome_vod",
-            style=TextStyle.short,
+            label="VOD Link + Positivity Timestamp",
+            placeholder="youtube.com/my_awesome_vod\n00:00",
+            style=TextStyle.paragraph,
             required=True,
             min_length=1,
         )
@@ -50,9 +50,9 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             required=True,
         )
 
+        self.add_item(self.title_input)
         self.add_item(self.tracker_game_url)
         self.add_item(self.vod_url)
-        self.add_item(self.positivity_timestamp)
         self.add_item(self.i_agree)
         self.add_item(self.extra)
 
@@ -93,7 +93,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         vod_submissions_channel_id = 1055308028603269140
 
         await self.client.get_channel(vod_submissions_channel_id).create_thread(
-            name=f"VOD SUBMISSION FOR {interaction.user.name}",
+            name=f"{self.title_input.value} | {interaction.user.name}",
             applied_tags=[Object(id=1104453647053619200)],
             content=f"""
 Submission for {interaction.user.mention}
@@ -101,10 +101,7 @@ Submission for {interaction.user.mention}
 Account + Match + Consistency Heatmap:
 {self.tracker_game_url.value}
 
-POSITIVITY TIMESTAMP:
-{self.positivity_timestamp.value}
-
-VOD URL:
+VOD URL + POSITIVITY TIMESTAMP:
 {self.vod_url.value}
 
 Extra Information (Optional):

@@ -7,6 +7,7 @@ from typing import Optional
 from .vod_submissions import (
     get_latest_timestamp,
     update_timestamp,
+    reset_user,
 )
 
 from .point_accrual import (
@@ -687,3 +688,6 @@ class DB:
 
     def update_timestamp(self, user_id: int):
         return update_timestamp(user_id, self.session)
+
+    def reset_user(self, user_id: int):
+        return reset_user(user_id, self.session)

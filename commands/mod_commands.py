@@ -63,6 +63,14 @@ class ModCommands(app_commands.Group, name="mod"):
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
 
+    @app_commands.command(name="reset_vod_submission")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user_id="Discord User ID")
+    async def reset_vod_submission(self, interaction: Interaction, user_id: str) -> None:
+        """Allows the given userID to submit a VOD."""
+        DB().reset_user(user_id)
+        await interaction.response.send_message("Success!", ephemeral=True)
+
     @app_commands.command(name="timer")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(time="Time in seconds")

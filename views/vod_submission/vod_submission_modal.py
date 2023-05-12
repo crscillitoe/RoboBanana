@@ -86,7 +86,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
 
         if timestamp is not None and not timestamp.date() <= one_week_ago:
             # Bad, not enough time
-            await interaction.response.send_message(f"You appear to have submitted a VOD less than one week ago. Try again in one week.")
+            await interaction.response.send_message(f"You appear to have submitted a VOD less than one week ago. Try again in one week.", ephemeral=True)
             return
 
         # Makes the post

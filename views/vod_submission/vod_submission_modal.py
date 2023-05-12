@@ -69,6 +69,13 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             await interaction.response.send_message(f"You currently have the BANNED role! You cannot submit a VOD at this time.", ephemeral=True)
             return
 
+        accepted_role = 1043260642968223794
+        role = discord.utils.get(interaction.user.roles, id=accepted_role)
+        if role is None:
+            await interaction.response.send_message(f"You have not accepted the VOD Review rules!", ephemeral=True)
+            return
+
+
         if self.i_agree.value.lower() != "i have read all the rules":
             await interaction.response.send_message(f"You did not type 'I have read all the rules'.", ephemeral=True)
             return

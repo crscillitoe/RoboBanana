@@ -44,16 +44,16 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
 
         # Paragraph
         self.i_agree = TextInput(
-            label="Please type 'I have read all the rules'",
-            placeholder="I HAVE READ ALL THE RULES",
+            label="Please paste rule 11 here. And read it.",
+            placeholder="I have read all of the rules....",
             style=TextStyle.paragraph,
             required=True,
         )
 
+        self.add_item(self.i_agree)
         self.add_item(self.title_input)
         self.add_item(self.tracker_game_url)
         self.add_item(self.vod_url)
-        self.add_item(self.i_agree)
         self.add_item(self.extra)
 
     async def on_submit(self, interaction: Interaction) -> None:
@@ -75,9 +75,8 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             await interaction.response.send_message(f"You have not accepted the VOD Review rules!", ephemeral=True)
             return
 
-
-        if self.i_agree.value.lower() != "i have read all the rules":
-            await interaction.response.send_message(f"You did not type 'I have read all the rules'.", ephemeral=True)
+        if "i have read all of the rules" not in self.i_agree.value.lower():
+            await interaction.response.send_message(f"You didn't paste in rule 11.", ephemeral=True)
             return
 
         # Check that we can make the post (they dont have an active submission <1 week old)

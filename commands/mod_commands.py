@@ -17,6 +17,7 @@ import logging
 import random
 from threading import Thread
 import requests
+import enum
 
 LOG = logging.getLogger(__name__)
 JOEL_DISCORD_ID = 112386674155122688
@@ -28,6 +29,11 @@ PUBLISH_URL = "http://localhost:3000/publish-vod"
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
 
+class ChannelPerms(enum.Enum):
+    t3jail = 1
+    t3chat = 2
+    everyonechat = 3
+    off = 4
 
 @app_commands.guild_only()
 class ModCommands(app_commands.Group, name="mod"):
@@ -270,6 +276,45 @@ class ModCommands(app_commands.Group, name="mod"):
     async def redo_payout(self, interaction: Interaction, option: PredictionOutcome):
         """Redo the last prediction's payout"""
         await PredictionController.redo_payout(option, interaction, self.client)
+
+    @app_commands.command(name="set_chat_mode")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(mode="Chat Mode")
+    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms):
+        stream_chat_id = 1037040541017309225
+
+        t3_role_role = interaction.guild.get_role(1036807951484203099)
+        gifted_t3_role = interaction.guild.get_role(1045466382470484040)
+        twitch_t3 = interaction.guild.get_role(935319103302926409)
+        everyone = interaction.guild.get_role(915336728707989534)
+
+        channel = self.client.get_channel(stream_chat_id)
+
+        if mode == ChannelPerms.t3jail:
+            await channel.set_permissions(t3_role_role, send_messages=False)
+            await channel.set_permissions(gifted_t3_role, send_messages=False)
+            await channel.set_permissions(twitch_t3, send_messages=False)
+            await channel.set_permissions(everyone, send_messages=True)
+
+        if mode == ChannelPerms.t3chat
+            await channel.set_permissions(t3_role_role, send_messages=True)
+            await channel.set_permissions(gifted_t3_role, send_messages=True)
+            await channel.set_permissions(twitch_t3, send_messages=True)
+            await channel.set_permissions(everyone, send_messages=False)
+
+        if mode == ChannelPerms.off
+            await channel.set_permissions(t3_role_role, send_messages=False)
+            await channel.set_permissions(gifted_t3_role, send_messages=False)
+            await channel.set_permissions(twitch_t3, send_messages=False)
+            await channel.set_permissions(everyone, send_messages=False)
+
+        if mode == ChannelPerms.everyonechat
+            await channel.set_permissions(t3_role_role, send_messages=True)
+            await channel.set_permissions(gifted_t3_role, send_messages=True)
+            await channel.set_permissions(twitch_t3, send_messages=True)
+            await channel.set_permissions(everyone, send_messages=True)
+
+        await interaction.response.send_message("Done!", ephemeral=True)
 
     @app_commands.command(name="give_points")
     @app_commands.checks.has_role("Mod")

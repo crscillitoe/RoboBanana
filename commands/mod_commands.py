@@ -294,25 +294,25 @@ class ModCommands(app_commands.Group, name="mod"):
             await channel.set_permissions(t3_role_role, send_messages=False)
             await channel.set_permissions(gifted_t3_role, send_messages=False)
             await channel.set_permissions(twitch_t3, send_messages=False)
-            await channel.set_permissions(everyone, send_messages=True)
+            await channel.set_permissions(everyone, send_messages=True, use_external_emojis=False, embed_links=False, attach_files=False, use_external_stickers=False)
 
         if mode == ChannelPerms.t3chat:
             await channel.set_permissions(t3_role_role, send_messages=True)
             await channel.set_permissions(gifted_t3_role, send_messages=True)
             await channel.set_permissions(twitch_t3, send_messages=True)
-            await channel.set_permissions(everyone, send_messages=False)
+            await channel.set_permissions(everyone, send_messages=False, use_external_emojis=False, embed_links=False, attach_files=False, use_external_stickers=False)
 
         if mode == ChannelPerms.off:
             await channel.set_permissions(t3_role_role, send_messages=False)
             await channel.set_permissions(gifted_t3_role, send_messages=False)
             await channel.set_permissions(twitch_t3, send_messages=False)
-            await channel.set_permissions(everyone, send_messages=False)
+            await channel.set_permissions(everyone, send_messages=False, use_external_emojis=False, embed_links=False, attach_files=False, use_external_stickers=False)
 
         if mode == ChannelPerms.everyonechat:
             await channel.set_permissions(t3_role_role, send_messages=True)
             await channel.set_permissions(gifted_t3_role, send_messages=True)
             await channel.set_permissions(twitch_t3, send_messages=True)
-            await channel.set_permissions(everyone, send_messages=True)
+            await channel.set_permissions(everyone, send_messages=True, use_external_emojis=False, embed_links=False, attach_files=False, use_external_stickers=False)
 
         await interaction.response.send_message("Done!", ephemeral=True)
 

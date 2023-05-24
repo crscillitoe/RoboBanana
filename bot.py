@@ -13,6 +13,7 @@ from discord import (
     Message,
     Reaction,
 )
+from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
@@ -77,9 +78,13 @@ class RaffleBot(Client):
             await message.author.send(f"Hey! Keep your messages in the stream chat under {MAX_CHARACTER_LENGTH} characters please! Your message was {length} characters long! Thanks! Here's your message: {content}.")
 
     async def on_message(self, message: Message):
+        haft_id = 870173027445399612
         # Don't respond to ourselves
         if message.author == self.user or message.author.id == FOSSA_BOT_ID:
             return
+
+        if message.author.id == haft_id:
+            await message.add_reaction("🤓")
 
         # Server Subscription message
         if (
@@ -151,6 +156,7 @@ def publish_cool(cool: int):
 
 async def main():
     async with client:
+        tree.add_command(MemeCommands(tree, client))
         tree.add_command(ModCommands(tree, client))
         tree.add_command(ViewerCommands(tree, client))
         tree.add_command(ManagerCommands(tree, client))

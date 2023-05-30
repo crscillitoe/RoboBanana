@@ -184,3 +184,13 @@ class PredictionEntry(Base):
 
     def __repr__(self):
         return f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r}, user_id={self.user_id!r}, channel_points={self.channel_points!r}, guess={self.guess!r})"
+
+class EmojiReactions(Base):
+    __tablename__ = "emoji_reactions"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False)
+    emoji = Column(VARCHAR(100), nullable=False)
+
+    def __repr__(self):
+        return f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r}, emoji={self.emoji})"

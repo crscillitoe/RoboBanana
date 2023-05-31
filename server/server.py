@@ -36,6 +36,7 @@ TIMER_CHANNEL = "timer"
 
 TAMAGACHI_CHANNEL = "tamagachi"
 
+
 def keep_alive():
     with app.app_context():
         sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
@@ -58,6 +59,7 @@ sched.start()
 def index():
     return jsonify(last_published)
 
+
 @app.route("/publish-tamagachi", methods=["POST"])
 @token_required
 def publish_tamagachi():
@@ -67,6 +69,7 @@ def publish_tamagachi():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
+
 
 @app.route("/publish-timer", methods=["POST"])
 @token_required
@@ -78,6 +81,7 @@ def publish_timer():
     except (KeyError, ValueError):
         return ("Bad Request", 400)
 
+
 @app.route("/publish-vod", methods=["POST"])
 @token_required
 def publish_vod():
@@ -88,6 +92,7 @@ def publish_vod():
     except (KeyError, ValueError):
         return ("Bad Request", 400)
 
+
 @app.route("/publish-cool", methods=["POST"])
 @token_required
 def publish_cool():
@@ -97,6 +102,7 @@ def publish_cool():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
+
 
 @app.route("/publish-poll", methods=["POST"])
 @token_required
@@ -142,6 +148,7 @@ def publish_sub():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
+
 
 def parse_prediction_from_request():
     description = request.json["description"]
@@ -211,6 +218,7 @@ def parse_poll_from_request():
     options = request.json["options"]
     return {"title": title, "options": options}
 
+
 def parse_vod_from_request():
     """
     {
@@ -225,6 +233,7 @@ def parse_vod_from_request():
     complete = request.json["complete"]
     username = request.json["username"]
     return {"complete": complete, "username": username, "rank": rank, "riotid": riotid}
+
 
 def parse_cool_from_request():
     """
@@ -250,15 +259,20 @@ def parse_poll_answer_from_request():
     user_roles = request.json["userRoleIDs"]
     return {"userID": user_id, "optionNumber": option_number, "userRoleIDs": user_roles}
 
+
 def parse_timer_from_request():
     """
     {
         // Seconds
-        "time": 50
+        "time": 50,
+        // Timer Direction
+        "direction": "inc",
     }
     """
     time = request.json["time"]
-    return {"time": time}
+    direction = request.json["direction"]
+    return {"time": time, "direction": direction}
+
 
 def parse_tamagachi_from_request():
     """

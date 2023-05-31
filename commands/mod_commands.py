@@ -29,11 +29,18 @@ PUBLISH_URL = "http://localhost:3000/publish-vod"
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
 
+
 class ChannelPerms(enum.Enum):
     t3jail = 1
     t3chat = 2
     everyonechat = 3
     off = 4
+
+
+class TimerDirection(enum.Enum):
+    increment = "inc"
+    decrement = "dec"
+
 
 @app_commands.guild_only()
 class ModCommands(app_commands.Group, name="mod"):
@@ -72,7 +79,9 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="reset_vod_submission")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user_id="Discord User ID")
-    async def reset_vod_submission(self, interaction: Interaction, user_id: str) -> None:
+    async def reset_vod_submission(
+        self, interaction: Interaction, user_id: str
+    ) -> None:
         """Allows the given userID to submit a VOD."""
         DB().reset_user(user_id)
         await interaction.response.send_message("Success!", ephemeral=True)
@@ -80,9 +89,20 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="timer")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(time="Time in seconds")
-    async def timer(self, interaction: Interaction, time: int) -> None:
+    async def timer(
+        self,
+        interaction: Interaction,
+        time: int,
+        direction: TimerDirection = TimerDirection.decrement,
+    ) -> None:
         """Display a timer on stream of the given length"""
-        Thread(target=publish_timer, args=(time,)).start()
+        Thread(
+            target=publish_timer,
+            args=(
+                time,
+                direction,
+            ),
+        ).start()
 
         await interaction.response.send_message("Timer created!", ephemeral=True)
 
@@ -93,9 +113,26 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(option_two="option_two")
     @app_commands.describe(option_three="option_three")
     @app_commands.describe(option_four="option_four")
-    async def poll(self, interaction: Interaction, title: str, option_one: str, option_two: str, option_three: str="", option_four: str="") -> None:
+    async def poll(
+        self,
+        interaction: Interaction,
+        title: str,
+        option_one: str,
+        option_two: str,
+        option_three: str = "",
+        option_four: str = "",
+    ) -> None:
         """Run the given poll, 2-4 options"""
-        Thread(target=publish_poll, args=(title, option_one, option_two, option_three, option_four,)).start()
+        Thread(
+            target=publish_poll,
+            args=(
+                title,
+                option_one,
+                option_two,
+                option_three,
+                option_four,
+            ),
+        ).start()
 
         await interaction.response.send_message("Poll created!", ephemeral=True)
 
@@ -104,9 +141,19 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(username="username")
     @app_commands.describe(riotid="riotid")
     @app_commands.describe(rank="rank")
-    async def vod(self, interaction: Interaction, username: str, riotid: str, rank: str) -> None:
+    async def vod(
+        self, interaction: Interaction, username: str, riotid: str, rank: str
+    ) -> None:
         """Start a VOD review for the given username"""
-        Thread(target=publish_update, args=(username, riotid, rank, False,)).start()
+        Thread(
+            target=publish_update,
+            args=(
+                username,
+                riotid,
+                rank,
+                False,
+            ),
+        ).start()
 
         await interaction.response.send_message("Username event sent!", ephemeral=True)
 
@@ -114,9 +161,19 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def complete(self, interaction: Interaction) -> None:
         """Start a VOD review for the given username"""
-        Thread(target=publish_update, args=("", "", "", True,)).start()
+        Thread(
+            target=publish_update,
+            args=(
+                "",
+                "",
+                "",
+                True,
+            ),
+        ).start()
 
-        await interaction.response.send_message("VOD Complete Event sent!", ephemeral=True)
+        await interaction.response.send_message(
+            "VOD Complete Event sent!", ephemeral=True
+        )
 
     @app_commands.command(name="gift")
     @app_commands.checks.has_role("Mod")
@@ -403,6 +460,7 @@ def publish_update(username, riotid, rank, complete):
     if response.status_code != 200:
         LOG.error(f"Failed to publish updated prediction summary: {response.text}")
 
+
 def publish_poll(title, option_one, option_two, option_three, option_four):
     payload = {
         "title": title,
@@ -416,9 +474,11 @@ def publish_poll(title, option_one, option_two, option_three, option_four):
     if response.status_code != 200:
         LOG.error(f"Failed to publish poll: {response.text}")
 
-def publish_timer(time):
+
+def publish_timer(time, direction: TimerDirection):
     payload = {
         "time": time,
+        "direction": direction.value,
     }
 
     response = requests.post(

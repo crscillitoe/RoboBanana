@@ -49,6 +49,10 @@ from .channel_rewards import (
     pause_redemptions,
     check_redemption_status,
 )
+from .emoji_reactions import (
+    get_reactions_for_user,
+    toggle_emoji_reaction
+)
 from .models import (
     Base,
     Prediction,
@@ -691,3 +695,26 @@ class DB:
 
     def reset_user(self, user_id: int):
         return reset_user(user_id, self.session)
+
+    def toggle_emoji_reaction(self, user_id: int, emoji: str) -> bool:
+        """Toggles emoji reaction for a given user
+
+        Args:
+            user_id (int): Discord User ID to add reaction to
+            emoji (str): Discord \emoji_name representation of emoji to add to messages
+
+        Returns:
+            bool: True if emoji was toggled ON, False if toggled OFF
+        """
+        return toggle_emoji_reaction(user_id, emoji, self.session)
+
+    def get_reactions_for_user(self, user_id: int) -> list[str]:
+        """Get reactions to apply to a user's messages
+
+        Args:
+            user_id (int): Discord User ID to add reaction to
+
+        Returns:
+            list[str]: Emojis to apply to messages
+        """
+        return get_reactions_for_user(user_id, self.session)

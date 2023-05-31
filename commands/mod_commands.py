@@ -25,7 +25,6 @@ HOOJ_DISCORD_ID = 82969926125490176
 POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
-PUBLISH_URL = "http://localhost:3000/publish-vod"
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
 
@@ -135,45 +134,6 @@ class ModCommands(app_commands.Group, name="mod"):
         ).start()
 
         await interaction.response.send_message("Poll created!", ephemeral=True)
-
-    @app_commands.command(name="vod")
-    @app_commands.checks.has_role("Mod")
-    @app_commands.describe(username="username")
-    @app_commands.describe(riotid="riotid")
-    @app_commands.describe(rank="rank")
-    async def vod(
-        self, interaction: Interaction, username: str, riotid: str, rank: str
-    ) -> None:
-        """Start a VOD review for the given username"""
-        Thread(
-            target=publish_update,
-            args=(
-                username,
-                riotid,
-                rank,
-                False,
-            ),
-        ).start()
-
-        await interaction.response.send_message("Username event sent!", ephemeral=True)
-
-    @app_commands.command(name="complete")
-    @app_commands.checks.has_role("Mod")
-    async def complete(self, interaction: Interaction) -> None:
-        """Start a VOD review for the given username"""
-        Thread(
-            target=publish_update,
-            args=(
-                "",
-                "",
-                "",
-                True,
-            ),
-        ).start()
-
-        await interaction.response.send_message(
-            "VOD Complete Event sent!", ephemeral=True
-        )
 
     @app_commands.command(name="gift")
     @app_commands.checks.has_role("Mod")
@@ -479,22 +439,6 @@ class ModCommands(app_commands.Group, name="mod"):
             return
 
         await interaction.response.send_message("Winner removed!")
-
-
-def publish_update(username, riotid, rank, complete):
-    payload = {
-        "username": username,
-        "riotid": riotid,
-        "rank": rank,
-        "complete": complete,
-    }
-
-    response = requests.post(
-        url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
-    )
-
-    if response.status_code != 200:
-        LOG.error(f"Failed to publish updated prediction summary: {response.text}")
 
 
 def publish_poll(title, option_one, option_two, option_three, option_four):

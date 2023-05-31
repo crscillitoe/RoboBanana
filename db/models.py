@@ -110,6 +110,7 @@ class MorningPoints(Base):
     def __repr__(self):
         return f"MorningPoints(user_id={self.user_id!r}, weekly_count={self.weekly_count!r}, total_count={self.total_count!r}, timestamp={self.timestamp!r})"
 
+
 class VodSubmission(Base):
     __tablename__ = "vod_submissions"
     user_id = Column(BigInteger, primary_key=True)
@@ -117,6 +118,7 @@ class VodSubmission(Base):
 
     def __repr__(self):
         return f"VodSubmission(user_id={self.user_id!r}, timestamp={self.timestamp!r})"
+
 
 class ChannelPoints(Base):
     __tablename__ = "channel_points"
@@ -184,6 +186,7 @@ class PredictionEntry(Base):
 
     def __repr__(self):
         return f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r}, user_id={self.user_id!r}, channel_points={self.channel_points!r}, guess={self.guess!r})"
+
 
 class EmojiReactions(Base):
     __tablename__ = "emoji_reactions"

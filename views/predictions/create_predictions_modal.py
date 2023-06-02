@@ -56,15 +56,20 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
         await interaction.response.send_message("Creating prediction...")
 
         end_time = datetime.now() + timedelta(seconds=duration)
+        
         prediction_message = await interaction.original_response()
+
+        prediction_thread = await prediction_message.create_thread(name="Prediction Thread")
+
         await PredictionController.create_prediction(
             interaction.guild_id,
             interaction.channel.id,
             prediction_message.id,
+            prediction_thread.id,
             self.description.value,
             self.option_one.value,
             self.option_two.value,
-            end_time,
+            end_time
         )
         prediction_embed = PredictionEmbed(
             interaction.guild_id, self.description.value, end_time

@@ -46,6 +46,8 @@ class ClosePredictionView(View):
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
         prediction_message_id = DB().get_prediction_message_id(prediction_id)
         prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
+        prediction_thread_id = DB().get_prediction_thread_id(prediction_id)
+
         prediction_message = await self.client.get_channel(
             prediction_channel_id
         ).fetch_message(prediction_message_id)
@@ -57,6 +59,9 @@ class ClosePredictionView(View):
         )
         await prediction_message.reply("Prediction closed!")
         await interaction.response.send_message("Prediction closed!", ephemeral=True)
+
+        prediction_thread = self.client.get_channel(prediction_thread_id)
+        await prediction_thread.delete()
 
         await self.client.get_channel(PENDING_REWARDS_CHAT_ID).send(
             "Payout Prediction!",

@@ -157,6 +157,7 @@ class Prediction(Base):
     guild_id = Column(BigInteger, nullable=False)
     channel_id = Column(BigInteger, nullable=False)
     message_id = Column(BigInteger, nullable=False, unique=True)
+    thread_id = Column(BigInteger, nullable=False, unique=True)
     accepting_entries = Column(Boolean, nullable=False, default=True)
     ended = Column(Boolean, nullable=False, default=False)
     start_time = Column(DateTime, default=func.now())

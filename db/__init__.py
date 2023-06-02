@@ -35,6 +35,7 @@ from .predictions import (
     get_ongoing_prediction_id,
     get_prediction_point_counts,
     get_prediction_message_id,
+    get_prediction_thread_id,
     get_prediction_channel_id,
     get_prediction_summary,
     get_user_prediction_entry,
@@ -502,6 +503,7 @@ class DB:
         guild_id: int,
         channel_id: int,
         message_id: str,
+        thread_id: str,
         description: str,
         option_one: str,
         option_two: str,
@@ -512,6 +514,7 @@ class DB:
         Args:
             guild_id (int): Discord Guild ID initiating prediction
             message_id (str): Discord ID for message initiating prediction
+            thread_id (str): Thread ID from the Message initiatin the prediction
             description (str): Description of what viewers are trying to predict
             option_one (str): First option that users can vote for
             option_two (str): Second option that users can vote for
@@ -521,6 +524,7 @@ class DB:
             guild_id,
             channel_id,
             message_id,
+            thread_id,
             description,
             option_one,
             option_two,
@@ -588,6 +592,17 @@ class DB:
             Optional(int): ID of message which started prediction
         """
         return get_prediction_message_id(prediction_id, self.session)
+    
+    def get_prediction_thread_id(self, prediction_id: int) -> Optional[int]:
+        """Get thread ID from the thread of initial prediction start
+
+        Args:
+            prediction_id (int): ID of Prediction to retrieve starting message for
+
+        Returns:
+            Optional(int): ID of message which started prediction
+        """
+        return get_prediction_thread_id(prediction_id, self.session)
 
     def get_prediction_channel_id(self, prediction_id: int) -> Optional[int]:
         """Get channel ID of an ongoing prediction

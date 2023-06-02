@@ -260,6 +260,8 @@ class PredictionController:
         channel_id = DB().get_prediction_channel_id(prediction_id)
         message_id = DB().get_prediction_message_id(prediction_id)
 
+        thread_id = DB().get_prediction_thread_id(prediction_id)
+
         # We'll use this prediction summary for the reply message
         prediction_summary = DB().get_prediction_summary(prediction_id)
         Thread(target=publish_update, args=(prediction_summary,)).start()
@@ -272,7 +274,10 @@ class PredictionController:
         prediction_message = await client.get_channel(channel_id).fetch_message(
             message_id
         )
-        await prediction_message.reply(
+
+        prediction_thread = client.get_channel(thread_id)
+
+        await prediction_thread.send(
             f"{interaction.user.mention} bet {channel_points} hooj bucks on {chosen_option}"
         )
         return True
@@ -282,6 +287,7 @@ class PredictionController:
         guild_id: int,
         channel_id: int,
         message_id: str,
+        thread_id: str,
         description: str,
         option_one: str,
         option_two: str,
@@ -291,6 +297,7 @@ class PredictionController:
             guild_id,
             channel_id,
             message_id,
+            thread_id,
             description,
             option_one,
             option_two,

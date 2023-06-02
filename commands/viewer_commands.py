@@ -16,6 +16,7 @@ LOG = logging.getLogger(__name__)
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll-answer"
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 
+
 @app_commands.guild_only()
 class ViewerCommands(app_commands.Group, name="hooj"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:
@@ -29,7 +30,10 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         redemptions_allowed = DB().check_redemption_status()
         if not redemptions_allowed:
             return await interaction.response.send_message(
-                "Sorry! Reward redemptions are currently paused. Try again during stream!",
+                (
+                    "Sorry! Reward redemptions are currently paused. Try again during"
+                    " stream!"
+                ),
                 ephemeral=True,
             )
 
@@ -58,24 +62,29 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         )
 
     @app_commands.command(name="vote")
-    @app_commands.choices(option_number=[
-        Choice(name='1', value=1),
-        Choice(name='2', value=2),
-        Choice(name='3', value=3),
-        Choice(name='4', value=4),
-    ])
-    async def vote(
-        self, interaction: Interaction, option_number: int
-    ):
+    @app_commands.choices(
+        option_number=[
+            Choice(name="1", value=1),
+            Choice(name="2", value=2),
+            Choice(name="3", value=3),
+            Choice(name="4", value=4),
+        ]
+    )
+    async def vote(self, interaction: Interaction, option_number: int):
         """Places your vote on the thing, if you revote it updates your choice"""
-        Thread(target=publish_poll_answer, args=(interaction.user.id, option_number, [r.id for r in interaction.user.roles],)).start()
+        Thread(
+            target=publish_poll_answer,
+            args=(
+                interaction.user.id,
+                option_number,
+                [r.id for r in interaction.user.roles],
+            ),
+        ).start()
 
         await interaction.response.send_message("Poll answer sent!", ephemeral=True)
 
     @app_commands.command(name="submit_vod")
-    async def start(
-        self, interaction: Interaction
-    ):
+    async def start(self, interaction: Interaction):
         """Opens the VOD Submission Prompt"""
 
         modal = NewVodSubmissionModal(self.client)

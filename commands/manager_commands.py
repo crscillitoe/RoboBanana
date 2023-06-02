@@ -11,6 +11,7 @@ class VODType(enum.Enum):
     rejected = 2
     complete = 3
 
+
 @app_commands.guild_only()
 class ManagerCommands(app_commands.Group, name="manager"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

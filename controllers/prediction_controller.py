@@ -273,7 +273,8 @@ class PredictionController:
             message_id
         )
         await prediction_message.reply(
-            f"{interaction.user.mention} bet {channel_points} hooj bucks on {chosen_option}"
+            f"{interaction.user.mention} bet {channel_points} hooj bucks on"
+            f" {chosen_option}"
         )
         return True
 

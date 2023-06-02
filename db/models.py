@@ -69,7 +69,11 @@ class Raffle(Base):
     entries = relationship("RaffleEntry", back_populates="raffle")
 
     def __repr__(self):
-        return f"Raffle(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r})"
+        return (
+            f"Raffle(id={self.id!r}, guild_id={self.guild_id!r},"
+            f" message_id={self.message_id!r}, start_time={self.start_time!r},"
+            f" end_time={self.end_time!r}, ended={self.ended!r})"
+        )
 
 
 class RaffleEntry(Base):
@@ -85,7 +89,11 @@ class RaffleEntry(Base):
     raffle = relationship("Raffle", back_populates="entries")
 
     def __repr__(self):
-        return f"RaffleEntry(id={self.id!r}, raffle_id={self.raffle_id!r}, user_id={self.user_id!r}, tickets={self.tickets!r}, timestamp={self.timestamp!r}, winner={self.winner!r})"
+        return (
+            f"RaffleEntry(id={self.id!r}, raffle_id={self.raffle_id!r},"
+            f" user_id={self.user_id!r}, tickets={self.tickets!r},"
+            f" timestamp={self.timestamp!r}, winner={self.winner!r})"
+        )
 
 
 class RoleModifier(Base):
@@ -97,7 +105,10 @@ class RoleModifier(Base):
     modifier = Column(Integer, nullable=False, default=0)
 
     def __repr__(self):
-        return f"RoleModifier(id={self.id!r}, guild_id={self.guild_id!r}, role_id={self.role_id!r}, modifier={self.modifier!r})"
+        return (
+            f"RoleModifier(id={self.id!r}, guild_id={self.guild_id!r},"
+            f" role_id={self.role_id!r}, modifier={self.modifier!r})"
+        )
 
 
 class MorningPoints(Base):
@@ -108,7 +119,11 @@ class MorningPoints(Base):
     total_count = Column(Integer, nullable=False, default=0)
 
     def __repr__(self):
-        return f"MorningPoints(user_id={self.user_id!r}, weekly_count={self.weekly_count!r}, total_count={self.total_count!r}, timestamp={self.timestamp!r})"
+        return (
+            f"MorningPoints(user_id={self.user_id!r},"
+            f" weekly_count={self.weekly_count!r}, total_count={self.total_count!r},"
+            f" timestamp={self.timestamp!r})"
+        )
 
 
 class VodSubmission(Base):
@@ -127,7 +142,10 @@ class ChannelPoints(Base):
     timestamp = Column(DateTime, default=func.now(), onupdate=func.now())
 
     def __repr__(self):
-        return f"ChannelPoints(user_id={self.user_id!r}, points={self.points!r}, timestamp={self.timestamp!r})"
+        return (
+            f"ChannelPoints(user_id={self.user_id!r}, points={self.points!r},"
+            f" timestamp={self.timestamp!r})"
+        )
 
 
 class ChannelReward(Base):
@@ -137,7 +155,10 @@ class ChannelReward(Base):
     name = Column(VARCHAR(100), nullable=False)
 
     def __repr__(self):
-        return f"ChannelReward(id={self.id!r}, point_cost={self.point_cost!r}, name={self.name!r})"
+        return (
+            f"ChannelReward(id={self.id!r}, point_cost={self.point_cost!r},"
+            f" name={self.name!r})"
+        )
 
 
 class AllowRedemption(Base):
@@ -169,7 +190,12 @@ class Prediction(Base):
     entries = relationship("PredictionEntry", back_populates="prediction")
 
     def __repr__(self):
-        return f"Prediction(id={self.id!r}, guild_id={self.guild_id!r}, message_id={self.message_id!r}, start_time={self.start_time!r}, end_time={self.end_time!r}, ended={self.ended!r}, winning_option={self.winning_option!r})"
+        return (
+            f"Prediction(id={self.id!r}, guild_id={self.guild_id!r},"
+            f" message_id={self.message_id!r}, start_time={self.start_time!r},"
+            f" end_time={self.end_time!r}, ended={self.ended!r},"
+            f" winning_option={self.winning_option!r})"
+        )
 
 
 class PredictionEntry(Base):
@@ -185,7 +211,11 @@ class PredictionEntry(Base):
     prediction = relationship("Prediction", back_populates="entries")
 
     def __repr__(self):
-        return f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r}, user_id={self.user_id!r}, channel_points={self.channel_points!r}, guess={self.guess!r})"
+        return (
+            f"PredictionEntry(id={self.id!r}, prediction_id={self.prediction_id!r},"
+            f" user_id={self.user_id!r}, channel_points={self.channel_points!r},"
+            f" guess={self.guess!r})"
+        )
 
 
 class EmojiReactions(Base):
@@ -196,4 +226,7 @@ class EmojiReactions(Base):
     emoji = Column(VARCHAR(100), nullable=False)
 
     def __repr__(self):
-        return f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r}, emoji={self.emoji})"
+        return (
+            f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r},"
+            f" emoji={self.emoji})"
+        )

@@ -31,7 +31,10 @@ class NewRaffleModal(Modal, title="Create VOD Review Raffle"):
         self.description = TextInput(
             label="Description",
             placeholder="Description",
-            default="Raffle time! Click below to enter. The winner(s) will be randomly chosen.",
+            default=(
+                "Raffle time! Click below to enter. The winner(s) will be randomly"
+                " chosen."
+            ),
             style=TextStyle.paragraph,
             required=False,
         )

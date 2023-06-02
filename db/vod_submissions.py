@@ -5,6 +5,7 @@ from sqlalchemy import select, update, func, delete
 from sqlalchemy.dialects.mysql import Insert
 from typing import Optional
 
+
 def get_latest_timestamp(user_id: int, session: sessionmaker) -> int:
     """Get the latest timestamp of the users submitted VOD
 
@@ -25,11 +26,13 @@ def get_latest_timestamp(user_id: int, session: sessionmaker) -> int:
         submission: VodSubmission = result[0]
         return submission.timestamp
 
+
 def reset_user(user_id: int, session: sessionmaker):
     with session() as sess:
         result = sess.execute(
             delete(VodSubmission).where(VodSubmission.user_id == user_id)
         )
+
 
 def update_timestamp(user_id: int, session: sessionmaker):
     """Set the vod submission timestamp for the given user to now
@@ -39,9 +42,7 @@ def update_timestamp(user_id: int, session: sessionmaker):
         session (sessionmaker): Open DB session
     """
 
-    insert_stmt = Insert(VodSubmission).values(
-        user_id=user_id,
-        timestamp=func.now())
+    insert_stmt = Insert(VodSubmission).values(user_id=user_id, timestamp=func.now())
 
     on_duplicate_key_stmt = insert_stmt.on_duplicate_key_update(
         timestamp=insert_stmt.inserted.timestamp

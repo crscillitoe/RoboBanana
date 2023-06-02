@@ -21,6 +21,7 @@ import enum
 
 HOOJ_DISCORD_ID = 82969926125490176
 
+
 def get_processed_string(string):
     toRemove = [
         "\n",
@@ -44,6 +45,7 @@ def get_processed_string(string):
         toReturn = toReturn.replace(remove, "")
 
     return toReturn.lower()
+
 
 class MemeCommands(app_commands.Group, name="meme"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:
@@ -121,4 +123,3 @@ class MemeCommands(app_commands.Group, name="meme"):
                 word1 = random.choice(self.chain[word1])
 
         await interaction.response.send_message(f"HOOJ BOT SAYS: {message} /s")
-

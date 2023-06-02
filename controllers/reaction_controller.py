@@ -1,6 +1,7 @@
 from discord import Message
 from db import DB
 
+
 class ReactionController:
     @staticmethod
     async def apply_reactions(message: Message):

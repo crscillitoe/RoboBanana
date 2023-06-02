@@ -102,7 +102,10 @@ class RaffleController:
         if vod_approved_role is None:
             return (
                 False,
-                f"VODs must be submitted to <#{VOD_SUBMISSION_CHANNEL_ID}> and approved ahead of entering a raffle.",
+                (
+                    f"VODs must be submitted to <#{VOD_SUBMISSION_CHANNEL_ID}> and"
+                    " approved ahead of entering a raffle."
+                ),
             )
 
         one_week_ago = datetime.now().date() - timedelta(days=6)
@@ -116,6 +119,9 @@ class RaffleController:
             )
             return (
                 False,
-                f"You can only win the raffle once per week. You can next enter on <t:{next_eligible_ts}:D>",
+                (
+                    "You can only win the raffle once per week. You can next enter on"
+                    f" <t:{next_eligible_ts}:D>"
+                ),
             )
         return True, None

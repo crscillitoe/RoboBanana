@@ -23,7 +23,9 @@ ROLE_MULTIPLIERS: dict[str, int] = {
 
 
 def get_multiplier_for_user(roles: list[Role]) -> int:
-    for role_id, multiplier in sorted(ROLE_MULTIPLIERS.items(), key=lambda item: item[1], reverse=True):
+    for role_id, multiplier in sorted(
+        ROLE_MULTIPLIERS.items(), key=lambda item: item[1], reverse=True
+    ):
         role = discord.utils.get(roles, id=role_id)
         if role is not None:
             return multiplier

@@ -49,10 +49,7 @@ from .channel_rewards import (
     pause_redemptions,
     check_redemption_status,
 )
-from .emoji_reactions import (
-    get_reactions_for_user,
-    toggle_emoji_reaction
-)
+from .emoji_reactions import get_reactions_for_user, toggle_emoji_reaction
 from .models import (
     Base,
     Prediction,

@@ -2,6 +2,7 @@ from discord import app_commands, Interaction, Client, User
 from discord.ext.commands import Cog
 from db import DB
 
+
 @app_commands.guild_only()
 class ReactionCommands(app_commands.Group, name="reactions"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

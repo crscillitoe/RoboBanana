@@ -6,6 +6,7 @@ import discord.utils
 
 from db import DB, VodSubmission
 
+
 class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
     def __init__(self, client) -> None:
         super().__init__(timeout=None)
@@ -60,23 +61,39 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         vod_rejected_role_id = 1055486151860953259
         role = discord.utils.get(interaction.user.roles, id=vod_rejected_role_id)
         if role is not None:
-            await interaction.response.send_message(f"You currently have the VOD REJECTED role! You cannot submit a VOD at this time.", ephemeral=True)
+            await interaction.response.send_message(
+                (
+                    f"You currently have the VOD REJECTED role! You cannot submit a VOD"
+                    f" at this time."
+                ),
+                ephemeral=True,
+            )
             return
 
         banned_role_id = 1058462071202787441
         role = discord.utils.get(interaction.user.roles, id=banned_role_id)
         if role is not None:
-            await interaction.response.send_message(f"You currently have the BANNED role! You cannot submit a VOD at this time.", ephemeral=True)
+            await interaction.response.send_message(
+                (
+                    f"You currently have the BANNED role! You cannot submit a VOD at"
+                    f" this time."
+                ),
+                ephemeral=True,
+            )
             return
 
         accepted_role = 1043260642968223794
         role = discord.utils.get(interaction.user.roles, id=accepted_role)
         if role is None:
-            await interaction.response.send_message(f"You have not accepted the VOD Review rules!", ephemeral=True)
+            await interaction.response.send_message(
+                f"You have not accepted the VOD Review rules!", ephemeral=True
+            )
             return
 
         if "i have read all of the rules" not in self.i_agree.value.lower():
-            await interaction.response.send_message(f"You didn't paste in rule 11.", ephemeral=True)
+            await interaction.response.send_message(
+                f"You didn't paste in rule 11.", ephemeral=True
+            )
             return
 
         # Check that we can make the post (they dont have an active submission <1 week old)
@@ -85,7 +102,13 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
 
         if timestamp is not None and not timestamp.date() <= one_week_ago:
             # Bad, not enough time
-            await interaction.response.send_message(f"You appear to have submitted a VOD less than one week ago. Try again in one week.", ephemeral=True)
+            await interaction.response.send_message(
+                (
+                    f"You appear to have submitted a VOD less than one week ago. Try"
+                    f" again in one week."
+                ),
+                ephemeral=True,
+            )
             return
 
         # Makes the post
@@ -108,10 +131,11 @@ Extra Information (Optional):
 
 User Agreement:
 {self.i_agree.value}
-"""
+""",
         )
-
 
         # Sets timestamp for that user at time.now()
         DB().update_timestamp(interaction.user.id)
-        await interaction.response.send_message(f"Your VOD has been submitted! Thank you!", ephemeral=True)
+        await interaction.response.send_message(
+            f"Your VOD has been submitted! Thank you!", ephemeral=True
+        )

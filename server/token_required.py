@@ -12,6 +12,7 @@ sys.path.append(parent_directory)
 
 from config import Config
 
+
 # Authentication decorator
 def token_required(f):
     @wraps(f)

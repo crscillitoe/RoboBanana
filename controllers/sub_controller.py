@@ -64,7 +64,10 @@ class SubController:
         # create the thank you message
         if role_sub_data.get("is_renewal", False):
             num_months = role_sub_data.get("total_months_subscribed", 1)
-            thankyou_message = f"{name_prefix} for resubscribing to {role_name} for {num_months} months!"
+            thankyou_message = (
+                f"{name_prefix} for resubscribing to {role_name} for"
+                f" {num_months} months!"
+            )
         else:
             thankyou_message = f"{name_prefix} for subscribing to {role_name}!"
 

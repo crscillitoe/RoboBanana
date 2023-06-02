@@ -81,14 +81,20 @@ class RaffleBot(Client):
         if length > MAX_CHARACTER_LENGTH:
             content = message.content
             await message.delete()
-            await message.author.send(f"Hey! Keep your messages in the stream chat under {MAX_CHARACTER_LENGTH} characters please! Your message was {length} characters long! Thanks! Here's your message: {content}.")
+            await message.author.send(
+                "Hey! Keep your messages in the stream chat under"
+                f" {MAX_CHARACTER_LENGTH} characters please! Your message was"
+                f" {length} characters long! Thanks! Here's your message: {content}."
+            )
 
     async def on_message(self, message: Message):
         # Don't respond to ourselves
         if message.author == self.user or message.author.id == FOSSA_BOT_ID:
             return
 
-        asyncio.get_event_loop().create_task(ReactionController.apply_reactions(message))
+        asyncio.get_event_loop().create_task(
+            ReactionController.apply_reactions(message)
+        )
 
         # Gold, Coin
         if message.author.id == 77825229690253312:
@@ -109,7 +115,6 @@ class RaffleBot(Client):
         # Blade, Sheesh
         if message.author.id == 394719244652249089:
             await message.add_reaction("<:hoojSheesh:1076744568818647103>")
-
 
         # Server Subscription message
         if (
@@ -178,6 +183,7 @@ def publish_cool(cool: int):
     )
     if response.status_code != 200:
         LOG.error(f"Failed to publish sub summary: {response.text}")
+
 
 async def main():
     async with client:

@@ -36,7 +36,8 @@ class GoodMorningController:
                 f"Good morning {interaction.user.mention}! "
                 f"Your current weekly count is {points}! "
                 f"{GOOD_MORNING_EXPLANATION}"
-            ), ephemeral=True
+            ),
+            ephemeral=True,
         )
 
     async def reward_users(interaction: Interaction):

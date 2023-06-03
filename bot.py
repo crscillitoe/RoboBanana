@@ -18,6 +18,7 @@ from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
 from commands.reaction_commands import ReactionCommands
+from commands.vod_commands import VodCommands
 from config import Config
 from controllers.reaction_controller import ReactionController
 from controllers.sub_controller import SubController
@@ -41,6 +42,8 @@ CROWD_MUTE_DURATION = int(Config.CONFIG["Discord"]["CrowdMuteDuration"])
 FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
+
+LOG = logging.getLogger(__name__)
 
 
 class RaffleBot(Client):
@@ -192,6 +195,7 @@ async def main():
         tree.add_command(ViewerCommands(tree, client))
         tree.add_command(ManagerCommands(tree, client))
         tree.add_command(ReactionCommands(tree, client))
+        tree.add_command(VodCommands(tree, client))
         await client.start(Config.CONFIG["Discord"]["Token"])
 
 

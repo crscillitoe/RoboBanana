@@ -13,6 +13,7 @@ from discord import (
     Message,
     Reaction,
 )
+from commands.aimlabs_commands import AimlabsCommands
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.viewer_commands import ViewerCommands
@@ -196,6 +197,7 @@ async def main():
         tree.add_command(ManagerCommands(tree, client))
         tree.add_command(ReactionCommands(tree, client))
         tree.add_command(VodCommands(tree, client))
+        tree.add_command(AimlabsCommands(tree, client))
         await client.start(Config.CONFIG["Discord"]["Token"])
 
 

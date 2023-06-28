@@ -230,3 +230,22 @@ class EmojiReactions(Base):
             f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r},"
             f" emoji={self.emoji})"
         )
+
+
+class AimlabsTracking(Base):
+    __tablename__ = "aimlabs_tracking"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False)
+    aimlabs_id = Column(VARCHAR(16), nullable=False)
+    day_count = Column(Integer, default=0)
+    week_count = Column(Integer, default=0)
+    last_played = Column(DateTime, nullable=True)
+    days_played = Column(VARCHAR(50), default="[false, false, false, false, false, false, false]")
+
+    def __repr__(self):
+        return (
+            f"AimlabsTracking(id={self.id!r}, user_id={self.user_id!r},)"
+            f" aimlabs_id={self.aimlabs_id}, week_count={self.week_count!r},"
+            f" day_count={self.day_count!r}, last_played={self.last_played}"
+        )

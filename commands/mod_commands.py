@@ -426,7 +426,6 @@ class ModCommands(app_commands.Group, name="mod"):
                 use_external_stickers=False,
             )
 
-
         await interaction.response.send_message("Done!", ephemeral=True)
 
     @app_commands.command(name="give_points")

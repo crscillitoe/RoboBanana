@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
+from controllers.prediction_controller import PredictionController
 from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
@@ -277,6 +278,21 @@ class ModCommands(app_commands.Group, name="mod"):
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
         await PredictionController.refund_prediction(interaction, self.client)
+
+    @app_commands.command(name="close_prediction")
+    @app_commands.checks.has_role("Mod")
+    async def close_prediction(self, interaction: Interaction):
+        """CLOSE PREDICTION"""
+        await PredictionController.close_prediction(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        prediction_message_id = DB().get_prediction_message_id(prediction_id)
+        prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
+        prediction_message = await self.client.get_channel(
+            prediction_channel_id
+        ).fetch_message(prediction_message_id)
+
+        await prediction_message.reply("Prediction closed!")
+        await interaction.response.send_message("Prediction closed!", ephemeral=True)
 
     @app_commands.command(name="payout_prediction")
     @app_commands.checks.has_role("Mod")

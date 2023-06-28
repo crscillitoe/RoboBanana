@@ -1,7 +1,11 @@
-from discord import Interaction, Message, Thread
+from discord import Interaction, Thread
 from db import DB
 from config import Config
+from datetime import datetime
+from time import mktime as epochtime
+from pytz import timezone
 import asyncio
+
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 REWARD_ROLE_ID = int(Config.CONFIG["Discord"]["GoodMorningRewardRoleID"])
@@ -9,6 +13,11 @@ REWARD_REDEMPTION_CHANNEL_ID = int(
     Config.CONFIG["Discord"]["GoodMorningRewardRedemptionChannelID"]
 )
 GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
+
+PACIFIC_TZ = timezone("US/Pacific")
+UTC_TZ = timezone("UTC")
+START_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=9, minute=0)).time()
+END_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=11, minute=30)).time()
 
 
 class GoodMorningController:
@@ -18,10 +27,28 @@ class GoodMorningController:
             f"Your current weekly count is {points}!", ephemeral=True
         )
 
+    def valid_accrual_time(interaction_datetime: datetime):
+        pacific_interaction_time = interaction_datetime.astimezone(PACIFIC_TZ).time()
+        return START_TIME < pacific_interaction_time < END_TIME
+
+    def to_utc(timestamp: datetime):
+        return PACIFIC_TZ.normalize(PACIFIC_TZ.localize(timestamp)).astimezone(UTC_TZ)
+
+    def outside_window_response():
+        start_time = datetime.combine(datetime.utcnow().date(), START_TIME)
+        end_time = datetime.combine(datetime.utcnow().date(), END_TIME)
+        start_time_epoch = epochtime(
+            GoodMorningController.to_utc(start_time).timetuple()
+        )
+        end_time_epoch = epochtime(GoodMorningController.to_utc(end_time).timetuple())
+        start_time_str = f"<t:{start_time_epoch:.0f}:t>"
+        end_time_str = f"<t:{end_time_epoch:.0f}:t>"
+        return f"You can only say good morning between {start_time_str} and {end_time_str}!"
+
     async def accrue_good_morning(interaction: Interaction):
-        if interaction.channel.id != STREAM_CHAT_ID:
+        if not GoodMorningController.valid_accrual_time(interaction.created_at):
             return await interaction.response.send_message(
-                f"You can only say good morning in <#{STREAM_CHAT_ID}>!", ephemeral=True
+                GoodMorningController.outside_window_response(), ephemeral=True
             )
 
         accrued = DB().accrue_morning_points(interaction.user.id)

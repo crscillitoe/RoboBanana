@@ -43,7 +43,10 @@ class GoodMorningController:
         end_time_epoch = epochtime(GoodMorningController.to_utc(end_time).timetuple())
         start_time_str = f"<t:{start_time_epoch:.0f}:t>"
         end_time_str = f"<t:{end_time_epoch:.0f}:t>"
-        return f"You can only say good morning between {start_time_str} and {end_time_str}!"
+        return (
+            f"You can only say good morning between {start_time_str} and"
+            f" {end_time_str}!"
+        )
 
     async def accrue_good_morning(interaction: Interaction):
         if not GoodMorningController.valid_accrual_time(interaction.created_at):

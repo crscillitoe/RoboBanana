@@ -315,6 +315,8 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(mode="Chat Mode")
     async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms):
+        await interaction.response.send_message("Updating chat mode...", ephemeral=True)
+
         stream_chat_id = 1037040541017309225
 
         t3_role_role = interaction.guild.get_role(1036807951484203099)
@@ -425,9 +427,6 @@ class ModCommands(app_commands.Group, name="mod"):
                 attach_files=False,
                 use_external_stickers=False,
             )
-
-
-        await interaction.response.send_message("Done!", ephemeral=True)
 
     @app_commands.command(name="give_points")
     @app_commands.checks.has_role("Mod")

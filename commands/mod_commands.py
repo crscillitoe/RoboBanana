@@ -34,7 +34,8 @@ class ChannelPerms(enum.Enum):
     t3jail = 1
     t3chat = 2
     everyonechat = 3
-    off = 4
+    subchat = 4
+    off = 5
 
 
 class TimerDirection(enum.Enum):
@@ -319,14 +320,35 @@ class ModCommands(app_commands.Group, name="mod"):
         t3_role_role = interaction.guild.get_role(1036807951484203099)
         gifted_t3_role = interaction.guild.get_role(1045466382470484040)
         twitch_t3 = interaction.guild.get_role(935319103302926409)
+
+        discord_t2 = interaction.guild.get_role(1036807522457231384)
+        gifted_t2 = interaction.guild.get_role(1046886011071905933)
+        t2_good_morning = interaction.guild.get_role(1069255940181856327)
+
+        discord_t1 = interaction.guild.get_role(1036801694564102174)
+        gifted_t1 = interaction.guild.get_role(1038174011034710128)
+        twitch_sub = interaction.guild.get_role(935319103302926406)
+
+        t3_subs = [t3_role_role, gifted_t3_role, twitch_t3]
+        t2_subs = [discord_t2, gifted_t2, t2_good_morning]
+        t1_subs = [discord_t1, gifted_t1, twitch_sub]
+
+        all_subs = t3_subs + t2_subs + t1_subs
+
         everyone = interaction.guild.get_role(915336728707989534)
 
         channel = self.client.get_channel(stream_chat_id)
 
         if mode == ChannelPerms.t3jail:
-            await channel.set_permissions(t3_role_role, send_messages=False)
-            await channel.set_permissions(gifted_t3_role, send_messages=False)
-            await channel.set_permissions(twitch_t3, send_messages=False)
+            for t3 in t3_subs:
+                await channel.set_permissions(t3, send_messages=False)
+
+            for t2 in t2_subs:
+                await channel.set_permissions(t2, send_messages=True)
+
+            for t1 in t1_subs:
+                await channel.set_permissions(t1, send_messages=True)
+
             await channel.set_permissions(
                 everyone,
                 create_private_threads=False,
@@ -339,9 +361,15 @@ class ModCommands(app_commands.Group, name="mod"):
             )
 
         if mode == ChannelPerms.t3chat:
-            await channel.set_permissions(t3_role_role, send_messages=True)
-            await channel.set_permissions(gifted_t3_role, send_messages=True)
-            await channel.set_permissions(twitch_t3, send_messages=True)
+            for t3 in t3_subs:
+                await channel.set_permissions(t3, send_messages=True)
+
+            for t2 in t2_subs:
+                await channel.set_permissions(t2, send_messages=False)
+
+            for t1 in t1_subs:
+                await channel.set_permissions(t1, send_messages=False)
+
             await channel.set_permissions(
                 everyone,
                 create_private_threads=False,
@@ -354,9 +382,9 @@ class ModCommands(app_commands.Group, name="mod"):
             )
 
         if mode == ChannelPerms.off:
-            await channel.set_permissions(t3_role_role, send_messages=False)
-            await channel.set_permissions(gifted_t3_role, send_messages=False)
-            await channel.set_permissions(twitch_t3, send_messages=False)
+            for sub in all_subs:
+                await channel.set_permissions(sub, send_messages=False)
+
             await channel.set_permissions(
                 everyone,
                 create_private_threads=False,
@@ -369,9 +397,9 @@ class ModCommands(app_commands.Group, name="mod"):
             )
 
         if mode == ChannelPerms.everyonechat:
-            await channel.set_permissions(t3_role_role, send_messages=True)
-            await channel.set_permissions(gifted_t3_role, send_messages=True)
-            await channel.set_permissions(twitch_t3, send_messages=True)
+            for sub in all_subs:
+                await channel.set_permissions(sub, send_messages=True)
+
             await channel.set_permissions(
                 everyone,
                 create_private_threads=False,
@@ -382,6 +410,22 @@ class ModCommands(app_commands.Group, name="mod"):
                 attach_files=False,
                 use_external_stickers=False,
             )
+
+        if mode == ChannelPerms.subchat:
+            for sub in all_subs:
+                await channel.set_permissions(sub, send_messages=True)
+
+            await channel.set_permissions(
+                everyone,
+                create_private_threads=False,
+                create_public_threads=False,
+                send_messages=False,
+                use_external_emojis=False,
+                embed_links=False,
+                attach_files=False,
+                use_external_stickers=False,
+            )
+
 
         await interaction.response.send_message("Done!", ephemeral=True)
 

@@ -60,7 +60,7 @@ from .models import (
     RaffleEntry,
     RoleModifier,
     RaffleType,
-    VodSubmission
+    VodSubmission,
 )
 from config import Config
 
@@ -717,11 +717,12 @@ class DB:
         """
         return get_reactions_for_user(user_id, self.session)
 
-    def register_user(self, user_id: int, aimlabs_id: str):
+    def register_user(self, user_id: int, aimlabs_id: str, timezone: str):
         """Register new user for Aimlabs Tracking
 
         Args:
             user_id (int): Discord ID of user to register
             aimlabs_id (str): Aimlabs ID to associate with this Discord user
+            timezone (str): Local timezone of Discord user
         """
-        return register_user(user_id, aimlabs_id, self.session)
+        return register_user(user_id, aimlabs_id, timezone, self.session)

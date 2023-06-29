@@ -238,10 +238,13 @@ class AimlabsTracking(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(BigInteger, nullable=False)
     aimlabs_id = Column(VARCHAR(16), nullable=False)
+    timezone = Column(VARCHAR(50), nullable=False)
     day_count = Column(Integer, default=0)
     week_count = Column(Integer, default=0)
     last_played = Column(DateTime, nullable=True)
-    days_played = Column(VARCHAR(50), default="[false, false, false, false, false, false, false]")
+    days_played = Column(
+        VARCHAR(50), default="[false, false, false, false, false, false, false]"
+    )
 
     def __repr__(self):
         return (

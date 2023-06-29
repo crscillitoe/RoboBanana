@@ -1,6 +1,7 @@
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import pytz
 from time import sleep
+
 
 def option_one():
     hour = 12
@@ -9,7 +10,7 @@ def option_one():
     local_tz_unaware = utc_now.replace(hour=hour)
     tzinfo = timezone(local_tz_unaware - utc_now)
     local_tz_aware = local_tz_unaware.replace(tzinfo=tzinfo)
-    
+
     tz_offset = local_tz_aware.utcoffset()
     sleep(1)
 
@@ -18,6 +19,7 @@ def option_one():
     apply_timezone = apply_timezone.replace(tzinfo=timezone(tz_offset))
     print(apply_timezone.isoformat())
 
+
 def option_two():
     utc = pytz.utc
     utc_dt = datetime.now(utc)
@@ -25,6 +27,10 @@ def option_two():
     local_dt = utc_dt.astimezone(pacific)
     print(local_dt.isoformat())
 
+
 if __name__ == "__main__":
     option_one()
     option_two()
+    with open("all_timezones.txt", "w") as file:
+        for tz in pytz.all_timezones:
+            file.write(f"{tz}\n")

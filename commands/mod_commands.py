@@ -343,16 +343,17 @@ class ModCommands(app_commands.Group, name="mod"):
 
         if mode == ChannelPerms.t3jail:
             for t3 in t3_subs:
-                await channel.set_permissions(t3, send_messages=False)
+                await channel.set_permissions(t3, send_messages=False, view_channel=True)
 
             for t2 in t2_subs:
-                await channel.set_permissions(t2, send_messages=True)
+                await channel.set_permissions(t2, send_messages=True, view_channel=True)
 
             for t1 in t1_subs:
-                await channel.set_permissions(t1, send_messages=True)
+                await channel.set_permissions(t1, send_messages=True, view_channel=True)
 
             await channel.set_permissions(
                 everyone,
+                view_channel=False,
                 create_private_threads=False,
                 create_public_threads=False,
                 send_messages=True,
@@ -364,16 +365,17 @@ class ModCommands(app_commands.Group, name="mod"):
 
         if mode == ChannelPerms.t3chat:
             for t3 in t3_subs:
-                await channel.set_permissions(t3, send_messages=True)
+                await channel.set_permissions(t3, send_messages=True, view_channel=True)
 
             for t2 in t2_subs:
-                await channel.set_permissions(t2, send_messages=False)
+                await channel.set_permissions(t2, send_messages=False, view_channel=False)
 
             for t1 in t1_subs:
-                await channel.set_permissions(t1, send_messages=False)
+                await channel.set_permissions(t1, send_messages=False, view_channel=False)
 
             await channel.set_permissions(
                 everyone,
+                view_channel=False,
                 create_private_threads=False,
                 create_public_threads=False,
                 send_messages=False,
@@ -385,10 +387,11 @@ class ModCommands(app_commands.Group, name="mod"):
 
         if mode == ChannelPerms.off:
             for sub in all_subs:
-                await channel.set_permissions(sub, send_messages=False)
+                await channel.set_permissions(sub, send_messages=False, view_channel=True)
 
             await channel.set_permissions(
                 everyone,
+                view_channel=False,
                 create_private_threads=False,
                 create_public_threads=False,
                 send_messages=False,
@@ -400,10 +403,11 @@ class ModCommands(app_commands.Group, name="mod"):
 
         if mode == ChannelPerms.everyonechat:
             for sub in all_subs:
-                await channel.set_permissions(sub, send_messages=True)
+                await channel.set_permissions(sub, send_messages=True, view_channel=True)
 
             await channel.set_permissions(
                 everyone,
+                view_channel=True,
                 create_private_threads=False,
                 create_public_threads=False,
                 send_messages=True,
@@ -415,10 +419,11 @@ class ModCommands(app_commands.Group, name="mod"):
 
         if mode == ChannelPerms.subchat:
             for sub in all_subs:
-                await channel.set_permissions(sub, send_messages=True)
+                await channel.set_permissions(sub, send_messages=True, view_channel=True)
 
             await channel.set_permissions(
                 everyone,
+                view_channel=False,
                 create_private_threads=False,
                 create_public_threads=False,
                 send_messages=False,

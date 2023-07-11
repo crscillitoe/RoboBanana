@@ -62,11 +62,9 @@ class GoodMorningController:
 
         points = DB().get_morning_points(interaction.user.id)
         await interaction.response.send_message(
-            (
-                f"Good morning {interaction.user.mention}! "
-                f"Your current weekly count is {points}! "
-                f"{GOOD_MORNING_EXPLANATION}"
-            ),
+            f"Good morning {interaction.user.mention}! "
+            f"Your current weekly count is {points}! "
+            f"{GOOD_MORNING_EXPLANATION}",
             ephemeral=True,
         )
 

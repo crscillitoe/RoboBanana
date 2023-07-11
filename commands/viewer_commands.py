@@ -32,10 +32,8 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         redemptions_allowed = DB().check_redemption_status()
         if not redemptions_allowed:
             return await interaction.response.send_message(
-                (
-                    "Sorry! Reward redemptions are currently paused. Try again during"
-                    " stream!"
-                ),
+                "Sorry! Reward redemptions are currently paused. Try again during"
+                " stream!",
                 ephemeral=True,
             )
 

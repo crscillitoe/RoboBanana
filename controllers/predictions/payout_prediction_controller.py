@@ -1,25 +1,16 @@
-from datetime import datetime, timezone
-from typing import Generator, Optional, Tuple
-from discord import Interaction, Client
-from db import DB
+from typing import Generator, Tuple
+
+from discord import Client, Interaction
+from controllers.predictions.update_prediction_controller import (
+    UpdatePredictionController,
+)
 from db.models import (
     Prediction,
     PredictionChoice,
     PredictionOutcome,
     PredictionEntry,
-    PredictionSummary,
 )
-from threading import Thread
-from config import Config
-import logging
-import requests
-
-PUBLISH_URL = "http://localhost:3000/publish-prediction"
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
-
-LOG = logging.getLogger(__name__)
-
-REFUND_PREDICTION_CHOICE = -1
+from db import DB
 
 
 class ReturnableGenerator:
@@ -30,7 +21,7 @@ class ReturnableGenerator:
         self.return_value = yield from self.gen
 
 
-class PredictionController:
+class PayoutPredictionController:
     @staticmethod
     def get_winning_pot(winning_option: int, option_one: int, option_two: int):
         if winning_option == PredictionChoice.pink.value:
@@ -64,7 +55,7 @@ class PredictionController:
     ) -> Generator[Tuple[int, int], None, int]:
         option_one, option_two = DB().get_prediction_point_counts(prediction_id)
         total_points = option_one + option_two
-        winning_pot = PredictionController.get_winning_pot(
+        winning_pot = PayoutPredictionController.get_winning_pot(
             option, option_one, option_two
         )
         entries: list[PredictionEntry] = DB().get_prediction_entries_for_guess(
@@ -72,7 +63,7 @@ class PredictionController:
         )
 
         for entry in entries:
-            payout = PredictionController.calculate_payout(
+            payout = PayoutPredictionController.calculate_payout(
                 entry, winning_pot, total_points
             )
             yield entry.user_id, payout
@@ -82,11 +73,12 @@ class PredictionController:
     async def _perform_payout(
         prediction_id: int,
         option: PredictionChoice,
-        interaction: Interaction,
         client: Client,
     ):
         payout_generator = ReturnableGenerator(
-            PredictionController.get_payout_for_option(option.value, prediction_id)
+            PayoutPredictionController.get_payout_for_option(
+                option.value, prediction_id
+            )
         )
 
         for user_id, payout in payout_generator:
@@ -95,7 +87,9 @@ class PredictionController:
         total_points = payout_generator.return_value
 
         prediction_summary = DB().get_prediction_summary(prediction_id)
-        publish_prediction_end_summary(prediction_id, prediction_summary)
+        UpdatePredictionController.publish_prediction_end_summary(
+            prediction_id, prediction_summary
+        )
 
         paid_option = (
             prediction_summary.option_one
@@ -125,21 +119,21 @@ class PredictionController:
             )
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
-        payout_message = await PredictionController._perform_payout(
-            prediction_id, option, interaction, client
+        payout_message = await PayoutPredictionController._perform_payout(
+            prediction_id, option, client
         )
 
         DB().complete_prediction(interaction.guild_id, option.value)
         await interaction.response.send_message(payout_message, ephemeral=True)
 
     @staticmethod
-    async def _perform_refund(
-        prediction_id: int, interaction: Interaction, client: Client
-    ):
-        for entry in PredictionController.get_entries_for_prediction(prediction_id):
+    async def _perform_refund(prediction_id: int, client: Client):
+        for entry in PayoutPredictionController.get_entries_for_prediction(
+            prediction_id
+        ):
             DB().deposit_points(entry.user_id, entry.channel_points)
 
-        publish_prediction_end_summary(prediction_id)
+        UpdatePredictionController.publish_prediction_end_summary(prediction_id)
 
         refund_message = "Prediction has been refunded!"
         await reply_to_initial_message(prediction_id, client, refund_message)
@@ -158,7 +152,7 @@ class PredictionController:
             )
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
-        refund_message = await PredictionController._perform_refund(
+        refund_message = await PayoutPredictionController._perform_refund(
             prediction_id, interaction, client
         )
 
@@ -174,14 +168,14 @@ class PredictionController:
         """
         if prediction.winning_option != PredictionOutcome.refund.value:
             # Withdraw points from previous winners
-            payout_generator = PredictionController.get_payout_for_option(
+            payout_generator = PayoutPredictionController.get_payout_for_option(
                 prediction.winning_option, prediction.id
             )
 
             for user_id, payout in payout_generator:
                 DB().withdraw_points(user_id, payout)
         else:
-            entry_generator = PredictionController.get_entries_for_prediction(
+            entry_generator = PayoutPredictionController.get_entries_for_prediction(
                 prediction.id
             )
             for entry in entry_generator:
@@ -202,7 +196,7 @@ class PredictionController:
                 f"Prediction outcome is already {option.name}", ephemeral=True
             )
 
-        PredictionController.reset_points_from_payout(prediction)
+        PayoutPredictionController.reset_points_from_payout(prediction)
 
         reply_message = ""
         if option != PredictionOutcome.refund:
@@ -211,118 +205,16 @@ class PredictionController:
                 if option == PredictionOutcome.pink
                 else PredictionChoice.blue
             )
-            reply_message = await PredictionController._perform_payout(
+            reply_message = await PayoutPredictionController._perform_payout(
                 prediction.id, payout_option, interaction, client
             )
         else:
-            reply_message = await PredictionController._perform_refund(
-                prediction.id, interaction, client
+            reply_message = await PayoutPredictionController._perform_refund(
+                prediction.id, client
             )
 
         DB().set_prediction_outcome(prediction.id, option.value)
         await interaction.response.send_message(reply_message, ephemeral=True)
-
-    @staticmethod
-    async def create_prediction_entry(
-        channel_points: int,
-        guess: PredictionChoice,
-        interaction: Interaction,
-        client: Client,
-    ) -> bool:
-        if channel_points <= 0:
-            return await interaction.response.send_message(
-                "You must wager a positive number of points!", ephemeral=True
-            )
-
-        point_balance = DB().get_point_balance(interaction.user.id)
-        if channel_points > point_balance:
-            return await interaction.response.send_message(
-                f"You can only wager up to {point_balance} points", ephemeral=True
-            )
-
-        result, _ = DB().withdraw_points(interaction.user.id, channel_points)
-        if not result:
-            return await interaction.response.send_message(
-                "Unable to cast vote - please try again!", ephemeral=True
-            )
-
-        success = DB().create_prediction_entry(
-            interaction.guild_id, interaction.user.id, channel_points, guess.value
-        )
-        if not success:
-            await interaction.response.send_message(
-                "Unable to cast vote", ephemeral=True
-            )
-            return False
-
-        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
-
-        channel_id = DB().get_prediction_channel_id(prediction_id)
-        message_id = DB().get_prediction_message_id(prediction_id)
-
-        # We'll use this prediction summary for the reply message
-        prediction_summary = DB().get_prediction_summary(prediction_id)
-        Thread(target=publish_update, args=(prediction_summary,)).start()
-
-        chosen_option = (
-            prediction_summary.option_one
-            if guess == PredictionChoice.pink
-            else prediction_summary.option_two
-        )
-        prediction_message = await client.get_channel(channel_id).fetch_message(
-            message_id
-        )
-        await prediction_message.reply(
-            f"{interaction.user.mention} bet {channel_points} hooj bucks on"
-            f" {chosen_option}"
-        )
-        return True
-
-    @staticmethod
-    async def create_prediction(
-        guild_id: int,
-        channel_id: int,
-        message_id: str,
-        description: str,
-        option_one: str,
-        option_two: str,
-        end_time: datetime,
-    ):
-        DB().create_prediction(
-            guild_id,
-            channel_id,
-            message_id,
-            description,
-            option_one,
-            option_two,
-            end_time,
-        )
-        prediction_id = DB().get_ongoing_prediction_id(guild_id)
-        publish_prediction_summary(prediction_id)
-
-    @staticmethod
-    async def close_prediction(guild_id: int):
-        DB().close_prediction(guild_id)
-        prediction_id = DB().get_ongoing_prediction_id(guild_id)
-        publish_prediction_summary(prediction_id)
-
-
-def publish_update(prediction_summary: PredictionSummary):
-    payload = {
-        "description": prediction_summary.description,
-        "optionOne": prediction_summary.option_one,
-        "optionTwo": prediction_summary.option_two,
-        "optionOnePoints": prediction_summary.option_one_points,
-        "optionTwoPoints": prediction_summary.option_two_points,
-        "endTime": prediction_summary.end_time.astimezone(timezone.utc).isoformat(),
-        "acceptingEntries": prediction_summary.accepting_entries,
-        "ended": prediction_summary.ended,
-    }
-    response = requests.post(
-        url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
-    )
-    if response.status_code != 200:
-        LOG.error(f"Failed to publish updated prediction summary: {response.text}")
 
 
 async def reply_to_initial_message(prediction_id: int, client: Client, message: str):
@@ -332,17 +224,3 @@ async def reply_to_initial_message(prediction_id: int, client: Client, message: 
         prediction_message_id
     )
     await prediction_message.reply(message)
-
-
-def publish_prediction_summary(prediction_id: int):
-    prediction_summary = DB().get_prediction_summary(prediction_id)
-    Thread(target=publish_update, args=(prediction_summary,)).start()
-
-
-def publish_prediction_end_summary(
-    prediction_id: int, prediction_summary: Optional[PredictionSummary] = None
-):
-    if prediction_summary is None:
-        prediction_summary = DB().get_prediction_summary(prediction_id)
-    prediction_summary.ended = True
-    Thread(target=publish_update, args=(prediction_summary,)).start()

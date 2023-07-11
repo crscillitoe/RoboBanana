@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
 from discord import app_commands, Interaction, Client, User
 from discord.app_commands.errors import AppCommandError, CheckFailure
-from controllers.prediction_controller import PredictionController
 from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
 )
-from controllers.prediction_controller import PredictionController
+from controllers.predictions.close_prediction_controller import (
+    ClosePredictionController,
+)
+from controllers.predictions.payout_prediction_controller import (
+    PayoutPredictionController,
+)
 from db import DB, RaffleType
 from db.models import PredictionChoice, PredictionOutcome
 from views.predictions.create_predictions_modal import CreatePredictionModal
@@ -278,13 +282,13 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
-        await PredictionController.refund_prediction(interaction, self.client)
+        await PayoutPredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="close_prediction")
     @app_commands.checks.has_role("Mod")
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
-        await PredictionController.close_prediction(interaction.guild_id)
+        await ClosePredictionController.close_prediction(interaction.guild_id)
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
         prediction_message_id = DB().get_prediction_message_id(prediction_id)
         prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
@@ -302,14 +306,16 @@ class ModCommands(app_commands.Group, name="mod"):
         self, interaction: Interaction, option: PredictionChoice
     ):
         """Payout predicton to option pink or blue"""
-        await PredictionController.payout_prediction(option, interaction, self.client)
+        await PayoutPredictionController.payout_prediction(
+            option, interaction, self.client
+        )
 
     @app_commands.command(name="redo_payout")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(option="Option to payout")
     async def redo_payout(self, interaction: Interaction, option: PredictionOutcome):
         """Redo the last prediction's payout"""
-        await PredictionController.redo_payout(option, interaction, self.client)
+        await PayoutPredictionController.redo_payout(option, interaction, self.client)
 
     @app_commands.command(name="set_chat_mode")
     @app_commands.checks.has_role("Mod")

@@ -1,6 +1,8 @@
 from discord import TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
-from controllers.prediction_controller import PredictionController
+from controllers.predictions.prediction_entry_controller import (
+    PredictionEntryController,
+)
 from db import DB
 from db.models import PredictionChoice
 
@@ -38,7 +40,7 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
             )
             return
 
-        await PredictionController.create_prediction_entry(
+        await PredictionEntryController.create_prediction_entry(
             channel_points, self.guess, interaction, self.client
         )
         self.parent.update_fields()

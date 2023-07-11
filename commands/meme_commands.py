@@ -1,23 +1,5 @@
-from datetime import datetime, timedelta
-from discord import app_commands, Interaction, Client, User
-from discord.app_commands.errors import AppCommandError, CheckFailure
-from controllers.good_morning_controller import (
-    GoodMorningController,
-    GOOD_MORNING_EXPLANATION,
-)
-from controllers.prediction_controller import PredictionController
-from db import DB, RaffleType
-from db.models import PredictionChoice, PredictionOutcome
-from views.predictions.create_predictions_modal import CreatePredictionModal
-from views.raffle.new_raffle_modal import NewRaffleModal
-from views.rewards.add_reward_modal import AddRewardModal
-from controllers.raffle_controller import RaffleController
-from config import Config
-import logging
+from discord import app_commands, Interaction, Client
 import random
-from threading import Thread
-import requests
-import enum
 
 HOOJ_DISCORD_ID = 82969926125490176
 

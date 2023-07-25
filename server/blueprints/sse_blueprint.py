@@ -1,6 +1,6 @@
 import logging
 from flask_sse import ServerSentEventsBlueprint
-from flask import current_app, stream_with_context, request
+from quart import current_app, stream_with_context, request
 
 LOG = logging.getLogger(__name__)
 

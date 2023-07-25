@@ -99,26 +99,6 @@ class RaffleBot(Client):
             ReactionController.apply_reactions(message)
         )
 
-        # Gold, Coin
-        if message.author.id == 77825229690253312:
-            await message.add_reaction("🪙")
-
-        # Digi, Planet
-        if message.author.id == 792491980802228246:
-            await message.add_reaction("🪐")
-
-        # soczek, Clueless
-        if message.author.id == 263329578821484544:
-            await message.add_reaction("<:Clueless:1037094390960754699>")
-
-        # Valentina, hoojHeart
-        if message.author.id == 377547338836869121:
-            await message.add_reaction("<:hoojHeart:1059961646434500648>")
-
-        # Blade, Sheesh
-        if message.author.id == 394719244652249089:
-            await message.add_reaction("<:hoojSheesh:1076744568818647103>")
-
         # Server Subscription message
         if (
             message.channel.id == WELCOME_CHAT_ID

@@ -104,27 +104,31 @@ class PayoutPredictionController:
         return payout_message
 
     @staticmethod
-    async def payout_prediction(
-        option: PredictionChoice, interaction: Interaction, client: Client
+    async def payout_prediction_for_guild(
+        option: PredictionChoice, guild_id: int, client: Client
     ):
-        if not DB().has_ongoing_prediction(interaction.guild_id):
-            return await interaction.response.send_message(
-                "No ongoing prediction!", ephemeral=True
-            )
+        if not DB().has_ongoing_prediction(guild_id):
+            return False, "No ongoing prediction!"
 
-        if DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.response.send_message(
-                "Please close prediction from entries before paying out!",
-                ephemeral=True,
-            )
+        if DB().accepting_prediction_entries(guild_id):
+            return False, "Please close prediction from entries before paying out!"
 
-        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(guild_id)
         payout_message = await PayoutPredictionController._perform_payout(
             prediction_id, option, client
         )
 
-        DB().complete_prediction(interaction.guild_id, option.value)
-        await interaction.response.send_message(payout_message, ephemeral=True)
+        DB().complete_prediction(guild_id, option.value)
+        return True, payout_message
+
+    @staticmethod
+    async def payout_prediction(
+        option: PredictionChoice, interaction: Interaction, client: Client
+    ):
+        _, message = await PayoutPredictionController.payout_prediction_for_guild(
+            option, interaction.guild_id, client
+        )
+        return await interaction.response.send_message(message, ephemeral=True)
 
     @staticmethod
     async def _perform_refund(prediction_id: int, client: Client):
@@ -140,24 +144,27 @@ class PayoutPredictionController:
         return refund_message
 
     @staticmethod
-    async def refund_prediction(interaction: Interaction, client: Client):
-        if not DB().has_ongoing_prediction(interaction.guild_id):
-            return await interaction.response.send_message(
-                "No ongoing prediction!", ephemeral=True
-            )
+    async def refund_prediction_for_guild(guild_id: int, client: Client):
+        if not DB().has_ongoing_prediction(guild_id):
+            return False, "No ongoing prediction!"
 
-        if DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.response.send_message(
-                "Please close prediction from entries before refunding!", ephemeral=True
-            )
+        if DB().accepting_prediction_entries(guild_id):
+            return False, "Please close prediction from entries before refunding!"
 
-        prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
+        prediction_id = DB().get_ongoing_prediction_id(guild_id)
         refund_message = await PayoutPredictionController._perform_refund(
-            prediction_id, interaction, client
+            prediction_id, client
         )
 
-        DB().complete_prediction(interaction.guild_id, PredictionOutcome.refund.value)
-        await interaction.response.send_message(refund_message, ephemeral=True)
+        DB().complete_prediction(guild_id, PredictionOutcome.refund.value)
+        return True, refund_message
+
+    @staticmethod
+    async def refund_prediction(interaction: Interaction, client: Client):
+        _, message = await PayoutPredictionController.refund_prediction_for_guild(
+            interaction.guild_id, client
+        )
+        return await interaction.response.send_message(message, ephemeral=True)
 
     @staticmethod
     def reset_points_from_payout(prediction: Prediction):

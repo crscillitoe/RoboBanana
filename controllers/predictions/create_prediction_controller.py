@@ -21,6 +21,10 @@ REFUND_PREDICTION_CHOICE = -1
 
 class CreatePredictionController:
     @staticmethod
+    def has_ongoing_prediction(guild_id: int):
+        return DB().has_ongoing_prediction(guild_id)
+
+    @staticmethod
     async def create_prediction(
         guild_id: int,
         channel_id: int,

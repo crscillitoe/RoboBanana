@@ -62,10 +62,8 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         role = discord.utils.get(interaction.user.roles, id=vod_rejected_role_id)
         if role is not None:
             await interaction.response.send_message(
-                (
-                    f"You currently have the VOD REJECTED role! You cannot submit a VOD"
-                    f" at this time."
-                ),
+                f"You currently have the VOD REJECTED role! You cannot submit a VOD"
+                f" at this time.",
                 ephemeral=True,
             )
             return
@@ -74,10 +72,8 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         role = discord.utils.get(interaction.user.roles, id=banned_role_id)
         if role is not None:
             await interaction.response.send_message(
-                (
-                    f"You currently have the BANNED role! You cannot submit a VOD at"
-                    f" this time."
-                ),
+                f"You currently have the BANNED role! You cannot submit a VOD at"
+                f" this time.",
                 ephemeral=True,
             )
             return
@@ -103,10 +99,8 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         if timestamp is not None and not timestamp.date() <= one_week_ago:
             # Bad, not enough time
             await interaction.response.send_message(
-                (
-                    f"You appear to have submitted a VOD less than one week ago. Try"
-                    f" again in one week."
-                ),
+                f"You appear to have submitted a VOD less than one week ago. Try"
+                f" again in one week.",
                 ephemeral=True,
             )
             return

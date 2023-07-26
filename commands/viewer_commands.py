@@ -1,7 +1,9 @@
-from discord import app_commands, Interaction, User, Client
+from discord import app_commands, Interaction, Client
 from discord.app_commands import Choice
 from controllers.good_morning_controller import GoodMorningController
-from controllers.prediction_controller import PredictionController
+from controllers.predictions.prediction_entry_controller import (
+    PredictionEntryController,
+)
 from db import DB
 from db.models import PredictionChoice
 from views.rewards.redeem_reward_view import RedeemRewardView
@@ -30,10 +32,8 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         redemptions_allowed = DB().check_redemption_status()
         if not redemptions_allowed:
             return await interaction.response.send_message(
-                (
-                    "Sorry! Reward redemptions are currently paused. Try again during"
-                    " stream!"
-                ),
+                "Sorry! Reward redemptions are currently paused. Try again during"
+                " stream!",
                 ephemeral=True,
             )
 
@@ -97,7 +97,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         self, interaction: Interaction, choice: PredictionChoice, points: int
     ):
         """Place bet on currently ongoing prediction"""
-        success = await PredictionController.create_prediction_entry(
+        success = await PredictionEntryController.create_prediction_entry(
             points, choice, interaction, self.client
         )
 

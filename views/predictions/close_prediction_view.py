@@ -1,6 +1,8 @@
 from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
-from controllers.prediction_controller import PredictionController
+from controllers.predictions.close_prediction_controller import (
+    ClosePredictionController,
+)
 from db import DB
 from config import Config
 
@@ -36,7 +38,7 @@ class ClosePredictionView(View):
         self.add_item(self.close_prediction_button)
 
     async def close_prediction_onclick(self, interaction: Interaction):
-        await PredictionController.close_prediction(interaction.guild_id)
+        await ClosePredictionController.close_prediction(interaction.guild_id)
         self.entry_embed.update_fields()
 
         self.close_prediction_button.disabled = True

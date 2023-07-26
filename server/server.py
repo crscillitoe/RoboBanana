@@ -1,4 +1,3 @@
-import quart.flask_patch
 import asyncio
 from quart_cors import cors
 from db.models import PredictionChoice
@@ -19,10 +18,10 @@ discord.utils.setup_logging(level=logging.INFO, root=True)
 logging.getLogger("apscheduler.executors.default").setLevel(logging.ERROR)
 
 app = Quart(__name__)
+app = cors(app, allow_origin="*")
 app.config["REDIS_URL"] = "redis://localhost"
 app.register_blueprint(sse, url_prefix="/stream")
 
-cors(app, allow_origin="*")
 
 last_published = {}
 PREDICTIONS_CHANNEL = "predictions"
@@ -49,20 +48,15 @@ LOG = logging.getLogger(__name__)
 
 async def keep_alive():
     async with app.app_context():
-        sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=SUBS_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=POLL_ANSWERS_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=SUBS_COUNT_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=TIMER_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=VOD_REVIEW_CHANNEL)
-        sse.publish("\n\n", type="keepalive", channel=TAMAGACHI_CHANNEL)
-
-
-sched = AsyncIOScheduler()
-sched.add_job(keep_alive, "interval", seconds=15)
-sched.start()
+        await sse.publish("\n\n", type="keepalive", channel=PREDICTIONS_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=SUBS_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=POLL_ANSWERS_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=POLLS_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=COOL_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=SUBS_COUNT_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=TIMER_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=VOD_REVIEW_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=TAMAGACHI_CHANNEL)
 
 
 @app.before_serving
@@ -72,6 +66,9 @@ async def setup():
 
 def start_stuff():
     loop = asyncio.get_event_loop()
+    sched = AsyncIOScheduler(event_loop=loop)
+    sched.add_job(keep_alive, "interval", seconds=15)
+    sched.start()
     asyncio.ensure_future(main(), loop=loop)
 
 
@@ -85,7 +82,7 @@ async def index():
 async def publish_tamagachi():
     try:
         to_publish = await parse_tamagachi_from_request()
-        sse.publish(to_publish, type="publish", channel=TAMAGACHI_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=TAMAGACHI_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -96,7 +93,7 @@ async def publish_tamagachi():
 async def publish_timer():
     try:
         to_publish = await parse_timer_from_request()
-        sse.publish(to_publish, type="publish", channel=TIMER_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=TIMER_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -107,7 +104,7 @@ async def publish_timer():
 async def publish_vod():
     try:
         to_publish = await parse_vod_from_request()
-        sse.publish(to_publish, type="publish", channel=VOD_REVIEW_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=VOD_REVIEW_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -118,7 +115,7 @@ async def publish_vod():
 async def publish_cool():
     try:
         to_publish = await parse_cool_from_request()
-        sse.publish(to_publish, type="publish", channel=COOL_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=COOL_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -129,7 +126,7 @@ async def publish_cool():
 async def publish_poll():
     try:
         to_publish = await parse_poll_from_request()
-        sse.publish(to_publish, type="publish", channel=POLLS_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=POLLS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -140,7 +137,7 @@ async def publish_poll():
 async def publish_poll_answer():
     try:
         to_publish = await parse_poll_answer_from_request()
-        sse.publish(to_publish, type="publish", channel=POLL_ANSWERS_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=POLL_ANSWERS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -152,7 +149,7 @@ async def publish_prediction():
     global last_published
     try:
         to_publish = await parse_prediction_from_request()
-        sse.publish(to_publish, type="publish", channel=PREDICTIONS_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=PREDICTIONS_CHANNEL)
         last_published = to_publish
         return ("OK", 200)
     except (KeyError, ValueError):
@@ -164,7 +161,7 @@ async def publish_prediction():
 async def publish_sub():
     try:
         to_publish = await parse_sub_from_request()
-        sse.publish(to_publish, type="publish", channel=SUBS_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=SUBS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
@@ -187,7 +184,7 @@ async def quick_prediction():
 async def publish_sub_count():
     try:
         to_publish = await parse_sub_count_from_request()
-        sse.publish(to_publish, type="publish", channel=SUBS_COUNT_CHANNEL)
+        await sse.publish(to_publish, type="publish", channel=SUBS_COUNT_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)

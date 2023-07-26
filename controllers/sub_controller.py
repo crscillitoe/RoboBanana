@@ -82,7 +82,6 @@ class SubController:
         if "6 months" in mention_thankyou and "THE ONES WHO" in mention_thankyou:
             await message.author.add_roles(t3_6_month_role)
 
-        await client.get_channel(BOT_AUDIT_CHANNEL).send(mention_thankyou)
         Thread(
             target=publish_update,
             args=(
@@ -91,6 +90,7 @@ class SubController:
                 name_thankyou,
             ),
         ).start()
+        await client.get_channel(BOT_AUDIT_CHANNEL).send(mention_thankyou)
 
     @tasks.loop(minutes=1.0)
     async def send_count(self):

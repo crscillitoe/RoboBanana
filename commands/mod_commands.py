@@ -348,17 +348,15 @@ class ModCommands(app_commands.Group, name="mod"):
                 )
 
             for t2 in t2_subs:
-                await channel.set_permissions(t2, send_messages=True, view_channel=True)
+                await channel.set_permissions(t2, view_channel=True)
 
             for t1 in t1_subs:
-                await channel.set_permissions(t1, send_messages=True, view_channel=True)
+                await channel.set_permissions(t1, view_channel=True)
 
             await channel.set_permissions(
                 everyone,
-                view_channel=False,
                 create_private_threads=False,
                 create_public_threads=False,
-                send_messages=True,
                 use_external_emojis=False,
                 embed_links=False,
                 attach_files=False,

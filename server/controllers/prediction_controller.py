@@ -23,6 +23,7 @@ LOG = logging.getLogger(__name__)
 class PredictionController:
     async def create_prediction(prediction_details: QuickPrediction, client: Client):
         if CreatePredictionController.has_ongoing_prediction(GUILD_ID):
+            LOG.info("Ongoing prediction running")
             return False
 
         LOG.info("Creating new quick prediction")

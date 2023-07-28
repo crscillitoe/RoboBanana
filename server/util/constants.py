@@ -1,18 +1,19 @@
-PREDICTIONS_CHANNEL = "predictions"
-SUBS_CHANNEL = "subs"
-SUBS_COUNT_CHANNEL = "subs-count"
+EVENTS_CHANNEL = "events"
+PREDICTIONS_TYPE = "predictions"
+SUBS_TYPE = "subs"
+SUBS_COUNT_TYPE = "subs-count"
 
 # User responses to current active poll
-POLL_ANSWERS_CHANNEL = "poll-answers"
+POLL_ANSWERS_TYPE = "poll-answers"
 
 # New poll information
-POLLS_CHANNEL = "polls"
+POLLS_TYPE = "polls"
 
 # Track the cool level of current VOD
-COOL_CHANNEL = "cool"
+COOL_TYPE = "cool"
 
-VOD_REVIEW_CHANNEL = "vod-reviews"
+VOD_REVIEW_TYPE = "vod-reviews"
 
-TIMER_CHANNEL = "timer"
+TIMER_TYPE = "timer"
 
-TAMAGACHI_CHANNEL = "tamagachi"
+TAMAGACHI_TYPE = "tamagachi"

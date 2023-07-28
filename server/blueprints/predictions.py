@@ -3,7 +3,7 @@ from db.models import PredictionChoice
 from server.controllers.prediction_controller import PredictionController
 from server.models.quick_prediction import QuickPrediction
 
-from server.util.constants import PREDICTIONS_CHANNEL
+from server.util.constants import PREDICTIONS_TYPE, EVENTS_CHANNEL
 from server.util.discord_client import DISCORD_CLIENT
 from server.util.token_required import token_required
 from server.util.parse_schema import parse_body, SchemaValueType
@@ -26,7 +26,7 @@ async def publish_prediction():
     }
     try:
         to_publish = await parse_body(request, valid_request)
-        await sse.publish(to_publish, type="publish", channel=PREDICTIONS_CHANNEL)
+        await sse.publish(to_publish, type=PREDICTIONS_TYPE, channel=EVENTS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)

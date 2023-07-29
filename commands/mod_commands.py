@@ -320,10 +320,9 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="set_chat_mode")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(mode="Chat Mode")
-    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms):
+    @app_commands.describe(channel_id="Channel ID")
+    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms, channel_id: int):
         await interaction.response.send_message("Updating chat mode...", ephemeral=True)
-
-        stream_chat_id = 1037040541017309225
 
         t3_role_role = interaction.guild.get_role(1036807951484203099)
         gifted_t3_role = interaction.guild.get_role(1045466382470484040)
@@ -345,7 +344,7 @@ class ModCommands(app_commands.Group, name="mod"):
 
         everyone = interaction.guild.get_role(915336728707989534)
 
-        channel = self.client.get_channel(stream_chat_id)
+        channel = self.client.get_channel(channel_id)
 
         if mode == ChannelPerms.t3jail:
             for t3 in t3_subs:
@@ -398,7 +397,7 @@ class ModCommands(app_commands.Group, name="mod"):
         if mode == ChannelPerms.off:
             for sub in all_subs:
                 await channel.set_permissions(
-                    sub, send_messages=False, view_channel=True
+                    sub, send_messages=False, view_channel=False
                 )
 
             await channel.set_permissions(

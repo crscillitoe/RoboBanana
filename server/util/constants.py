@@ -16,4 +16,8 @@ VOD_REVIEW_TYPE = "vod-reviews"
 
 TIMER_TYPE = "timer"
 
+CHAT_MESSAGE_STREAM_TYPE = "chat-message"
+
+CHAT_MESSAGE_TEST_TYPE = "chat-test-message"
+
 TAMAGACHI_TYPE = "tamagachi"

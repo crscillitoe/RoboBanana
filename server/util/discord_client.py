@@ -29,7 +29,6 @@ class ServerBot(Client):
         if message.channel.id == 1037040541017309225:
             stream = True
 
-
         # Valorant Discussion Channel (high volume good for testing)
         if stream or test:
             to_send = {
@@ -42,12 +41,11 @@ class ServerBot(Client):
                         "colorB": r.color.b,
                         "icon": None if r.icon is None else r.icon.url,
                         "id": r.id,
-                        "name": r.name
-                    } for r in message.author.roles],
-                "stickers": [
-                    {
-                        "url": s.url
-                    } for s in message.stickers]
+                        "name": r.name,
+                    }
+                    for r in message.author.roles
+                ],
+                "stickers": [{"url": s.url} for s in message.stickers],
             }
             await publish_chat(to_send, stream)
 

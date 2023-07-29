@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from discord import app_commands, Interaction, Client, User
+from discord import app_commands, Interaction, Client, User, TextChannel
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.good_morning_controller import (
     GoodMorningController,
@@ -320,8 +320,8 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="set_chat_mode")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(mode="Chat Mode")
-    @app_commands.describe(channel_id="Channel ID")
-    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms, channel_id: int):
+    @app_commands.describe(channel="Channel")
+    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms, channel: TextChannel):
         await interaction.response.send_message("Updating chat mode...", ephemeral=True)
 
         t3_role_role = interaction.guild.get_role(1036807951484203099)
@@ -344,7 +344,7 @@ class ModCommands(app_commands.Group, name="mod"):
 
         everyone = interaction.guild.get_role(915336728707989534)
 
-        channel = self.client.get_channel(channel_id)
+        channel = self.client.get_channel(channel.id)
 
         if mode == ChannelPerms.t3jail:
             for t3 in t3_subs:

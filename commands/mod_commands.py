@@ -321,7 +321,9 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(mode="Chat Mode")
     @app_commands.describe(channel_id="Channel ID")
-    async def set_chat_mode(self, interaction: Interaction, mode: ChannelPerms, channel_id: int):
+    async def set_chat_mode(
+        self, interaction: Interaction, mode: ChannelPerms, channel_id: int
+    ):
         await interaction.response.send_message("Updating chat mode...", ephemeral=True)
 
         t3_role_role = interaction.guild.get_role(1036807951484203099)

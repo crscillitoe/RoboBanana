@@ -34,8 +34,6 @@ class ServerBot(Client):
         if stream or test:
             to_send = {
                 "content": message.content,
-                "authorNick": message.author.nick,
-                "authorName": message.author.name,
                 "displayName": message.author.display_name,
                 "roles": [
                     {

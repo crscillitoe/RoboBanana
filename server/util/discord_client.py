@@ -39,7 +39,9 @@ class ServerBot(Client):
                 return
             to_send = {
                 "content": message.content,
-                "displayName": message.author.display_name,
+                "displayName": message.author.nick
+                if message.author.nick is not None
+                else message.author.display_name,
                 "roles": [
                     {
                         "colorR": r.color.r,
@@ -54,6 +56,7 @@ class ServerBot(Client):
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
             }
+            LOG.info(to_send)
             await publish_chat(to_send, stream)
 
     def find_emojis(self, content: str):

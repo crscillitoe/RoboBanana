@@ -8,7 +8,7 @@ import re
 
 LOG = logging.getLogger(__name__)
 
-CUSTOM_EMOJI_PATTERN = re.compile(r"(<:[a-zA-Z]+:([0-9]+)>)")
+CUSTOM_EMOJI_PATTERN = re.compile(r"(<a?:[a-zA-Z]+:([0-9]+)>)")
 
 
 class ServerBot(Client):

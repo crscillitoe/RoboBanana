@@ -34,6 +34,9 @@ class ServerBot(Client):
 
         # Valorant Discussion Channel (high volume good for testing)
         if stream or test:
+            should_send, emoji_content = self.find_emojis(message.content)
+            if not should_send:
+                return
             to_send = {
                 "content": message.content,
                 "displayName": message.author.display_name,
@@ -49,7 +52,7 @@ class ServerBot(Client):
                     for r in message.author.roles
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
-                "emojis": self.find_emojis(message.content),
+                "emojis": emoji_content,
             }
             await publish_chat(to_send, stream)
 
@@ -60,9 +63,9 @@ class ServerBot(Client):
             emoji = self.get_emoji(int(emoji_id))
             if emoji is None:
                 LOG.warn(f"Could not find custom emoji {emoji_text}")
-                continue
+                return False, []
             stream_content.append({"emoji_text": emoji_text, "emoji_url": emoji.url})
-        return stream_content
+        return True, stream_content
 
 
 async def start_discord_client(client: Client):

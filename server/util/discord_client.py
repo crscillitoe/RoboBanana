@@ -39,9 +39,11 @@ class ServerBot(Client):
                 return
             to_send = {
                 "content": message.content,
-                "displayName": message.author.nick
-                if message.author.nick is not None
-                else message.author.display_name,
+                "displayName": (
+                    message.author.nick
+                    if message.author.nick is not None
+                    else message.author.display_name
+                ),
                 "roles": [
                     {
                         "colorR": r.color.r,

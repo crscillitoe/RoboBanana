@@ -4,6 +4,9 @@ from server.util.constants import (
     EVENTS_CHANNEL,
 )
 from .sse import sse
+import re
+
+CUSTOM_EMOJI_PATTERN = re.compile(r"<:[a-zA-Z]+:[0-9]+>")
 
 
 async def publish_chat(chat_message, stream):

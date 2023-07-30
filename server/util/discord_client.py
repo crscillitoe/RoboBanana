@@ -4,8 +4,11 @@ from discord import Client, Intents, Message
 from server.blueprints.chat import publish_chat
 
 from config import Config
+import re
 
 LOG = logging.getLogger(__name__)
+
+CUSTOM_EMOJI_PATTERN = re.compile(r"(<:[a-zA-Z]+:([0-9]+)>)")
 
 
 class ServerBot(Client):
@@ -23,7 +26,7 @@ class ServerBot(Client):
     async def on_message(self, message: Message):
         stream = False
         test = False
-        if message.channel.id == 915336728707989537:
+        if message.channel.id == 1037550665645445172:
             test = True
 
         if message.channel.id == 1037040541017309225:
@@ -46,8 +49,20 @@ class ServerBot(Client):
                     for r in message.author.roles
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
+                "emojis": self.find_emojis(message.content),
             }
             await publish_chat(to_send, stream)
+
+    def find_emojis(self, content: str):
+        stream_content = []
+        emoji_matches = CUSTOM_EMOJI_PATTERN.findall(content)
+        for emoji_text, emoji_id in emoji_matches:
+            emoji = self.get_emoji(int(emoji_id))
+            if emoji is None:
+                LOG.warn(f"Could not find custom emoji {emoji_text}")
+                continue
+            stream_content.append({"emoji_text": emoji_text, "emoji_url": emoji.url})
+        return stream_content
 
 
 async def start_discord_client(client: Client):

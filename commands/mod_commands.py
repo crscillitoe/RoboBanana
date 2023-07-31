@@ -98,11 +98,7 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(na_score="-1 for no change")
     @app_commands.describe(eu_score="-1 for no change")
     async def chess(
-        self,
-        interaction: Interaction,
-        open_value: int,
-        na_score: int,
-        eu_score: int
+        self, interaction: Interaction, open_value: int, na_score: int, eu_score: int
     ) -> None:
         """Open NA vs NOT NA Chess"""
         Thread(
@@ -574,12 +570,9 @@ def publish_timer(time, direction: TimerDirection):
     if response.status_code != 200:
         LOG.error(f"Failed to publish timer: {response.text}")
 
+
 def publish_chess(openValue, na, eu):
-    payload = {
-        "open": openValue,
-        "naScore": na,
-        "euScore": eu
-    }
+    payload = {"open": openValue, "naScore": na, "euScore": eu}
 
     response = requests.post(
         url=PUBLISH_CHESS_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
@@ -587,6 +580,7 @@ def publish_chess(openValue, na, eu):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish chess: {response.text}")
+
 
 def publish_timer(time, direction: TimerDirection):
     payload = {
@@ -600,6 +594,7 @@ def publish_timer(time, direction: TimerDirection):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish timer: {response.text}")
+
 
 def publish_timer(time, direction: TimerDirection):
     payload = {

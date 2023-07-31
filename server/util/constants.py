@@ -2,6 +2,7 @@ EVENTS_CHANNEL = "events"
 PREDICTIONS_TYPE = "predictions"
 SUBS_TYPE = "subs"
 SUBS_COUNT_TYPE = "subs-count"
+CHESS_TYPE = "chess"
 
 # User responses to current active poll
 POLL_ANSWERS_TYPE = "poll-answers"

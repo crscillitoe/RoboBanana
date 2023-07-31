@@ -32,6 +32,7 @@ POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
+PUBLISH_CHESS_URL = "http://localhost:3000/publish-chess"
 
 
 class ChannelPerms(enum.Enum):
@@ -90,6 +91,30 @@ class ModCommands(app_commands.Group, name="mod"):
         """Allows the given userID to submit a VOD."""
         DB().reset_user(user_id)
         await interaction.response.send_message("Success!", ephemeral=True)
+
+    @app_commands.command(name="chess")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(open_value="1 for yes 0 for no")
+    @app_commands.describe(na_score="-1 for no change")
+    @app_commands.describe(eu_score="-1 for no change")
+    async def chess(
+        self,
+        interaction: Interaction,
+        open_value: int,
+        na_score: int,
+        eu_score: int
+    ) -> None:
+        """Open NA vs NOT NA Chess"""
+        Thread(
+            target=publish_chess,
+            args=(
+                open_value,
+                na_score,
+                eu_score,
+            ),
+        ).start()
+
+        await interaction.response.send_message("Chess event sent!", ephemeral=True)
 
     @app_commands.command(name="timer")
     @app_commands.checks.has_role("Mod")
@@ -535,6 +560,46 @@ def publish_poll(title, option_one, option_two, option_three, option_four):
     if response.status_code != 200:
         LOG.error(f"Failed to publish poll: {response.text}")
 
+
+def publish_timer(time, direction: TimerDirection):
+    payload = {
+        "time": time,
+        "direction": direction.value,
+    }
+
+    response = requests.post(
+        url=PUBLISH_TIMER_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish timer: {response.text}")
+
+def publish_chess(openValue, na, eu):
+    payload = {
+        "open": openValue,
+        "naScore": na,
+        "euScore": eu
+    }
+
+    response = requests.post(
+        url=PUBLISH_CHESS_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish chess: {response.text}")
+
+def publish_timer(time, direction: TimerDirection):
+    payload = {
+        "time": time,
+        "direction": direction.value,
+    }
+
+    response = requests.post(
+        url=PUBLISH_TIMER_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish timer: {response.text}")
 
 def publish_timer(time, direction: TimerDirection):
     payload = {

@@ -4,6 +4,7 @@ from server.blueprints.sse import sse
 from server.blueprints.predictions import prediction_blueprint
 from server.blueprints.timer import timer_blueprint
 from server.blueprints.vod import vod_blueprint
+from server.blueprints.chess import chess_blueprint
 from server.blueprints.cool import cool_blueprint
 from server.blueprints.poll import poll_blueprint
 from server.blueprints.sub import sub_blueprint
@@ -24,6 +25,7 @@ app.config["REDIS_URL"] = "redis://localhost"
 
 app.register_blueprint(sse, url_prefix="/stream")
 app.register_blueprint(prediction_blueprint)
+app.register_blueprint(chess_blueprint)
 app.register_blueprint(timer_blueprint)
 app.register_blueprint(vod_blueprint)
 app.register_blueprint(cool_blueprint)

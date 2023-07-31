@@ -30,7 +30,7 @@ class ServerBot(Client):
     async def on_message(self, message: Message):
         stream = False
         test = False
-        if message.channel.id == 1037550665645445172:
+        if message.channel.id == 915336728707989537:
             test = True
 
         if message.channel.id == 1037040541017309225:

@@ -102,11 +102,14 @@ class SubController:
         # Grab the day of the year... in FUCKING HONOLULU POG
         # NA INHOUSES MORE LIKE HAWAIIAN INHOUSES
         # Example: July 31st --> 212
-        day_of_year_hawaii = datetime.now(pytz.timezone('US/Hawaii')).timetuple().tm_yday
-
+        day_of_year_hawaii = (
+            datetime.now(pytz.timezone("US/Hawaii")).timetuple().tm_yday
+        )
 
         # this variable is very clear.
-        day_of_year_east_brazil = datetime.now(pytz.timezone('Brazil/East')).timetuple().tm_yday
+        day_of_year_east_brazil = (
+            datetime.now(pytz.timezone("Brazil/East")).timetuple().tm_yday
+        )
 
         # GIVE IT UP FOR THE EVEN DAYS BABY WOOOO
         na_queues_open = day_of_year_hawaii % 2 == 0
@@ -126,14 +129,9 @@ class SubController:
         eu_inhouses = self.client.get_channel(1074056805275140308)
 
         for t3 in t3_subs:
-            await na_inhouses.set_permissions(
-                t3, view_channel=na_queues_open
-            )
+            await na_inhouses.set_permissions(t3, view_channel=na_queues_open)
 
-            await eu_inhouses.set_permissions(
-                t3, view_channel=eu_queues_open
-            )
-
+            await eu_inhouses.set_permissions(t3, view_channel=eu_queues_open)
 
     @tasks.loop(minutes=1.0)
     async def send_count(self):

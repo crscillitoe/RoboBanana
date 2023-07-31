@@ -61,8 +61,9 @@ class ServerBot(Client):
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
-                "mentions": self.find_users(message.content)
-                + self.find_channels(message.content),
+                "mentions": self.find_users(message.content) + self.find_channels(
+                    message.content
+                ),
             }
             LOG.debug(to_send)
             await publish_chat(to_send, stream)

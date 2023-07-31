@@ -8,7 +8,10 @@ import re
 
 LOG = logging.getLogger(__name__)
 
+GUILD_ID = int(Config.CONFIG["Predictions"]["GuildID"])
+
 CUSTOM_EMOJI_PATTERN = re.compile(r"(<a?:[a-zA-Z0-9]+:([0-9]+)>)")
+MENTION_PATTERN = re.compile(r"(<@([0-9]+)>)")
 
 
 class ServerBot(Client):
@@ -57,8 +60,9 @@ class ServerBot(Client):
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
+                "mentions": self.find_mentions(message.content),
             }
-            LOG.info(to_send)
+            LOG.debug(to_send)
             await publish_chat(to_send, stream)
 
     def find_emojis(self, content: str):
@@ -71,6 +75,19 @@ class ServerBot(Client):
                 return False, []
             stream_content.append({"emoji_text": emoji_text, "emoji_url": emoji.url})
         return True, stream_content
+
+    def find_mentions(self, content: str):
+        stream_content = []
+        mention_matches = MENTION_PATTERN.findall(content)
+        for mention_text, user_id in mention_matches:
+            member = self.get_guild(GUILD_ID).get_member(int(user_id))
+            if member is None:
+                LOG.warn(f"Unable to find user {user_id=}")
+                continue
+            stream_content.append(
+                {"mention_text": mention_text, "display_name": member.display_name}
+            )
+        return stream_content
 
 
 async def start_discord_client(client: Client):

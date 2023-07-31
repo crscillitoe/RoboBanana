@@ -5,6 +5,8 @@ import discord.utils
 from config import Config
 import logging
 import requests
+from datetime import datetime
+import pytz
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 BOT_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
@@ -91,6 +93,47 @@ class SubController:
             ),
         ).start()
         await client.get_channel(BOT_AUDIT_CHANNEL).send(mention_thankyou)
+
+    @tasks.loop(minutes=5.0)
+    async def sync_channel_perms(self):
+        # Dear god, forgive me for the dark arts I am about to use
+        # to smite my logical problem solving issues into oblivion.
+
+        # Grab the day of the year... in FUCKING HONOLULU POG
+        # NA INHOUSES MORE LIKE HAWAIIAN INHOUSES
+        # Example: July 31st --> 212
+        day_of_year_hawaii = datetime.now(pytz.timezone('US/Hawaii')).timetuple().tm_yday
+
+
+        # this variable is very clear.
+        day_of_year_east_brazil = datetime.now(pytz.timezone('Brazil/East')).timetuple().tm_yday
+
+        # GIVE IT UP FOR THE EVEN DAYS BABY WOOOO
+        na_queues_open = day_of_year_hawaii % 2 == 0
+
+        # Except EU likes odd days because brazil is a day behind EU
+        eu_queues_open = day_of_year_east_brazil % 2 == 1
+
+        # normal stuff here
+        guild = await self.client.fetch_guild(Config.CONFIG["Discord"]["GuildID"])
+
+        t3_role_role = guild.get_role(1036807951484203099)
+        gifted_t3_role = guild.get_role(1045466382470484040)
+        twitch_t3 = guild.get_role(935319103302926409)
+        t3_subs = [t3_role_role, gifted_t3_role, twitch_t3]
+
+        na_inhouses = self.client.get_channel(1118272266988441630)
+        eu_inhouses = self.client.get_channel(1074056805275140308)
+
+        for t3 in t3_subs:
+            await na_inhouses.set_permissions(
+                t3, view_channel=na_queues_open
+            )
+
+            await eu_inhouses.set_permissions(
+                t3, view_channel=eu_queues_open
+            )
+
 
     @tasks.loop(minutes=1.0)
     async def send_count(self):

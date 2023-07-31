@@ -65,6 +65,7 @@ class RaffleBot(Client):
         # tree.copy_global_to(guild=guild)
         # await tree.sync(guild=guild)
         SubController(self).send_count.start()
+        SubController(self).sync_channel_perms.start()
 
     async def on_message_edit(self, before: Message, message: Message):
         # Don't respond to ourselves

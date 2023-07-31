@@ -11,7 +11,8 @@ LOG = logging.getLogger(__name__)
 GUILD_ID = int(Config.CONFIG["Predictions"]["GuildID"])
 
 CUSTOM_EMOJI_PATTERN = re.compile(r"(<a?:[a-zA-Z0-9]+:([0-9]+)>)")
-MENTION_PATTERN = re.compile(r"(<@([0-9]+)>)")
+USER_PATTERN = re.compile(r"(<@([0-9]+)>)")
+CHANNEL_PATTERN = re.compile(r"(<#([0-9]+)>)")
 
 
 class ServerBot(Client):
@@ -60,7 +61,8 @@ class ServerBot(Client):
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
-                "mentions": self.find_mentions(message.content),
+                "mentions": self.find_users(message.content)
+                + self.find_channels(message.content),
             }
             LOG.debug(to_send)
             await publish_chat(to_send, stream)
@@ -76,16 +78,33 @@ class ServerBot(Client):
             stream_content.append({"emoji_text": emoji_text, "emoji_url": emoji.url})
         return True, stream_content
 
-    def find_mentions(self, content: str):
+    def find_users(self, content: str):
         stream_content = []
-        mention_matches = MENTION_PATTERN.findall(content)
-        for mention_text, user_id in mention_matches:
+        user_matches = USER_PATTERN.findall(content)
+        for user_text, user_id in user_matches:
             member = self.get_guild(GUILD_ID).get_member(int(user_id))
             if member is None:
                 LOG.warn(f"Unable to find user {user_id=}")
                 continue
             stream_content.append(
-                {"mention_text": mention_text, "display_name": member.display_name}
+                {
+                    "mention_text": user_text,
+                    "display_name": f"@{member.display_name}",
+                }
+            )
+        return stream_content
+
+    def find_channels(self, content: str):
+        LOG.info("HERE")
+        stream_content = []
+        channel_matches = CHANNEL_PATTERN.findall(content)
+        for channel_text, channel_id in channel_matches:
+            channel = self.get_guild(GUILD_ID).get_channel(int(channel_id))
+            if channel is None:
+                LOG.warn(f"Unable to find channel {channel_id=}")
+                continue
+            stream_content.append(
+                {"mention_text": channel_text, "display_name": f"# {channel.name}"}
             )
         return stream_content
 

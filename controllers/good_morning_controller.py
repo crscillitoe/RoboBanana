@@ -17,7 +17,7 @@ GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
 PACIFIC_TZ = timezone("US/Pacific")
 UTC_TZ = timezone("UTC")
 START_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=9, minute=0)).time()
-END_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=11, minute=30)).time()
+END_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=14, minute=0)).time()
 
 
 class GoodMorningController:

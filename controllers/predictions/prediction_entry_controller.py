@@ -17,6 +17,11 @@ class PredictionEntryController:
         interaction: Interaction,
         client: Client,
     ) -> bool:
+        if not DB().accepting_prediction_entries(interaction.guild_id):
+            return await interaction.response.send_message(
+                "Predictions are currently closed!", ephemeral=True
+            )
+
         if channel_points <= 0:
             return await interaction.response.send_message(
                 "You must wager a positive number of points!", ephemeral=True

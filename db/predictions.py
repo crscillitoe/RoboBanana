@@ -129,9 +129,6 @@ def get_prediction_channel_id(
 def create_prediction_entry(
     guild_id: int, user_id: int, channel_points: int, guess: int, session: sessionmaker
 ) -> bool:
-    if not accepting_prediction_entries(guild_id, session):
-        return False
-
     prediction_id = get_ongoing_prediction_id(guild_id, session)
     with session() as sess:
         sess.execute(

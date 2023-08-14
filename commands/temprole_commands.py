@@ -19,9 +19,16 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time"""
-        await TempRoleController.add_temprole(user.id, role, duration, interaction)
+        await TempRoleController.add_temprole(user, role, duration, interaction)
+
+    @app_commands.command(name="view_user_roles")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="Discord User to check roles for")
+    async def view_user_roles(self, interaction: Interaction, user: User):
+        """See expriations for all temproles currently assigned to given user"""
+        await TempRoleController.view_temproles(user, interaction)
 
     @app_commands.command(name="view_roles")
     async def view_roles(self, interaction: Interaction):
         """See expriations for all temproles currently assigned to you"""
-        await TempRoleController.view_temproles(interaction)
+        await TempRoleController.view_temproles(interaction.user, interaction)

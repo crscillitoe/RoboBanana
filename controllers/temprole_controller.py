@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Interaction, Role
+from discord import Client, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from db import DB
 from config import Config
@@ -21,8 +21,9 @@ class TempRoleController:
 
     @staticmethod
     async def add_temprole(
-        user_id: int, role: Role, duration: str, interaction: Interaction
+        user: User, role: Role, duration: str, interaction: Interaction
     ):
+        user_id = user.id
         delta = timedelta(seconds=timeparse(duration))
         expiration = datetime.now() + delta
 
@@ -39,18 +40,19 @@ class TempRoleController:
 
         unixtime = time.mktime(expiration.timetuple())
         await interaction.response.send_message(
-            f"Assigned temprole expiring <t:{unixtime:.0f}:f>", ephemeral=True
+            f"Assigned temprole to {user.mention} expiring <t:{unixtime:.0f}:f>"
         )
 
     @staticmethod
-    async def view_temproles(interaction: Interaction):
-        temproles = DB().get_user_temproles(interaction.user.id, interaction.guild_id)
+    async def view_temproles(user: User, interaction: Interaction):
+        temproles = DB().get_user_temproles(user.id, interaction.guild_id)
         if len(temproles) == 0:
-            await interaction.response.send_message(
-                "You do not currently have any temproles assigned!"
+            return await interaction.response.send_message(
+                f"{user.mention} does not currently have any temproles assigned!",
+                ephemeral=True,
             )
 
-        response = "Your current temproles:\n\n"
+        response = f"{user.mention} current temproles:\n\n"
         for temprole in temproles:
             role = interaction.guild.get_role(temprole.role_id)
             if role is None:

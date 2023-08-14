@@ -18,7 +18,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
     async def add_role(
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
-        """Assign temprole to a user for a specified time"""
+        """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
         await TempRoleController.add_temprole(user, role, duration, interaction)
 
     @app_commands.command(name="view_user_roles")

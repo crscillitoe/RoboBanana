@@ -15,6 +15,7 @@ from discord import (
 )
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
+from commands.temprole_commands import TemproleCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
 from commands.reaction_commands import ReactionCommands
@@ -22,6 +23,7 @@ from commands.vod_commands import VodCommands
 from config import Config
 from controllers.reaction_controller import ReactionController
 from controllers.sub_controller import SubController
+from controllers.temprole_controller import TempRoleController
 from db import DB
 from threading import Thread
 
@@ -66,6 +68,7 @@ class RaffleBot(Client):
         # await tree.sync(guild=guild)
         SubController(self).send_count.start()
         SubController(self).sync_channel_perms.start()
+        TempRoleController(self).expire_roles.start()
 
     async def on_message_edit(self, before: Message, message: Message):
         # Don't respond to ourselves
@@ -177,6 +180,7 @@ async def main():
         tree.add_command(ManagerCommands(tree, client))
         tree.add_command(ReactionCommands(tree, client))
         tree.add_command(VodCommands(tree, client))
+        tree.add_command(TemproleCommands(tree, client))
         await client.start(Config.CONFIG["Discord"]["Token"])
 
 

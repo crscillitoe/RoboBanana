@@ -24,6 +24,9 @@ UncoolEmojiID = 1087887812923232266
 CrowdMuteThreshold = 15
 CrowdMuteDuration = 1
 
+[TempRoles]
+ExpirationCheckCadenceMinutes = 5
+
 [Server]
 AuthToken =
 

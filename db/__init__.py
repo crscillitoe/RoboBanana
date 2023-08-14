@@ -4,6 +4,13 @@ from sqlalchemy import create_engine, select, update, insert, func
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
 
+from db.temproles import (
+    delete_temprole,
+    get_expired_roles,
+    get_user_temproles,
+    write_temprole,
+)
+
 from .vod_submissions import (
     get_latest_timestamp,
     update_timestamp,
@@ -59,6 +66,7 @@ from .models import (
     RaffleEntry,
     RoleModifier,
     RaffleType,
+    TempRoles,
     VodSubmission,
 )
 from config import Config
@@ -715,3 +723,48 @@ class DB:
             list[str]: Emojis to apply to messages
         """
         return get_reactions_for_user(user_id, self.session)
+
+    def write_temprole(
+        self, user_id: int, role_id: int, guild_id: int, expiration: datetime
+    ):
+        """Write a temprole to the DB
+
+        Args:
+            user_id (int): Discord User ID to grant role to
+            role_id (int): Role ID to grant to user
+            guild_id (int): Discord Guild ID the user belongs to
+            expiration (datetime): Expritation date of role
+        """
+        return write_temprole(user_id, role_id, guild_id, expiration, self.session)
+
+    def get_expired_roles(self, compare_time: datetime) -> list[TempRoles]:
+        """Get temproles which will expire by given time
+
+        Args:
+            compare_time (datetime): Time to compare temproles to
+            session (sessionmaker): Open DB session
+
+        Returns:
+            list[TempRoles]: All temproles which will be expired by this time
+        """
+        return get_expired_roles(compare_time, self.session)
+
+    def get_user_temproles(self, user_id: int, guild_id: int) -> list[TempRoles]:
+        """Get all temproles assigned to user
+
+        Args:
+            user_id (int): Discord User ID to grab roles for
+            guild_id (int): Guild ID to grab roles for
+
+        Returns:
+            list[TempRoles]: All temproles assigned to user
+        """
+        return get_user_temproles(user_id, guild_id, self.session)
+
+    def delete_temprole(self, id: int):
+        """Remove temprole from database with corresponding id
+
+        Args:
+            id (int): Temprole ID to delete
+        """
+        return delete_temprole(id, self.session)

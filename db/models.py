@@ -230,3 +230,19 @@ class EmojiReactions(Base):
             f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r},"
             f" emoji={self.emoji})"
         )
+
+
+class TempRoles(Base):
+    __tablename__ = "temproles"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False)
+    role_id = Column(BigInteger, nullable=False)
+    guild_id = Column(BigInteger, nullable=False)
+    expiration = Column(DateTime, nullable=False)
+
+    def __repr__(self):
+        return (
+            f"TempRole(id={self.id!r}, user_id={self.user_id!r},"
+            f" role_id={self.role_id!r}, guild_id={self.guild_id!r}, expiration={self.expiration!r})"
+        )

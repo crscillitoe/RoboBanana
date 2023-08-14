@@ -244,5 +244,6 @@ class TempRoles(Base):
     def __repr__(self):
         return (
             f"TempRole(id={self.id!r}, user_id={self.user_id!r},"
-            f" role_id={self.role_id!r}, guild_id={self.guild_id!r}, expiration={self.expiration!r})"
+            f" role_id={self.role_id!r}, guild_id={self.guild_id!r},"
+            f" expiration={self.expiration!r})"
         )

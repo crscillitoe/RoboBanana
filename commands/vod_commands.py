@@ -8,7 +8,8 @@ from rdoclient import RandomOrgClient
 PUBLISH_URL = "http://localhost:3000/publish-vod"
 LOG = logging.getLogger(__name__)
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
-RANDOM_CLIENT = RandomOrgClient("1c34f7d6-f990-48b7-97f0-e73e5c669d1f")
+RANDOM_ORG_API_KEY = Config.CONFIG["RandomOrg"]["ApiKey"]
+RANDOM_CLIENT = RandomOrgClient(RANDOM_ORG_API_KEY)
 
 
 @app_commands.guild_only()

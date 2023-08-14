@@ -64,14 +64,14 @@ class VodCommands(app_commands.Group, name="vod"):
     async def rounds(
         self, interaction: Interaction, rounds: int
     ) -> None:
-        """Using Random.org, get rounds to be checked for VOD approval"""
+        """Get rounds to be checked for VOD approval"""
+        if (rounds < 21):
+            await interaction.response.send_message(f"Not enough rounds in VOD\n;rejectedforfinalscore", ephemeral=True)
+            return
         generatedList = RANDOM_CLIENT.generate_integers(rounds, 1, rounds, False)
         roundsToCheck = []
         checks = [False, False, False, False, False, False]
         returnString = "Pre-round Comms:"
-        if (rounds < 21):
-            await interaction.response.send_message(f"Not enough rounds in VOD\n;rejectedforfinalscore", ephemeral=True)
-            return
         for num in generatedList:
             if (3 < num and num < 13 and not checks[2]):
                 roundsToCheck.append(num)

@@ -10,25 +10,44 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self.tree = tree
         self.client = client
 
-    @app_commands.command(name="add_role")
+    @app_commands.command(name="set")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="Discord User to assign role to")
     @app_commands.describe(role="Discord Role to assign role to")
     @app_commands.describe(duration="Duration of temprole")
-    async def add_role(
+    async def set_role(
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
-        await TempRoleController.add_temprole(user, role, duration, interaction)
+        await TempRoleController.set_role(user, role, duration, interaction)
 
-    @app_commands.command(name="view_user_roles")
+    @app_commands.command(name="extend")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="Discord User to extend role for")
+    @app_commands.describe(role="Discord Role to extend duration for")
+    @app_commands.describe(duration="Duration to add to temprole")
+    async def extend_role(
+        self, interaction: Interaction, user: User, role: Role, duration: str
+    ):
+        """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        await TempRoleController.extend_role(user, role, duration, interaction)
+
+    @app_commands.command(name="remove")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="Discord User to remove role from")
+    @app_commands.describe(role="Discord Role to remove")
+    async def remove_role(self, interaction: Interaction, user: User, role: Role):
+        """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        await TempRoleController.remove_role(user, role, interaction)
+
+    @app_commands.command(name="status")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="Discord User to check roles for")
-    async def view_user_roles(self, interaction: Interaction, user: User):
+    async def status(self, interaction: Interaction, user: User):
         """See expriations for all temproles currently assigned to given user"""
         await TempRoleController.view_temproles(user, interaction)
 
-    @app_commands.command(name="view_roles")
-    async def view_roles(self, interaction: Interaction):
+    @app_commands.command(name="mine")
+    async def mine(self, interaction: Interaction):
         """See expriations for all temproles currently assigned to you"""
         await TempRoleController.view_temproles(interaction.user, interaction)

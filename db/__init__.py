@@ -8,7 +8,8 @@ from db.temproles import (
     delete_temprole,
     get_expired_roles,
     get_user_temproles,
-    write_temprole,
+    retrieve_temprole,
+    set_temprole,
 )
 
 from .vod_submissions import (
@@ -724,10 +725,10 @@ class DB:
         """
         return get_reactions_for_user(user_id, self.session)
 
-    def write_temprole(
+    def set_temprole(
         self, user_id: int, role_id: int, guild_id: int, expiration: datetime
     ):
-        """Write a temprole to the DB
+        """Set temprole for user to specified duration, even if one exists already
 
         Args:
             user_id (int): Discord User ID to grant role to
@@ -735,7 +736,19 @@ class DB:
             guild_id (int): Discord Guild ID the user belongs to
             expiration (datetime): Expritation date of role
         """
-        return write_temprole(user_id, role_id, guild_id, expiration, self.session)
+        return set_temprole(user_id, role_id, guild_id, expiration, self.session)
+
+    def retrieve_temprole(self, user_id: int, role_id: int) -> TempRoles | None:
+        """Retrieve temprole for user_id / role_id pairing
+
+        Args:
+            user_id (int): Discord User ID of user to grab temprole for
+            role_id (int): Discord Role ID of role to grab temprole for
+
+        Returns:
+            TempRoles | None: None if no pairing exists, TempRoles otherwise
+        """
+        return retrieve_temprole(user_id, role_id, self.session)
 
     def get_expired_roles(self, compare_time: datetime) -> list[TempRoles]:
         """Get temproles which will expire by given time

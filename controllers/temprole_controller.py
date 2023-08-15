@@ -40,7 +40,7 @@ class TempRoleController:
 
         unixtime = time.mktime(expiration.timetuple())
         await interaction.response.send_message(
-            f"Assigned temprole to {user.mention} expiring <t:{unixtime:.0f}:f>"
+            f"Assigned {role.name} to {user.mention} expiring <t:{unixtime:.0f}:f>"
         )
 
     @staticmethod

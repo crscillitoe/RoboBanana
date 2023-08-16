@@ -27,6 +27,12 @@ CrowdMuteDuration = 1
 [TempRoles]
 ExpirationCheckCadenceMinutes = 5
 
+[VODApproval]
+ApprovedTag = 
+RejectedTag = 
+ApprovedRole = 
+RejectedRole = 
+
 [Server]
 AuthToken =
 

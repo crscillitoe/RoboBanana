@@ -68,7 +68,8 @@ class TempRoleController:
 
         unixtime = time.mktime(expiration.timetuple())
         await interaction.response.send_message(
-            f"Extended {role.name} for {user.mention}. Now expiring <t:{unixtime:.0f}:f>"
+            f"Extended {role.name} for {user.mention}. Now expiring"
+            f" <t:{unixtime:.0f}:f>"
         )
 
     @staticmethod

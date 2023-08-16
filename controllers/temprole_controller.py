@@ -115,7 +115,7 @@ class TempRoleController:
 
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):
-        LOG.debug("Running expire roles...")
+        LOG.info("[TEMPROLE TASK] Running expire roles...")
         roles_to_expire = DB().get_expired_roles(datetime.now())
         for expire_role in roles_to_expire:
             guild = self.client.get_guild(expire_role.guild_id)

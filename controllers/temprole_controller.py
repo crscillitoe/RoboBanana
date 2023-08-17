@@ -41,8 +41,9 @@ class TempRoleController:
             if temprole is not None:
                 DB().delete_temprole(temprole.id)
             return await interaction.response.send_message(
-                f"Failed to assign {role.name} to {user.mention}. Ensure this role is not above RoboBanana.", 
-                ephemeral=True
+                f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
+                " not above RoboBanana.",
+                ephemeral=True,
             )
 
         unixtime = time.mktime(expiration.timetuple())

@@ -34,7 +34,16 @@ class TempRoleController:
 
         DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
 
-        await member.add_roles(role)
+        try:
+            await member.add_roles(role)
+        except:
+            temprole = DB().retrieve_temprole(user_id, role.id)
+            if temprole is not None:
+                DB().delete_temprole(temprole.id)
+            return await interaction.response.send_message(
+                f"Failed to assign {role.name} to {user.mention}. Ensure this role is not above RoboBanana.", 
+                ephemeral=True
+            )
 
         unixtime = time.mktime(expiration.timetuple())
         await interaction.response.send_message(
@@ -133,7 +142,11 @@ class TempRoleController:
                 LOG.warn(f"Unable to find {expire_role.user_id=}")
                 continue
 
-            await member.remove_roles(role)
+            try:
+                await member.remove_roles(role)
+            except:
+                LOG.warn(f"Failed to remove {role} from {member.name}")
+                continue
             DB().delete_temprole(expire_role.id)
 
             # Rate limit

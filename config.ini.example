@@ -32,6 +32,7 @@ ApprovedTag =
 RejectedTag = 
 ApprovedRole = 
 RejectedRole = 
+HoursPerReview = 8
 
 [Server]
 AuthToken =

@@ -11,6 +11,7 @@ from db.temproles import (
     retrieve_temprole,
     set_temprole,
 )
+from db.vod_review_bank import add_vod_review_balance, get_vod_review_balance
 
 from .vod_submissions import (
     get_latest_timestamp,
@@ -781,3 +782,19 @@ class DB:
             id (int): Temprole ID to delete
         """
         return delete_temprole(id, self.session)
+
+    def add_vod_review_balance(self, user_id: int, amount: int):
+        """Add VOD review balance for specified user
+
+        Args:
+            user_id (int): Discord User ID of user who performed review
+        """
+        return add_vod_review_balance(user_id, amount, self.session)
+
+    def get_vod_review_balance(self, user_id: int) -> Optional[int]:
+        """Get VOD review balance for specified user
+
+        Args:
+            user_id (int): Discord User ID
+        """
+        return get_vod_review_balance(user_id, self.session)

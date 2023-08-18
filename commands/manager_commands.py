@@ -1,4 +1,4 @@
-from discord import app_commands, Interaction, Client, User, ForumTag
+from discord import Embed, app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord import Object
 from config import Config
@@ -6,6 +6,7 @@ import enum
 import logging
 
 from controllers.temprole_controller import TempRoleController
+from controllers.vod_review_bank_controller import VODReviewBankController
 
 APPROVED_TAG = int(Config.CONFIG["VODApproval"]["ApprovedTag"])
 REJECTED_TAG = int(Config.CONFIG["VODApproval"]["RejectedTag"])
@@ -53,6 +54,14 @@ class ManagerCommands(app_commands.Group, name="manager"):
                 REJECTED_TAG, REJECTED_ROLE, duration, interaction
             )
 
+    @app_commands.command(name="add_balance")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="Community Manager to add VOD Review credit for")
+    @app_commands.describe(hours="Number of hours of Gifted T3 to add to their bank")
+    async def add_balance(self, interaction: Interaction, user: User, hours: int):
+        """Award Gifted T3 credit to Community Manager bank"""
+        await VODReviewBankController.add_balance(user, hours, interaction)
+
     @staticmethod
     async def process_vod(
         tag_id: int, role_id: int, duration: str, interaction: Interaction
@@ -72,6 +81,12 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await TempRoleController.set_role(owner, role, duration, interaction)
 
         await interaction.channel.remove_tags(*interaction.channel.applied_tags)
-        await interaction.channel.add_tags(Object(id=tag_id))
-        response_content = await interaction.original_response()
-        await response_content.reply("Applied tag and temprole.")
+        forum_tag = interaction.channel.parent.get_tag(tag_id)
+        await interaction.channel.add_tags(forum_tag)
+        embed = Embed(
+            title="Tag and Temprole",
+            description=f"Applied {forum_tag.name} and {role.mention}.",
+            color=0xF9D60D,
+        )
+        await interaction.followup.send(embed=embed)
+        await VODReviewBankController.increment_balance(interaction.user, interaction)

@@ -21,7 +21,10 @@ class VODReviewBankController:
     @staticmethod
     async def add_balance(user: User, amount: int, interaction: Interaction):
         new_balance = DB().add_vod_review_balance(user.id, amount)
-        reply_content = f"Added {amount}h to {user.mention} VOD review balance. New balance: {new_balance}h"
+        reply_content = (
+            f"Added {amount}h to {user.mention} VOD review balance. New balance:"
+            f" {new_balance}h"
+        )
         embed = Embed(
             title="VOD Bank Balance",
             description=reply_content,

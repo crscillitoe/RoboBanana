@@ -120,3 +120,28 @@ def get_user_temproles(
             return results
 
         return list(map(lambda result: result[0], results))
+    
+def get_temprole_users(
+        role_id: int, guild_id: int, session: sessionmaker
+) -> list[TempRoles]:
+    """Get all users that have temprole
+
+    Args:
+        role_id (int): Discord Role ID to grab users for
+        guild_id (int): Guild ID to grab users for
+        session (sessionmaker): Open DB Session
+
+    Returns:
+        list[TempRoles]: All users that have temprole
+    """
+    with session() as sess:
+        results = sess.execute(
+            select(TempRoles)
+            .where(TempRoles.role_id == role_id)
+            .where(TempRoles.guild_id == guild_id)
+        ).all()
+
+        if len(results) == 0:
+            return results
+        
+        return list(map(lambda result: result[0], results))

@@ -8,6 +8,7 @@ from db.temproles import (
     delete_temprole,
     get_expired_roles,
     get_user_temproles,
+    get_temprole_users,
     retrieve_temprole,
     set_temprole,
 )
@@ -734,7 +735,7 @@ class DB:
             user_id (int): Discord User ID to grant role to
             role_id (int): Role ID to grant to user
             guild_id (int): Discord Guild ID the user belongs to
-            expiration (datetime): Expritation date of role
+            expiration (datetime): Expiration date of role
         """
         return set_temprole(user_id, role_id, guild_id, expiration, self.session)
 
@@ -773,6 +774,18 @@ class DB:
             list[TempRoles]: All temproles assigned to user
         """
         return get_user_temproles(user_id, guild_id, self.session)
+    
+    def get_temprole_users(self, role_id: int, guild_id: int) -> list[TempRoles]:
+        """Get all users that have temprole
+        
+        Args:
+            role_id (int): Discord Role ID to grab users for
+            guild_id (int): Guild ID to grab users for
+            
+        Returns:
+            list[TempRoles]: All users that have temprole
+        """
+        return get_temprole_users(role_id, guild_id, self.session)
 
     def delete_temprole(self, id: int):
         """Remove temprole from database with corresponding id

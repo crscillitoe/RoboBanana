@@ -123,6 +123,28 @@ class TempRoleController:
 
         await interaction.response.send_message(response, ephemeral=True)
 
+    @staticmethod
+    async def view_users(role: Role, interaction: Interaction):
+        temproles = DB().get_temprole_users(role.id, interaction.guild.id)
+
+        if len(temproles) == 0:
+            return await interaction.response.send_message(
+                f"{role.mention} is not currently assigned to any users as a temprole!",
+                ephemeral=True,
+            )
+        
+        response = f"{role.mention} current users: \n\n"
+        for temprole in temproles:
+            user = interaction.guild.get_member(temprole.user_id)
+            if user is None:
+                response += f"Could not find user {temprole.user_id}"
+                continue
+
+            unixtime = time.mktime(temprole.expiration.timetuple())
+            response += f"{user.mention} expires <t:{unixtime:.0f}:f>\n"
+
+        await interaction.response.send_message(response, ephemeral=True)
+
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):
         LOG.info("[TEMPROLE TASK] Running expire roles...")

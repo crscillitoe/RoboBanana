@@ -8,6 +8,7 @@ PUBLISH_URL = "http://localhost:3000/publish-vod"
 LOG = logging.getLogger(__name__)
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 
+
 @app_commands.guild_only()
 class VodCommands(app_commands.Group, name="vod"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

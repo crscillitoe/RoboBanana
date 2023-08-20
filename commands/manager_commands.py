@@ -52,12 +52,12 @@ class ManagerCommands(app_commands.Group, name="manager"):
 
     @app_commands.command(name="get_review_rounds")
     @app_commands.checks.has_role("VOD Review Team")
-    @app_commands.describe(rounds="total number of rounds in VOD")
-    async def get_rounds(
-        self, interaction: Interaction, rounds: int
+    @app_commands.describe(total_rounds="total number of rounds in VOD")
+    async def get_review_rounds(
+        self, interaction: Interaction, total_rounds: int
     ) -> None:
         """Generates rounds to check for the pre-round comms requirement"""
-        if (rounds < 21):
+        if (total_rounds < 21):
             await interaction.response.send_message("Not enough rounds in VOD. Match must be 13-8 or closer.\n;rejectedforfinalscore", ephemeral=True)
             return
         roundsToCheck = []
@@ -66,8 +66,8 @@ class ManagerCommands(app_commands.Group, name="manager"):
         random.shuffle(SECOND_HALF_STARTING_ROUNDS)
         roundsToCheck += FIRST_HALF_STARTING_ROUNDS[:2]
         roundsToCheck += SECOND_HALF_STARTING_ROUNDS[:2]
-        roundsToCheck.append(random.randint(FIRST_HALF_NORMAL_ROUNDS_START, FIRST_HALF_NORMAL_ROUNDS_END)) # Add one more non-start round from each half
-        roundsToCheck.append(random.randint(SECOND_HALF_NORMAL_ROUNDS_START, rounds)) # Second round ends at total round number
+        roundsToCheck.append(random.randint(FIRST_HALF_NORMAL_ROUNDS_START, FIRST_HALF_NORMAL_ROUNDS_END))
+        roundsToCheck.append(random.randint(SECOND_HALF_NORMAL_ROUNDS_START, total_rounds)) # Game ends at total round number
         roundsToCheck.sort()
         for num in roundsToCheck:
             returnString += f"\nRound {num}:" # Generates response that VOD Reviewer can copy-paste into the forum 

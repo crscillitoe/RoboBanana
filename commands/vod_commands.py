@@ -58,43 +58,47 @@ class VodCommands(app_commands.Group, name="vod"):
             "VOD Complete Event sent!", ephemeral=True
         )
 
-    @app_commands.command(name="rounds")
-    @app_commands.checks.has_role("VOD Volunteer")
-    @app_commands.describe(rounds="number of rounds in VOD")
-    async def rounds(
+    @app_commands.command(name="get_rounds")
+    @app_commands.checks.has_role("VOD Review Team")
+    @app_commands.describe(rounds="total number of rounds in VOD")
+    async def get_rounds(
         self, interaction: Interaction, rounds: int
     ) -> None:
-        """Get rounds to be checked for VOD approval"""
+        """Genereates rounds to check for Pre-round Comms requirement"""
         if (rounds < 21):
-            await interaction.response.send_message(f"Not enough rounds in VOD\n;rejectedforfinalscore", ephemeral=True)
+            await interaction.response.send_message("Not enough rounds in VOD. Match must be 13-8 or closer.\n;rejectedforfinalscore", ephemeral=True)
             return
         generatedList = RANDOM_CLIENT.generate_integers(rounds, 1, rounds, False)
         roundsToCheck = []
-        checks = [False, False, False, False, False, False]
+        checks = [True, True, True, True, True, True]
         returnString = "Pre-round Comms:"
+        currentNum = 0
         for num in generatedList:
-            if (3 < num and num < 13 and not checks[2]):
+            currentNum = num
+            if (3 < num and num < 13 and checks[2]):
                 roundsToCheck.append(num)
-                checks[2] = True
+                checks[2] = False
                 continue
-            elif (15 < num and not checks[5]):
+            elif (15 < num and checks[5]):
                 roundsToCheck.append(num)
-                checks[5] = True
+                checks[5] = False
                 continue
-            elif (num < 4 and (not checks[0] or not checks[1])):
+            elif (num < 4 and (checks[0] or checks[1])):
                 roundsToCheck.append(num)
                 if (checks[0]):
-                    checks[1] = True
+                    checks[0] = False
                 else:
-                    checks[0] = True
+                    checks[1] = False
                 continue
-            elif (12 < num and num < 16 and (not checks[3] or not checks[4])):
+            elif (12 < num and num < 16 and (checks[3] or checks[4])):
                 roundsToCheck.append(num)
                 if (checks[3]):
-                    checks[4] = True
+                    checks[3] = False
                 else:
-                    checks[3] = True
+                    checks[4] = False
                 continue
+            if not any(checks):
+                break #early break if all checks have been completed
         roundsToCheck.sort()
         for num in roundsToCheck:
             returnString += f"\nRound {num}:"

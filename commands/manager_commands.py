@@ -5,6 +5,7 @@ from discord import Object
 from config import Config
 import enum
 import logging
+import random
 
 from controllers.temprole_controller import TempRoleController
 from controllers.vod_review_bank_controller import VODReviewBankController
@@ -16,10 +17,15 @@ REJECTED_ROLE = int(Config.CONFIG["VODApproval"]["RejectedRole"])
 
 LOG = logging.getLogger(__name__)
 
-
 class VODType(enum.Enum):
     approved = 1
     rejected = 2
+
+FIRST_HALF_STARTING_ROUNDS = [1,2,3]
+FIRST_HALF_NORMAL_ROUNDS_START = 4
+FIRST_HALF_NORMAL_ROUNDS_END = 12
+SECOND_HALF_STARTING_ROUNDS = [13,14,15]
+SECOND_HALF_NORMAL_ROUNDS_START = 16
 
 
 @app_commands.guild_only()
@@ -113,7 +119,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
             )
 
         await TempRoleController.set_role(owner, role, duration, interaction)
-
+        
         await interaction.channel.remove_tags(*interaction.channel.applied_tags)
         forum_tag = interaction.channel.parent.get_tag(tag_id)
         await interaction.channel.add_tags(forum_tag)
@@ -124,3 +130,27 @@ class ManagerCommands(app_commands.Group, name="manager"):
         )
         await interaction.followup.send(embed=embed)
         await VODReviewBankController.increment_balance(interaction.user, interaction)
+
+    @app_commands.command(name="get_review_rounds")
+    @app_commands.checks.has_role("VOD Review Team")
+    @app_commands.describe(total_rounds="total number of rounds in VOD")
+    async def get_review_rounds(
+        self, interaction: Interaction, total_rounds: int
+    ) -> None:
+        """Generates rounds to check for the pre-round comms requirement"""
+        if (total_rounds < 21):
+            await interaction.response.send_message("Not enough rounds in VOD. Match must be 13-8 or closer.\n;rejectedforfinalscore", ephemeral=True)
+            return
+        roundsToCheck = []
+        returnString = "Pre-round Comms:"
+        random.shuffle(FIRST_HALF_STARTING_ROUNDS) # Get two rounds from the first 3 rounds of each half
+        random.shuffle(SECOND_HALF_STARTING_ROUNDS)
+        roundsToCheck += FIRST_HALF_STARTING_ROUNDS[:2]
+        roundsToCheck += SECOND_HALF_STARTING_ROUNDS[:2]
+        roundsToCheck.append(random.randint(FIRST_HALF_NORMAL_ROUNDS_START, FIRST_HALF_NORMAL_ROUNDS_END))
+        roundsToCheck.append(random.randint(SECOND_HALF_NORMAL_ROUNDS_START, total_rounds)) # Game ends at total round number
+        roundsToCheck.sort()
+        for num in roundsToCheck:
+            returnString += f"\nRound {num}:" # Generates response that VOD Reviewer can copy-paste into the forum 
+
+        await interaction.response.send_message(returnString, ephemeral=True)

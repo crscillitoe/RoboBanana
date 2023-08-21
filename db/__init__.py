@@ -8,7 +8,13 @@ from db.temproles import (
     delete_temprole,
     get_expired_roles,
     get_user_temproles,
-    write_temprole,
+    retrieve_temprole,
+    set_temprole,
+)
+from db.vod_review_bank import (
+    add_vod_review_balance,
+    get_vod_review_balance,
+    reset_vod_review_balance,
 )
 
 from .vod_submissions import (
@@ -724,10 +730,10 @@ class DB:
         """
         return get_reactions_for_user(user_id, self.session)
 
-    def write_temprole(
+    def set_temprole(
         self, user_id: int, role_id: int, guild_id: int, expiration: datetime
     ):
-        """Write a temprole to the DB
+        """Set temprole for user to specified duration, even if one exists already
 
         Args:
             user_id (int): Discord User ID to grant role to
@@ -735,7 +741,19 @@ class DB:
             guild_id (int): Discord Guild ID the user belongs to
             expiration (datetime): Expritation date of role
         """
-        return write_temprole(user_id, role_id, guild_id, expiration, self.session)
+        return set_temprole(user_id, role_id, guild_id, expiration, self.session)
+
+    def retrieve_temprole(self, user_id: int, role_id: int) -> TempRoles | None:
+        """Retrieve temprole for user_id / role_id pairing
+
+        Args:
+            user_id (int): Discord User ID of user to grab temprole for
+            role_id (int): Discord Role ID of role to grab temprole for
+
+        Returns:
+            TempRoles | None: None if no pairing exists, TempRoles otherwise
+        """
+        return retrieve_temprole(user_id, role_id, self.session)
 
     def get_expired_roles(self, compare_time: datetime) -> list[TempRoles]:
         """Get temproles which will expire by given time
@@ -768,3 +786,27 @@ class DB:
             id (int): Temprole ID to delete
         """
         return delete_temprole(id, self.session)
+
+    def add_vod_review_balance(self, user_id: int, amount: int):
+        """Add VOD review balance for specified user
+
+        Args:
+            user_id (int): Discord User ID of user who performed review
+        """
+        return add_vod_review_balance(user_id, amount, self.session)
+
+    def get_vod_review_balance(self, user_id: int) -> Optional[int]:
+        """Get VOD review balance for specified user
+
+        Args:
+            user_id (int): Discord User ID
+        """
+        return get_vod_review_balance(user_id, self.session)
+
+    def reset_vod_review_balance(self, user_id: int):
+        """Reset VOD Review balance to 0h for specified user
+
+        Args:
+            user_id (int): Discord User ID of user to reset balance for
+        """
+        return reset_vod_review_balance(user_id, self.session)

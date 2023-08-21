@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Interaction, Role
+from discord import Client, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from db import DB
 from config import Config
@@ -20,9 +20,8 @@ class TempRoleController:
         self.client = client
 
     @staticmethod
-    async def add_temprole(
-        user_id: int, role: Role, duration: str, interaction: Interaction
-    ):
+    async def set_role(user: User, role: Role, duration: str, interaction: Interaction):
+        user_id = user.id
         delta = timedelta(seconds=timeparse(duration))
         expiration = datetime.now() + delta
 
@@ -33,24 +32,86 @@ class TempRoleController:
                 ephemeral=True,
             )
 
-        DB().write_temprole(user_id, role.id, interaction.guild_id, expiration)
+        DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
 
-        await member.add_roles(role)
+        try:
+            await member.add_roles(role)
+        except:
+            temprole = DB().retrieve_temprole(user_id, role.id)
+            if temprole is not None:
+                DB().delete_temprole(temprole.id)
+            return await interaction.response.send_message(
+                f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
+                " not above RoboBanana.",
+                ephemeral=True,
+            )
 
         unixtime = time.mktime(expiration.timetuple())
         await interaction.response.send_message(
-            f"Assigned temprole expiring <t:{unixtime:.0f}:f>", ephemeral=True
+            f"Assigned {role.name} to {user.mention} expiring <t:{unixtime:.0f}:f>"
         )
 
     @staticmethod
-    async def view_temproles(interaction: Interaction):
-        temproles = DB().get_user_temproles(interaction.user.id, interaction.guild_id)
-        if len(temproles) == 0:
-            await interaction.response.send_message(
-                "You do not currently have any temproles assigned!"
+    async def extend_role(
+        user: User, role: Role, duration: str, interaction: Interaction
+    ):
+        user_id = user.id
+        extension_duration = timedelta(seconds=timeparse(duration))
+
+        member = interaction.guild.get_member(user_id)
+        if member is None:
+            return await interaction.response.send_message(
+                f"Unable to find provided user - are they in this server?",
+                ephemeral=True,
             )
 
-        response = "Your current temproles:\n\n"
+        temprole = DB().retrieve_temprole(user_id, role.id)
+
+        expiration = datetime.now()
+        # Set temprole if no existing role to extend
+        if temprole is None:
+            expiration += extension_duration
+            DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+        else:
+            expiration = temprole.expiration + extension_duration
+            DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+
+        unixtime = time.mktime(expiration.timetuple())
+        await interaction.response.send_message(
+            f"Extended {role.name} for {user.mention}. Now expiring"
+            f" <t:{unixtime:.0f}:f>"
+        )
+
+    @staticmethod
+    async def remove_role(user: User, role: Role, interaction: Interaction):
+        temprole = DB().retrieve_temprole(user.id, role.id)
+        if temprole is None:
+            return await interaction.response.send_message(
+                f"No temprole to remove for {user.mention}!", ephemeral=True
+            )
+
+        member = interaction.guild.get_member(user.id)
+        if member is None:
+            return await interaction.response.send_message(
+                f"Could not find user {user.mention}!", ephemeral=True
+            )
+
+        await member.remove_roles(role)
+        DB().delete_temprole(temprole.id)
+        await interaction.response.send_message(
+            f"Removed {role.name} from {user.mention}"
+        )
+
+    @staticmethod
+    async def view_temproles(user: User, interaction: Interaction):
+        temproles = DB().get_user_temproles(user.id, interaction.guild_id)
+        if len(temproles) == 0:
+            return await interaction.response.send_message(
+                f"{user.mention} does not currently have any temproles assigned!",
+                ephemeral=True,
+            )
+
+        response = f"{user.mention} current temproles:\n\n"
         for temprole in temproles:
             role = interaction.guild.get_role(temprole.role_id)
             if role is None:
@@ -64,7 +125,7 @@ class TempRoleController:
 
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):
-        LOG.debug("Running expire roles...")
+        LOG.info("[TEMPROLE TASK] Running expire roles...")
         roles_to_expire = DB().get_expired_roles(datetime.now())
         for expire_role in roles_to_expire:
             guild = self.client.get_guild(expire_role.guild_id)
@@ -82,7 +143,11 @@ class TempRoleController:
                 LOG.warn(f"Unable to find {expire_role.user_id=}")
                 continue
 
-            await member.remove_roles(role)
+            try:
+                await member.remove_roles(role)
+            except:
+                LOG.warn(f"Failed to remove {role} from {member.name}")
+                continue
             DB().delete_temprole(expire_role.id)
 
             # Rate limit

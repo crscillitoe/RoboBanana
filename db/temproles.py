@@ -1,34 +1,67 @@
 from datetime import datetime
 from db.models import TempRoles
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, delete, insert, func
+from sqlalchemy import select, delete, insert, update
 
 
-def write_temprole(
+def set_temprole(
     user_id: int,
     role_id: int,
     guild_id: int,
     expiration: datetime,
     session: sessionmaker,
 ):
-    """Write a temprole to the DB
+    """Set temprole for user to specified duration, even if one exists already
 
     Args:
         user_id (int): Discord User ID to grant role to
         role_id (int): Role ID to grant to user
         guild_id (int): Discord Guild ID the user belongs to
-        expiration (datetime): Expritation date of role
+        expiration (datetime): Expiration date of role
         session (sessionmaker): Open DB session
     """
     with session() as sess:
-        sess.execute(
-            insert(TempRoles).values(
-                user_id=user_id,
-                role_id=role_id,
-                guild_id=guild_id,
-                expiration=expiration,
+        result = retrieve_temprole(user_id, role_id, session)
+        if result is None:
+            sess.execute(
+                insert(TempRoles).values(
+                    user_id=user_id,
+                    role_id=role_id,
+                    guild_id=guild_id,
+                    expiration=expiration,
+                )
             )
+            return
+        sess.execute(
+            update(TempRoles)
+            .where(TempRoles.user_id == user_id)
+            .where(TempRoles.role_id == role_id)
+            .values(expiration=expiration)
         )
+
+
+def retrieve_temprole(
+    user_id: int, role_id: int, session: sessionmaker
+) -> TempRoles | None:
+    """Retrieve temprole for user_id / role_id pairing
+
+    Args:
+        user_id (int): Discord User ID of user to grab temprole for
+        role_id (int): Discord Role ID of role to grab temprole for
+        session (sessionmaker): Open DB session
+
+    Returns:
+        TempRoles | None: None if no pairing exists, TempRoles otherwise
+    """
+    with session() as sess:
+        result = sess.execute(
+            select(TempRoles)
+            .where(TempRoles.user_id == user_id)
+            .where(TempRoles.role_id == role_id)
+        ).first()
+        if result is None:
+            return None
+        return result[0]
 
 
 def delete_temprole(id: int, session: sessionmaker):

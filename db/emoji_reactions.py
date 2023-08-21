@@ -51,10 +51,11 @@ def get_reactions_for_user(user_id: int, session: sessionmaker) -> list[str]:
         ).all()
 
         return [row[0].emoji for row in results]
-    
+
+
 def get_emoji_reaction_delay(session: sessionmaker) -> Optional[int]:
     """
-    Get Robomoji delay time 
+    Get Robomoji delay time
 
     Returns:
         int: Delay time in seconds for Robomojis
@@ -63,13 +64,14 @@ def get_emoji_reaction_delay(session: sessionmaker) -> Optional[int]:
         result = sess.query(EmojiReactionDelay).first()
 
         if result is None:
-            return None # Value has not been set yet, handle in Controller
-        
+            return None  # Value has not been set yet, handle in Controller
+
         return result.delay_in_seconds
+
 
 def set_emoji_reaction_delay(delay_time: int, session: sessionmaker) -> int:
     """
-    Set Robomoji delay time 
+    Set Robomoji delay time
 
     Args:
         delay_time (int): Delay time in seconds for Robomojis
@@ -81,13 +83,13 @@ def set_emoji_reaction_delay(delay_time: int, session: sessionmaker) -> int:
             sess.execute(insert(EmojiReactionDelay).values(delay_in_seconds=delay_time))
             return delay_time
 
-        sess.execute(
-            update(EmojiReactionDelay)
-            .values(delay_in_seconds=delay_time)
-        )
+        sess.execute(update(EmojiReactionDelay).values(delay_in_seconds=delay_time))
         return delay_time
-    
-def get_emoji_reaction_last_used(user_id: int, session: sessionmaker) -> Optional[datetime]:
+
+
+def get_emoji_reaction_last_used(
+    user_id: int, session: sessionmaker
+) -> Optional[datetime]:
     """
     Get DateTime of last Robomoji reaction
 
@@ -103,12 +105,15 @@ def get_emoji_reaction_last_used(user_id: int, session: sessionmaker) -> Optiona
         ).first()
 
         if result is None:
-            return None # First usage of Robomoji in new system by given user, handle in Controller
-        
+            return None  # First usage of Robomoji in new system by given user, handle in Controller
+
         emoji_reaction_time: EmojiReactionTimes = result[0]
         return emoji_reaction_time.last_reacted
 
-def set_emoji_reaction_last_used(user_id: int, last_used: datetime, session: sessionmaker):
+
+def set_emoji_reaction_last_used(
+    user_id: int, last_used: datetime, session: sessionmaker
+):
     """
     Set DateTime of last Robomoji reaction
 
@@ -122,7 +127,11 @@ def set_emoji_reaction_last_used(user_id: int, last_used: datetime, session: ses
         ).first()
 
         if result is None:
-            sess.execute(insert(EmojiReactionTimes).values(user_id=user_id, last_reacted=last_used))
+            sess.execute(
+                insert(EmojiReactionTimes).values(
+                    user_id=user_id, last_reacted=last_used
+                )
+            )
             return
 
         existing_row: EmojiReactionTimes = result[0]

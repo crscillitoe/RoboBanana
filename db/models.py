@@ -230,7 +230,8 @@ class EmojiReactions(Base):
             f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r},"
             f" emoji={self.emoji})"
         )
-    
+
+
 class EmojiReactionDelay(Base):
     __tablename__ = "emoji_reaction_delay"
 
@@ -238,8 +239,12 @@ class EmojiReactionDelay(Base):
     delay_in_seconds = Column(Integer, nullable=False)
 
     def __repr__(self):
-        return f"EmojiReactionDelay(id={self.id!r}, delay_in_seconds={self.delay_in_seconds!r})"
-    
+        return (
+            f"EmojiReactionDelay(id={self.id!r},"
+            f" delay_in_seconds={self.delay_in_seconds!r})"
+        )
+
+
 class EmojiReactionTimes(Base):
     __tablename__ = "emoji_reaction_times"
 

@@ -7,7 +7,7 @@ class ReactionController:
     @staticmethod
     async def apply_reactions(message: Message):
         emojis = DB().get_reactions_for_user(message.author.id)
-        if len(emojis) != 0:
+        if len(emojis) != 0: # prevents further DB calls if user does not have any Robomojis
             emoji_delay_seconds = DB().get_emoji_reaction_delay()
             last_reaction_datetime = DB().get_emoji_reaction_last_used(message.author.id)
             robomoji_allowed_datetime = last_reaction_datetime + timedelta(seconds=emoji_delay_seconds)

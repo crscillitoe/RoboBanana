@@ -23,5 +23,6 @@ class ReactionCommands(app_commands.Group, name="reactions"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(delay_time="Delay time in seconds for Robomojis")
     async def set_emoji_reaction_delay(self, interaction: Interaction, delay_time: int):
+        """Sets delay time in seconds between Robomoji reactions for users"""
         result = DB().set_emoji_reaction_delay(delay_time)
         await interaction.response.send_message(f"Robomoji delay time set to {result} seconds!")

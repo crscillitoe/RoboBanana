@@ -64,7 +64,7 @@ class PredictionView(View):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
         modal = PredictionVoteModal(
-            self.parent, PredictionChoice.pink, point_balance, self.client
+            self.parent, PredictionChoice.left, point_balance, self.client
         )
         await interaction.response.send_modal(modal)
 
@@ -73,6 +73,6 @@ class PredictionView(View):
             return
         point_balance = DB().get_point_balance(interaction.user.id)
         modal = PredictionVoteModal(
-            self.parent, PredictionChoice.blue, point_balance, self.client
+            self.parent, PredictionChoice.right, point_balance, self.client
         )
         await interaction.response.send_modal(modal)

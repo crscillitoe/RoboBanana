@@ -61,7 +61,7 @@ class PredictionEntryController:
 
         chosen_option = (
             prediction_summary.option_one
-            if guess == PredictionChoice.pink
+            if guess == PredictionChoice.left
             else prediction_summary.option_two
         )
         prediction_message = await client.get_channel(channel_id).fetch_message(

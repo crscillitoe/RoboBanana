@@ -326,7 +326,7 @@ class ModCommands(app_commands.Group, name="mod"):
     async def payout_prediction(
         self, interaction: Interaction, option: PredictionChoice
     ):
-        """Payout predicton to option pink or blue"""
+        """Payout predicton to option left or right"""
         await PayoutPredictionController.payout_prediction(
             option, interaction, self.client
         )

@@ -23,14 +23,14 @@ class RaffleType(enum.Enum):
 
 
 class PredictionChoice(enum.Enum):
-    pink = 0
-    blue = 1
+    left = 0
+    right = 1
 
 
 class PredictionOutcome(enum.Enum):
     refund = -1
-    pink = 0
-    blue = 1
+    left = 0
+    right = 1
 
 
 class PredictionSummary:

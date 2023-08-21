@@ -1,3 +1,4 @@
+from typing import Optional
 from discord import Embed, app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord import Object
@@ -57,10 +58,43 @@ class ManagerCommands(app_commands.Group, name="manager"):
     @app_commands.command(name="add_balance")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="Community Manager to add VOD Review credit for")
-    @app_commands.describe(hours="Number of hours of Gifted T3 to add to their bank")
-    async def add_balance(self, interaction: Interaction, user: User, hours: int):
+    @app_commands.describe(duration="Amount of time to add to user's balance")
+    async def add_balance(self, interaction: Interaction, user: User, duration: str):
         """Award Gifted T3 credit to Community Manager bank"""
-        await VODReviewBankController.add_balance(user, hours, interaction)
+        await VODReviewBankController.add_balance(user, duration, interaction)
+
+    @app_commands.command(name="balance")
+    @app_commands.checks.has_role("Community Manager")
+    async def balance(self, interaction: Interaction) -> None:
+        """Check Gifted T3 credit"""
+        await VODReviewBankController.get_balance(interaction.user, interaction)
+
+    @app_commands.command(name="balance_for")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(user="Community Manager to check VOD Review credit for")
+    async def balance_for(self, interaction: Interaction, user: User) -> None:
+        """Check Gifted T3 credit for specified user"""
+        await VODReviewBankController.get_balance(user, interaction)
+
+    @app_commands.command(name="redeem")
+    @app_commands.checks.has_role("Community Manager")
+    @app_commands.describe(user="Community Manager to check VOD Review credit for")
+    @app_commands.describe(
+        duration="Duration to redeem T3 for (if balance is sufficient)"
+    )
+    async def redeem(
+        self,
+        interaction: Interaction,
+        user: Optional[User] = None,
+        duration: Optional[str] = None,
+    ) -> None:
+        """Redeem the specified duration of gifted t3 to specified user"""
+        if user is None:
+            await VODReviewBankController.redeem_gifted_t3(
+                interaction.user, duration, interaction
+            )
+        else:
+            await VODReviewBankController.redeem_gifted_t3(user, duration, interaction)
 
     @staticmethod
     async def process_vod(

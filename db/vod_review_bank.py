@@ -42,3 +42,18 @@ def get_vod_review_balance(user_id: int, session: sessionmaker) -> Optional[int]
             return None
         bank: VODReviewBank = result[0]
         return bank.balance
+
+
+def reset_vod_review_balance(user_id: int, session: sessionmaker):
+    """Reset VOD review balance to 0h for specified user
+
+    Args:
+        user_id (int): Discord User ID of user to reset balance for
+        session (sessionmaker): Open DB session
+    """
+    with session() as sess:
+        sess.execute(
+            update(VODReviewBank)
+            .where(VODReviewBank.user_id == user_id)
+            .values(balance=0)
+        )

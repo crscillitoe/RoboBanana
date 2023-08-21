@@ -1,7 +1,7 @@
 from datetime import datetime
 from db.models import TempRoles
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, delete, insert, update
+from sqlalchemy import select, delete, insert, update, func
 
 
 def set_temprole(
@@ -120,11 +120,42 @@ def get_user_temproles(
             return results
 
         return list(map(lambda result: result[0], results))
-    
+
+
 def get_temprole_users(
-        role_id: int, guild_id: int, session: sessionmaker
+    role_id: int, guild_id: int, session: sessionmaker, offset: int = 0, limit: int = None
 ) -> list[TempRoles]:
-    """Get all users that have temprole
+    """Get all users that have given temprole
+
+    Args:
+        role_id (int): Discord Role ID to grab users for
+        guild_id (int): Guild ID to grab users for
+        session (sessionmaker): Open DB Session
+        offset (int, optional): Number of results to skip. Default is 0
+        limit (int): Max number of results to return. Default is all results
+
+    Returns:
+        list[TempRoles]: All users that have given temprole
+    """
+    with session() as sess:
+        results = sess.execute(
+            select(TempRoles)
+            .where(TempRoles.role_id == role_id)
+            .where(TempRoles.guild_id == guild_id)
+            .offset(offset)
+            .limit(limit)
+        ).all()
+
+        if len(results) == 0:
+            return results
+        
+        return list(map(lambda result: result[0], results))
+
+
+def get_temprole_users_count(
+    role_id: int, guild_id: int, session: sessionmaker
+) -> int:
+    """Get number of users that have given temprole
 
     Args:
         role_id (int): Discord Role ID to grab users for
@@ -132,16 +163,13 @@ def get_temprole_users(
         session (sessionmaker): Open DB Session
 
     Returns:
-        list[TempRoles]: All users that have temprole
+        int: Number of users that have given temprole
     """
     with session() as sess:
-        results = sess.execute(
-            select(TempRoles)
+        count = sess.execute(
+            select(func.count())
             .where(TempRoles.role_id == role_id)
             .where(TempRoles.guild_id == guild_id)
-        ).all()
+        ).scalar()
 
-        if len(results) == 0:
-            return results
-        
-        return list(map(lambda result: result[0], results))
+    return count

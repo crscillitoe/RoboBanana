@@ -2,31 +2,27 @@ from discord import Embed, ButtonStyle
 from discord.ui import View, button
 
 class PaginationEmbed(Embed):
-    def __init__(self, title, data_list, per_page=10):
+    """
+    Calls page_callback to get the next page for PaginationView
+    
+    Args:
+        page_callback (callable): Callback that gets the title, desc, and updated number of pages
+            Called with additional parameters: current_page (int), num_pages (int), per_page (int)
+            Returns: title (str), description (str), num_pages (int)
+        per_page (int): Number of results per page. Passed to page_callback
+    """
+    def __init__(self, page_callback, per_page=10):
         super().__init__()
-        self.base_title = title
-        self.data_list = data_list
+        self.page_callback = page_callback
         self.per_page = per_page
-        self.num_pages = (len(data_list) + per_page - 1) // per_page
         self.current_page = 0
+        self.num_pages = None
 
-    async def build_embed(self):
-        self.title = await self.build_title()
-        self.description = await self.build_description()
+    async def get_next_page(self):
+        self.title, self.description, self.num_pages = await self.page_callback(
+            self.current_page, self.num_pages, self.per_page
+            )
         return self
-
-    async def build_title(self):
-        title = self.base_title
-        if self.num_pages > 1:
-            title += f"\t\t(Page {self.current_page + 1}/{self.num_pages})\n"
-        return title
-
-    async def build_description(self):
-        start_idx = self.current_page * self.per_page
-        end_idx = start_idx + self.per_page
-        description = "".join(self.data_list[start_idx:end_idx])
-        return description
-
 
 class PaginationView(View):
     def __init__(self, interaction, pagination_embed):
@@ -50,12 +46,12 @@ class PaginationView(View):
             await self.update_embed()
 
     async def update_embed(self):
-        embed = await self.embed.build_embed()
+        embed = await self.embed.get_next_page()
         message = await self.interaction.original_response()
         self.prev_button.disabled = self.embed.current_page == 0
-        self.next_button.disabled = self.embed.current_page == self.embed.num_pages - 1
+        self.next_button.disabled = self.embed.current_page >= self.embed.num_pages - 1
         await message.edit(embed=embed, view=self)
-        
+
     async def on_timeout(self):
         self.next_button.disabled = True
         self.prev_button.disabled = True

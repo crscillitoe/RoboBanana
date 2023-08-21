@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import time
 from discord import Client, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
+from functools import partial
 from db import DB
 from config import Config
 from views.pagination.pagination_embed_view import PaginationEmbed, PaginationView
@@ -126,29 +127,47 @@ class TempRoleController:
 
     @staticmethod
     async def view_users(role: Role, interaction: Interaction):
-        temprole_users = DB().get_temprole_users(role.id, interaction.guild_id)
-
-        if len(temprole_users) == 0:
+        if DB().get_temprole_users_count(role.id, interaction.guild_id) == 0:
             return await interaction.response.send_message(
                 f"`@{role.name}` is not currently assigned to any users as a temprole!",
                 ephemeral=True,
             )
-        
+
+        page_callback = partial(TempRoleController.get_view_users_page, role, interaction)
+        embed = PaginationEmbed(page_callback)
+        await embed.get_next_page()
+        view = PaginationView(interaction, embed)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+    @staticmethod
+    async def get_view_users_page(
+        role: Role, interaction: Interaction, current_page, num_pages, per_page
+    ):
+        """
+        Gets title, description, and num_pages for each page of view_users
+        """
+        temprole_users_count = DB().get_temprole_users_count(role.id, interaction.guild_id)
+        num_pages = (temprole_users_count + per_page - 1) // per_page
+
         title = f"Users with `@{role.name}` temprole:"
-        user_list = []
-        for user in temprole_users:
+        if num_pages > 1:
+            title += f"\t\t(Page {current_page + 1}/{num_pages})\n"
+
+        if current_page + 1 > num_pages:
+            description = "There are no longer enough users to fill this page.\n"
+            return title, description, num_pages
+
+        description = ""
+        offset = current_page * per_page
+        for user in DB().get_temprole_users(role.id, interaction.guild_id, offset, limit=per_page):
             member = interaction.guild.get_member(user.user_id)
             if member is None:
-                response = f"Could not find user {user.user_id}"
+                description += f"Could not find user {user.user_id}\n"
             else:
                 unixtime = time.mktime(user.expiration.timetuple())
-                response = f"{member.mention} expires <t:{unixtime:.0f}:f>\n"
-            user_list.append(response)
+                description += f"{member.mention} expires <t:{unixtime:.0f}:f>\n"
 
-        embed = PaginationEmbed(title, user_list)
-        view = PaginationView(interaction, embed) 
-        await embed.build_embed()
-        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+        return title, description, num_pages
 
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):

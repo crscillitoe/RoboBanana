@@ -9,6 +9,7 @@ from db.temproles import (
     get_expired_roles,
     get_user_temproles,
     get_temprole_users,
+    get_temprole_users_count,
     retrieve_temprole,
     set_temprole,
 )
@@ -775,17 +776,33 @@ class DB:
         """
         return get_user_temproles(user_id, guild_id, self.session)
     
-    def get_temprole_users(self, role_id: int, guild_id: int) -> list[TempRoles]:
-        """Get all users that have temprole
+    def get_temprole_users(
+        self, role_id: int, guild_id: int, offset: int = 0, limit: int = None
+    ) -> list[TempRoles]:
+        """Get all users that have given temprole
         
         Args:
             role_id (int): Discord Role ID to grab users for
             guild_id (int): Guild ID to grab users for
-            
+            offset (int, optional): Number of results to skip. Default is 0
+            limit (int): Max number of results to return. Default is all results
+
         Returns:
-            list[TempRoles]: All users that have temprole
+            list[TempRoles]: All users that have given temprole
         """
-        return get_temprole_users(role_id, guild_id, self.session)
+        return get_temprole_users(role_id, guild_id, self.session, offset, limit)
+
+    def get_temprole_users_count(self, role_id: int, guild_id: int) -> int:
+        """Get number of users that have given temprole
+
+        Args:
+            role_id (int): Discord Role ID to grab users for
+            guild_id (int): Guild ID to grab users for
+
+        Returns:
+            int: Number of users that have given temprole
+        """
+        return get_temprole_users_count(role_id, guild_id, self.session)
 
     def delete_temprole(self, id: int):
         """Remove temprole from database with corresponding id

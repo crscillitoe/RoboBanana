@@ -19,9 +19,9 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         toggle_desc = "ON" if result else "OFF"
         await interaction.response.send_message(f"Reaction toggled {toggle_desc}!")
 
-    @app_commands.command(name="set_emoji_delay")
+    @app_commands.command(name="set_emoji_reaction_delay")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(delay_time="Delay time in seconds for Robomojis")
-    async def set_emoji_delay(self, interaction: Interaction, delay_time: int):
-        result = DB().set_emoji_delay(delay_time)
+    async def set_emoji_reaction_delay(self, interaction: Interaction, delay_time: int):
+        result = DB().set_emoji_reaction_delay(delay_time)
         await interaction.response.send_message(f"Robomoji delay time set to {result} seconds!")

@@ -65,10 +65,10 @@ from .channel_rewards import (
 from .emoji_reactions import (
     get_reactions_for_user,
     toggle_emoji_reaction,
-    get_emoji_delay,
-    set_emoji_delay,
-    get_emoji_last_used,
-    set_emoji_last_used,
+    get_emoji_reaction_delay,
+    set_emoji_reaction_delay,
+    get_emoji_reaction_last_used,
+    set_emoji_reaction_last_used,
 )
 from .models import (
     Base,
@@ -737,23 +737,23 @@ class DB:
         """
         return get_reactions_for_user(user_id, self.session)
 
-    def get_emoji_delay(self):
+    def get_emoji_reaction_delay(self):
         """Get Robomoji delay time
 
         Returns:
             int: Delay time in seconds for Robomojis
         """
-        return get_emoji_delay(self.session)
+        return get_emoji_reaction_delay(self.session)
 
-    def set_emoji_delay(self, delay_time: int):
+    def set_emoji_reaction_delay(self, delay_time: int):
         """Set Robomoji delay time
 
         Args:
             delay_time (int): Delay time in seconds for Robomojis
         """
-        return set_emoji_delay(delay_time, self.session)
+        return set_emoji_reaction_delay(delay_time, self.session)
 
-    def get_emoji_last_used(
+    def get_emoji_reaction_last_used(
         self,
         user_id: int,
     ):
@@ -766,9 +766,9 @@ class DB:
         Returns:
             DateTime: DateTime of last Robomoji reaction for given user
         """
-        return get_emoji_last_used(user_id, self.session)
+        return get_emoji_reaction_last_used(user_id, self.session)
 
-    def set_emoji_last_used(self, user_id: int, last_used: DateTime):
+    def set_emoji_reaction_last_used(self, user_id: int, last_used: DateTime):
         """
         Set DateTime of last Robomoji reaction
 
@@ -776,7 +776,7 @@ class DB:
             user_id (int): Discord User ID to add reaction to
             last_used (DateTime):  DateTime of most recently used Robomoji reaction
         """
-        return set_emoji_last_used(user_id, last_used, self.session)
+        return set_emoji_reaction_last_used(user_id, last_used, self.session)
 
     def set_temprole(
         self, user_id: int, role_id: int, guild_id: int, expiration: datetime

@@ -51,7 +51,7 @@ def get_reactions_for_user(user_id: int, session: sessionmaker) -> list[str]:
 
         return [row[0].emoji for row in results]
     
-def get_emoji_delay(session: sessionmaker) -> int:
+def get_emoji_reaction_delay(session: sessionmaker) -> int:
     """
     Get Robomoji delay time 
 
@@ -67,7 +67,7 @@ def get_emoji_delay(session: sessionmaker) -> int:
         
         return result.delay_in_seconds
 
-def set_emoji_delay(delay_time: int, session: sessionmaker) -> int:
+def set_emoji_reaction_delay(delay_time: int, session: sessionmaker) -> int:
     """
     Set Robomoji delay time 
 
@@ -89,7 +89,7 @@ def set_emoji_delay(delay_time: int, session: sessionmaker) -> int:
         )
         return delay_time
     
-def get_emoji_last_used(user_id: int, session: sessionmaker) -> datetime:
+def get_emoji_reaction_last_used(user_id: int, session: sessionmaker) -> datetime:
     """
     Get DateTime of last Robomoji reaction
 
@@ -111,7 +111,7 @@ def get_emoji_last_used(user_id: int, session: sessionmaker) -> datetime:
         emoji_reaction_time: EmojiReactionTimes = result[0]
         return emoji_reaction_time.last_reacted
 
-def set_emoji_last_used(user_id: int, last_used: DateTime, session: sessionmaker):
+def set_emoji_reaction_last_used(user_id: int, last_used: DateTime, session: sessionmaker):
     """
     Set DateTime of last Robomoji reaction
 

@@ -7,6 +7,8 @@ from db.models import EmojiReactions, EmojiReactionDelay, EmojiReactionTimes
 
 LOG = logging.getLogger(__name__)
 
+DEFAULT_EMOJI_REACTION_DELAY = 15 # Default delay for Robomoji reactions
+
 
 def toggle_emoji_reaction(user_id: int, emoji: str, session: sessionmaker) -> bool:
     """Toggles emoji reaction for a given user
@@ -62,8 +64,8 @@ def get_emoji_reaction_delay(session: sessionmaker) -> int:
         result = sess.query(EmojiReactionDelay).first()
 
         if result is None:
-            sess.execute(insert(EmojiReactionDelay).values(delay_in_seconds=15)) # Fallback default value of 15 seconds
-            return 15
+            sess.execute(insert(EmojiReactionDelay).values(delay_in_seconds=DEFAULT_EMOJI_REACTION_DELAY)) # Fallback default value of 15 seconds
+            return DEFAULT_EMOJI_REACTION_DELAY
         
         return result.delay_in_seconds
 

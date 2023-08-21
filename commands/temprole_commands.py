@@ -44,10 +44,17 @@ class TemproleCommands(app_commands.Group, name="temprole"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="Discord User to check roles for")
     async def status(self, interaction: Interaction, user: User):
-        """See expriations for all temproles currently assigned to given user"""
+        """See expirations for all temproles currently assigned to given user"""
         await TempRoleController.view_temproles(user, interaction)
 
     @app_commands.command(name="mine")
     async def mine(self, interaction: Interaction):
-        """See expriations for all temproles currently assigned to you"""
+        """See expirations for all temproles currently assigned to you"""
         await TempRoleController.view_temproles(interaction.user, interaction)
+
+    @app_commands.command(name="view")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(role="Discord Role to check users for")
+    async def view(self, interaction: Interaction, role: Role):
+        """See expirations for all users that currently have a given role"""
+        await TempRoleController.view_users(role, interaction)

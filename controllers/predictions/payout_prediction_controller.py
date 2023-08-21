@@ -24,9 +24,9 @@ class ReturnableGenerator:
 class PayoutPredictionController:
     @staticmethod
     def get_winning_pot(winning_option: int, option_one: int, option_two: int):
-        if winning_option == PredictionChoice.pink.value:
+        if winning_option == PredictionChoice.left.value:
             return option_one
-        elif winning_option == PredictionChoice.blue.value:
+        elif winning_option == PredictionChoice.right.value:
             return option_two
         else:
             raise ValueError(f"Invalid PredictionChoice provided: {winning_option}")
@@ -93,7 +93,7 @@ class PayoutPredictionController:
 
         paid_option = (
             prediction_summary.option_one
-            if option == PredictionChoice.pink
+            if option == PredictionChoice.left
             else prediction_summary.option_two
         )
 
@@ -208,9 +208,9 @@ class PayoutPredictionController:
         reply_message = ""
         if option != PredictionOutcome.refund:
             payout_option = (
-                PredictionChoice.pink
-                if option == PredictionOutcome.pink
-                else PredictionChoice.blue
+                PredictionChoice.left
+                if option == PredictionOutcome.left
+                else PredictionChoice.right
             )
             reply_message = await PayoutPredictionController._perform_payout(
                 prediction.id, payout_option, interaction, client

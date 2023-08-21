@@ -41,7 +41,7 @@ class PayoutPredictionView(View):
 
     async def option_one_onclick(self, interaction: Interaction):
         await PayoutPredictionController.payout_prediction(
-            PredictionChoice.pink, interaction, self.client
+            PredictionChoice.left, interaction, self.client
         )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True
@@ -50,7 +50,7 @@ class PayoutPredictionView(View):
 
     async def option_two_onclick(self, interaction: Interaction):
         await PayoutPredictionController.payout_prediction(
-            PredictionChoice.blue, interaction, self.client
+            PredictionChoice.right, interaction, self.client
         )
         self.option_one_button.disabled = True
         self.option_two_button.disabled = True

@@ -230,6 +230,28 @@ class EmojiReactions(Base):
             f"EmojiReaction(id={self.id!r}, user_id={self.user_id!r},"
             f" emoji={self.emoji})"
         )
+    
+class EmojiReactionDelay(Base):
+    __tablename__ = "emoji_reaction_delay"
+
+    id = Column(Integer, primary_key=True)
+    delay_in_seconds = Column(Integer, nullable=False)
+
+    def __repr__(self):
+        return f"EmojiReactionDelay(id={self.id!r}, delay_in_seconds={self.delay_in_seconds!r})"
+    
+class EmojiReactionTimes(Base):
+    __tablename__ = "emoji_reaction_times"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False)
+    last_reacted = Column(DateTime, nullable=False)
+
+    def __repr__(self):
+        return (
+            f"EmojiReactionTimes(id={self.id!r}, user_id={self.user_id!r},"
+            f" last_reacted={self.last_reacted!r})"
+        )
 
 
 class TempRoles(Base):

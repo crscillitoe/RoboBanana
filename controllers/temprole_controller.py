@@ -133,7 +133,9 @@ class TempRoleController:
                 ephemeral=True,
             )
 
-        page_callback = partial(TempRoleController.get_view_users_page, role, interaction)
+        page_callback = partial(
+            TempRoleController.get_view_users_page, role, interaction
+        )
         embed = PaginationEmbed(page_callback)
         await embed.get_next_page()
         view = PaginationView(interaction, embed)
@@ -146,7 +148,9 @@ class TempRoleController:
         """
         Gets title, description, and num_pages for each page of view_users
         """
-        temprole_users_count = DB().get_temprole_users_count(role.id, interaction.guild_id)
+        temprole_users_count = DB().get_temprole_users_count(
+            role.id, interaction.guild_id
+        )
         num_pages = (temprole_users_count + per_page - 1) // per_page
 
         title = f"Users with `@{role.name}` temprole:"
@@ -159,7 +163,9 @@ class TempRoleController:
 
         description = ""
         offset = current_page * per_page
-        for user in DB().get_temprole_users(role.id, interaction.guild_id, offset, limit=per_page):
+        for user in DB().get_temprole_users(
+            role.id, interaction.guild_id, offset, limit=per_page
+        ):
             member = interaction.guild.get_member(user.user_id)
             if member is None:
                 description += f"Could not find user {user.user_id}\n"

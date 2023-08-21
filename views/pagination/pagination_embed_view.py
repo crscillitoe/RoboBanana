@@ -1,16 +1,18 @@
 from discord import Embed, ButtonStyle
 from discord.ui import View, button
 
+
 class PaginationEmbed(Embed):
     """
     Calls page_callback to get the next page for PaginationView
-    
+
     Args:
         page_callback (callable): Callback that gets the title, desc, and updated number of pages
             Called with additional parameters: current_page (int), num_pages (int), per_page (int)
             Returns: title (str), description (str), num_pages (int)
         per_page (int): Number of results per page. Passed to page_callback
     """
+
     def __init__(self, page_callback, per_page=10):
         super().__init__()
         self.page_callback = page_callback
@@ -21,8 +23,9 @@ class PaginationEmbed(Embed):
     async def get_next_page(self):
         self.title, self.description, self.num_pages = await self.page_callback(
             self.current_page, self.num_pages, self.per_page
-            )
+        )
         return self
+
 
 class PaginationView(View):
     def __init__(self, interaction, pagination_embed):

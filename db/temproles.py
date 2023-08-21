@@ -123,7 +123,11 @@ def get_user_temproles(
 
 
 def get_temprole_users(
-    role_id: int, guild_id: int, session: sessionmaker, offset: int = 0, limit: int = None
+    role_id: int,
+    guild_id: int,
+    session: sessionmaker,
+    offset: int = 0,
+    limit: int = None,
 ) -> list[TempRoles]:
     """Get all users that have given temprole
 
@@ -148,13 +152,11 @@ def get_temprole_users(
 
         if len(results) == 0:
             return results
-        
+
         return list(map(lambda result: result[0], results))
 
 
-def get_temprole_users_count(
-    role_id: int, guild_id: int, session: sessionmaker
-) -> int:
+def get_temprole_users_count(role_id: int, guild_id: int, session: sessionmaker) -> int:
     """Get number of users that have given temprole
 
     Args:

@@ -780,12 +780,12 @@ class DB:
             list[TempRoles]: All temproles assigned to user
         """
         return get_user_temproles(user_id, guild_id, self.session)
-    
+
     def get_temprole_users(
         self, role_id: int, guild_id: int, offset: int = 0, limit: int = None
     ) -> list[TempRoles]:
         """Get all users that have given temprole
-        
+
         Args:
             role_id (int): Discord Role ID to grab users for
             guild_id (int): Guild ID to grab users for

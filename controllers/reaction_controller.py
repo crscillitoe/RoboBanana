@@ -5,7 +5,9 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-DEFAULT_EMOJI_REACTION_DELAY = 15  # Default delay for Robomoji reactions if not set manually
+DEFAULT_EMOJI_REACTION_DELAY = (
+    15  # Default delay for Robomoji reactions if not set manually
+)
 
 
 class ReactionController:
@@ -24,9 +26,14 @@ class ReactionController:
 
         last_reaction_datetime = DB().get_emoji_reaction_last_used(message.author.id)
 
-        robomoji_allowed_datetime = last_reaction_datetime or datetime.now() + timedelta(seconds=emoji_delay_seconds) # handles case on user's first message in new system
+        robomoji_allowed_datetime = (
+            last_reaction_datetime or datetime.now()
+        ) + timedelta(
+            seconds=emoji_delay_seconds
+        )  # handles case on user's first message in new system
         if (
-            last_reaction_datetime == None # handles case on user's first message in new system
+            last_reaction_datetime
+            == None  # handles case on user's first message in new system
             or robomoji_allowed_datetime <= datetime.now()
         ):
             for emoji in emojis:

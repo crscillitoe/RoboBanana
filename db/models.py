@@ -247,3 +247,10 @@ class TempRoles(Base):
             f" role_id={self.role_id!r}, guild_id={self.guild_id!r},"
             f" expiration={self.expiration!r})"
         )
+
+
+class VODReviewBank(Base):
+    __tablename__ = "vod_review_bank"
+
+    user_id = Column(BigInteger, primary_key=True, nullable=False)
+    balance = Column(Integer, nullable=False)

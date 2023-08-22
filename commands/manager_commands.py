@@ -46,7 +46,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="flag_vod")
-    @app_commands.checks.has_role("Community Manager")
+    @app_commands.checks.has_any_role(["Mod", "Community Manager", "VOD Review Team"])
     @app_commands.describe(vod_type="VOD Type (Approved/Rejected)")
     @app_commands.describe(duration="Duration to add to temprole")
     async def flag_vod(
@@ -72,7 +72,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await VODReviewBankController.add_balance(user, duration, interaction)
 
     @app_commands.command(name="balance")
-    @app_commands.checks.has_role("Community Manager")
+    @app_commands.checks.has_any_role(["Mod", "Community Manager", "VOD Review Team"])
     async def balance(self, interaction: Interaction) -> None:
         """Check Gifted T3 credit"""
         await VODReviewBankController.get_balance(interaction.user, interaction)
@@ -85,7 +85,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await VODReviewBankController.get_balance(user, interaction)
 
     @app_commands.command(name="redeem")
-    @app_commands.checks.has_role("Community Manager")
+    @app_commands.checks.has_any_role(["Mod", "Community Manager", "VOD Review Team"])
     @app_commands.describe(user="Community Manager to check VOD Review credit for")
     @app_commands.describe(
         duration="Duration to redeem T3 for (if balance is sufficient)"
@@ -134,7 +134,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await VODReviewBankController.increment_balance(interaction.user, interaction)
 
     @app_commands.command(name="get_review_rounds")
-    @app_commands.checks.has_role("VOD Review Team")
+    @app_commands.checks.has_any_role(["Mod", "Community Manager", "VOD Review Team"])
     @app_commands.describe(total_rounds="total number of rounds in VOD")
     async def get_review_rounds(
         self, interaction: Interaction, total_rounds: int

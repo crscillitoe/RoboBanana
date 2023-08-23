@@ -52,7 +52,10 @@ class TempRoleController:
         unixtime = time.mktime(expiration.timetuple())
         embed = Embed(
             title="Assigned Temprole",
-            description=f"Assigned {role.mention} to {user.mention} expiring <t:{unixtime:.0f}:f>",
+            description=(
+                f"Assigned {role.mention} to {user.mention} expiring"
+                f" <t:{unixtime:.0f}:f>"
+            ),
             color=Colour.green(),
         )
         await DiscordUtils.reply(interaction, embed=embed)
@@ -85,7 +88,10 @@ class TempRoleController:
         unixtime = time.mktime(expiration.timetuple())
         embed = Embed(
             title="Assigned Temprole",
-            description=f"Extended {role.mention} for {user.mention}. Now expiring <t:{unixtime:.0f}:f>",
+            description=(
+                f"Extended {role.mention} for {user.mention}. Now expiring"
+                f" <t:{unixtime:.0f}:f>"
+            ),
             color=Colour.green(),
         )
         await DiscordUtils.reply(interaction, embed=embed)

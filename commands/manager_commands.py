@@ -105,6 +105,16 @@ class ManagerCommands(app_commands.Group, name="manager"):
             await VODReviewBankController.redeem_gifted_t3(user, duration, interaction)
 
     @staticmethod
+    async def remove_incorrect_role(user: User, interaction: Interaction):
+        approved_role = interaction.guild.get_role(APPROVED_ROLE)
+        rejected_role = interaction.guild.get_role(REJECTED_ROLE)
+
+        if TempRoleController.user_has_temprole(user, approved_role):
+            await TempRoleController.remove_role(user, approved_role, interaction)
+        if TempRoleController.user_has_temprole(user, rejected_role):
+            await TempRoleController.remove_role(user, rejected_role, interaction)
+
+    @staticmethod
     async def process_vod(
         tag_id: int, role_id: int, duration: str, interaction: Interaction
     ):
@@ -120,6 +130,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
                 "Could not find author of this forum post", ephemeral=True
             )
 
+        await ManagerCommands.remove_incorrect_role(owner, interaction)
         await TempRoleController.set_role(owner, role, duration, interaction)
 
         await interaction.channel.remove_tags(*interaction.channel.applied_tags)

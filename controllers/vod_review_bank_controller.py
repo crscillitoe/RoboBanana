@@ -7,6 +7,8 @@ from db import DB
 from pytimeparse.timeparse import timeparse
 import logging
 
+from util.discord_utils import DiscordUtils
+
 HOURS_PER_REVIEW = int(Config.CONFIG["VODApproval"]["HoursPerReview"])
 LOG = logging.getLogger(__name__)
 GIFTED_T3_ROLE_ID = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
@@ -65,7 +67,9 @@ class VODReviewBankController:
             user (User): Discord User to increment balance for
             interaction (Interaction): Discord Command Interaction
         """
-        await VODReviewBankController.add_balance(user, HOURS_PER_REVIEW, interaction)
+        await VODReviewBankController.add_balance(
+            user, f"{HOURS_PER_REVIEW}h", interaction
+        )
 
     @staticmethod
     async def add_balance(user: User, duration: str, interaction: Interaction):
@@ -82,7 +86,4 @@ class VODReviewBankController:
             description=reply_content,
             color=Colour.green(),
         )
-        if interaction.response.is_done():
-            return await interaction.followup.send(embed=embed, ephemeral=True)
-
-        return await interaction.response.send_message(embed=embed, ephemeral=True)
+        return await DiscordUtils.reply(interaction, embed=embed, ephemeral=True)

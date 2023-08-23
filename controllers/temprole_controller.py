@@ -3,11 +3,12 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Interaction, Role, User
+from discord import Client, Guild, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
 from config import Config
+from util.discord_utils import DiscordUtils
 from views.pagination.pagination_embed_view import PaginationEmbed, PaginationView
 
 EXPIRATION_CHECK_CADENCE = float(
@@ -49,8 +50,9 @@ class TempRoleController:
             )
 
         unixtime = time.mktime(expiration.timetuple())
-        await interaction.response.send_message(
-            f"Assigned {role.name} to {user.mention} expiring <t:{unixtime:.0f}:f>"
+        await DiscordUtils.reply(
+            interaction,
+            f"Assigned {role.name} to {user.mention} expiring <t:{unixtime:.0f}:f>",
         )
 
     @staticmethod
@@ -85,6 +87,11 @@ class TempRoleController:
         )
 
     @staticmethod
+    def user_has_temprole(user: User, role: Role):
+        temprole = DB().retrieve_temprole(user.id, role.id)
+        return temprole is not None
+
+    @staticmethod
     async def remove_role(user: User, role: Role, interaction: Interaction):
         temprole = DB().retrieve_temprole(user.id, role.id)
         if temprole is None:
@@ -100,8 +107,8 @@ class TempRoleController:
 
         await member.remove_roles(role)
         DB().delete_temprole(temprole.id)
-        await interaction.response.send_message(
-            f"Removed {role.name} from {user.mention}"
+        await DiscordUtils.reply(
+            interaction, f"Removed {role.name} from {user.mention}"
         )
 
     @staticmethod

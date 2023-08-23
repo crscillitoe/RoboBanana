@@ -197,16 +197,19 @@ class TempRoleController:
             guild = self.client.get_guild(expire_role.guild_id)
             if guild is None:
                 LOG.warn(f"Unable to find {expire_role.guild_id=}")
+                DB().delete_temprole(expire_role.id)
                 continue
 
             role = guild.get_role(expire_role.role_id)
             if role is None:
                 LOG.warn(f"Unable to find {expire_role.role_id=}")
+                DB().delete_temprole(expire_role.id)
                 continue
 
             member = guild.get_member(expire_role.user_id)
             if member is None:
                 LOG.warn(f"Unable to find {expire_role.user_id=}")
+                DB().delete_temprole(expire_role.id)
                 continue
 
             try:

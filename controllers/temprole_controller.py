@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Guild, Interaction, Role, User
+from discord import Client, Colour, Embed, Guild, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
@@ -50,10 +50,12 @@ class TempRoleController:
             )
 
         unixtime = time.mktime(expiration.timetuple())
-        await DiscordUtils.reply(
-            interaction,
-            f"Assigned {role.name} to {user.mention} expiring <t:{unixtime:.0f}:f>",
+        embed = Embed(
+            title="Assigned Temprole",
+            description=f"Assigned {role.mention} to {user.mention} expiring <t:{unixtime:.0f}:f>",
+            color=Colour.green(),
         )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @staticmethod
     async def extend_role(
@@ -81,10 +83,12 @@ class TempRoleController:
             DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
 
         unixtime = time.mktime(expiration.timetuple())
-        await interaction.response.send_message(
-            f"Extended {role.name} for {user.mention}. Now expiring"
-            f" <t:{unixtime:.0f}:f>"
+        embed = Embed(
+            title="Assigned Temprole",
+            description=f"Extended {role.mention} for {user.mention}. Now expiring <t:{unixtime:.0f}:f>",
+            color=Colour.green(),
         )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @staticmethod
     def user_has_temprole(user: User, role: Role):
@@ -107,9 +111,12 @@ class TempRoleController:
 
         await member.remove_roles(role)
         DB().delete_temprole(temprole.id)
-        await DiscordUtils.reply(
-            interaction, f"Removed {role.name} from {user.mention}"
+        embed = Embed(
+            title="Assigned Temprole",
+            description=f"Removed {role.mention} from {user.mention}.",
+            color=Colour.green(),
         )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @staticmethod
     async def view_temproles(user: User, interaction: Interaction):

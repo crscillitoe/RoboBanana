@@ -9,9 +9,11 @@ import re
 LOG = logging.getLogger(__name__)
 
 GUILD_ID = int(Config.CONFIG["Predictions"]["GuildID"])
+STREAM_CHAT = int(Config.CONFIG["Discord"]["StreamChannel"])
 
 CUSTOM_EMOJI_PATTERN = re.compile(r"(<a?:[a-zA-Z0-9]+:([0-9]+)>)")
 USER_PATTERN = re.compile(r"(<@([0-9]+)>)")
+ROLE_PATTERN = re.compile(r"(<@&([0-9]+)>)")
 CHANNEL_PATTERN = re.compile(r"(<#([0-9]+)>)")
 
 
@@ -61,9 +63,9 @@ class ServerBot(Client):
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
-                "mentions": self.find_users(message.content) + self.find_channels(
-                    message.content
-                ),
+                "mentions": self.find_users(message.content)
+                + self.find_channels(message.content)
+                + self.find_roles(message.content),
             }
             LOG.debug(to_send)
             await publish_chat(to_send, stream)
@@ -95,8 +97,23 @@ class ServerBot(Client):
             )
         return stream_content
 
+    def find_roles(self, content: str):
+        stream_content = []
+        role_matches = ROLE_PATTERN.findall(content)
+        for role_text, role_id in role_matches:
+            role = self.get_guild(GUILD_ID).get_role(int(role_id))
+            if role is None:
+                LOG.warn(f"Unable to find role {role_id=}")
+                continue
+            stream_content.append(
+                {
+                    "mention_text": role_text,
+                    "display_name": f"@{role.name}",
+                }
+            )
+        return stream_content
+
     def find_channels(self, content: str):
-        LOG.info("HERE")
         stream_content = []
         channel_matches = CHANNEL_PATTERN.findall(content)
         for channel_text, channel_id in channel_matches:

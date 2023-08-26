@@ -27,6 +27,10 @@ CrowdMuteDuration = 1
 [TempRoles]
 ExpirationCheckCadenceMinutes = 5
 
+[Predictions]
+PredictionChannelID = 
+GuildID = 
+
 [VODApproval]
 ApprovedTag = 
 RejectedTag = 

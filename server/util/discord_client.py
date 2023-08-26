@@ -32,7 +32,7 @@ class ServerBot(Client):
     async def on_message(self, message: Message):
         stream = False
         test = False
-        if message.channel.id == 915336728707989537:
+        if message.channel.id == STREAM_CHAT:
             test = True
 
         if message.channel.id == 1037040541017309225:
@@ -41,10 +41,12 @@ class ServerBot(Client):
         # Valorant Discussion Channel (high volume good for testing)
         if stream or test:
             should_send, emoji_content = self.find_emojis(message.content)
+            reference_author = await self.find_reference_author(message)
             if not should_send:
                 return
+            modified_message_content = reference_author + message.content
             to_send = {
-                "content": message.content,
+                "content": modified_message_content,
                 "displayName": (
                     message.author.nick
                     if message.author.nick is not None
@@ -64,9 +66,9 @@ class ServerBot(Client):
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,
                 "mentions": (
-                    self.find_users(message.content)
-                    + self.find_channels(message.content)
-                    + self.find_roles(message.content)
+                    self.find_users(modified_message_content)
+                    + self.find_channels(modified_message_content)
+                    + self.find_roles(modified_message_content)
                 ),
             }
             LOG.debug(to_send)
@@ -127,6 +129,18 @@ class ServerBot(Client):
                 {"mention_text": channel_text, "display_name": f"# {channel.name}"}
             )
         return stream_content
+
+    async def find_reference_author(self, message: Message) -> str:
+        reference = message.reference
+        if reference is None:
+            return ""
+
+        channel = self.get_channel(reference.channel_id)
+        if channel is None:
+            return ""
+
+        reference_message = await channel.fetch_message(reference.message_id)
+        return reference_message.author.mention + " "
 
 
 async def start_discord_client(client: Client):

@@ -47,11 +47,7 @@ class ServerBot(Client):
             modified_message_content = reference_author + message.content
             to_send = {
                 "content": modified_message_content,
-                "displayName": (
-                    message.author.nick
-                    if message.author.nick is not None
-                    else message.author.display_name
-                ),
+                "displayName": message.author.display_name,
                 "roles": [
                     {
                         "colorR": r.color.r,
@@ -70,6 +66,7 @@ class ServerBot(Client):
                     + self.find_channels(modified_message_content)
                     + self.find_roles(modified_message_content)
                 ),
+                "author_id": message.author.id,
             }
             LOG.debug(to_send)
             await publish_chat(to_send, stream)

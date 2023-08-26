@@ -13,6 +13,7 @@ async def publish_vod():
     valid_request = {
         "complete": SchemaValueType.String,
         "username": SchemaValueType.String,
+        "userid": SchemaValueType.Integer,
         "rank": SchemaValueType.String,
         "riotid": SchemaValueType.String,
     }

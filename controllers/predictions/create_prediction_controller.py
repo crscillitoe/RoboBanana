@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from discord import Client, InteractionMessage
+from discord import Client, Message
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -28,7 +28,7 @@ class CreatePredictionController:
     async def create_prediction(
         guild_id: int,
         channel_id: int,
-        message: InteractionMessage,
+        message: Message,
         description: str,
         option_one: str,
         option_two: str,

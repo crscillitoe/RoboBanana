@@ -49,8 +49,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             return
 
         prediction_thread = await interaction.channel.create_thread(
-            name=self.description.value,
-            type=ChannelType.public_thread
+            name=self.description.value, type=ChannelType.public_thread
         )
         prediction_message = await prediction_thread.send(self.description.value)
 

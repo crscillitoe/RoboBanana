@@ -1,4 +1,4 @@
-from discord import TextStyle, Interaction, Client
+from discord import ChannelType, TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
 from datetime import datetime, timedelta
 
@@ -47,12 +47,18 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
                 "Invalid prediction duration.", ephemeral=True
             )
             return
-        await interaction.response.send_message("Creating prediction...")
 
-        prediction_message = await interaction.original_response()
+        prediction_thread = await interaction.channel.create_thread(
+            name=self.description.value,
+            type=ChannelType.public_thread
+        )
+        prediction_message = await prediction_thread.send(self.description.value)
+
+        await interaction.response.send_message("Starting prediction", ephemeral=True)
+
         await CreatePredictionController.create_prediction(
             interaction.guild_id,
-            interaction.channel.id,
+            prediction_thread.id,
             prediction_message,
             self.description.value,
             self.option_one.value,

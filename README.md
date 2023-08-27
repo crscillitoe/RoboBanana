@@ -78,7 +78,7 @@ You will also need MySQL and Redis for RoboBanana to connect to. This can be acc
 
 #### Redis
 - [Installing Redis to your Operating System](https://redis.io/docs/getting-started/installation/)
-- [Running Redis using Doker](https://redis.io/docs/getting-started/install-stack/docker/)
+- [Running Redis using Docker](https://redis.io/docs/getting-started/install-stack/docker/)
 
 ## Required Code changes
 Move or Copy the config.ini.example file to be config.ini

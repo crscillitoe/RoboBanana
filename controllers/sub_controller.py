@@ -10,6 +10,13 @@ import pytz
 
 STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
 BOT_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
+SIX_MONTH_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["6MonthTier3RoleID"])
+TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["Tier3RoleID"])
+GIFTED_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
+TWITCH_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["TwitchTier3RoleID"])
+NA_OPEN_INHOUSE_CHANNEL_ID = int(Config.CONFIG["Discord"]["NAOpenInhouseChannel"])
+EU_OPEN_INHOUSE_CHANNEL_ID = int(Config.CONFIG["Discord"]["EUOpenInhouseChannel"])
+
 AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
 PUBLISH_URL = "http://localhost:3000/publish-sub"
 PUBLISH_COUNT_URL = "http://localhost:3000/publish-sub-count"
@@ -39,7 +46,7 @@ class SubController:
         )
 
         # 6 Month T3
-        t3_6_month_role = message.guild.get_role(1087797719919235123)
+        t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
 
         role_sub_data = raw_msg.get("role_subscription_data")
         if role_sub_data is None:
@@ -82,7 +89,7 @@ class SubController:
         name_thankyou = thankyou_message.format(name=author_name)
 
         if "6 months" in mention_thankyou and "THE ONES WHO" in mention_thankyou:
-            await message.author.add_roles(t3_6_month_role)
+            await message.author.add_roles(SIX_MONTH_TIER_3_ROLE_ID)
 
         Thread(
             target=publish_update,
@@ -119,14 +126,13 @@ class SubController:
 
         # normal stuff here
         guild = await self.client.fetch_guild(Config.CONFIG["Discord"]["GuildID"])
-
-        t3_role_role = guild.get_role(1036807951484203099)
-        gifted_t3_role = guild.get_role(1045466382470484040)
-        twitch_t3 = guild.get_role(935319103302926409)
+        t3_role_role = guild.get_role(TIER_3_ROLE_ID)
+        gifted_t3_role = guild.get_role(GIFTED_TIER_3_ROLE_ID)
+        twitch_t3 = guild.get_role(TWITCH_TIER_3_ROLE_ID)
         t3_subs = [t3_role_role, gifted_t3_role, twitch_t3]
 
-        na_inhouses = self.client.get_channel(1118272266988441630)
-        eu_inhouses = self.client.get_channel(1074056805275140308)
+        na_inhouses = self.client.get_channel(NA_OPEN_INHOUSE_CHANNEL_ID)
+        eu_inhouses = self.client.get_channel(EU_OPEN_INHOUSE_CHANNEL_ID)
 
         for t3 in t3_subs:
             await na_inhouses.set_permissions(t3, view_channel=na_queues_open)

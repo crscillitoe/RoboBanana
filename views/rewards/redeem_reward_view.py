@@ -9,7 +9,9 @@ from .pending_reward_view import PendingRewardView
 
 
 STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
-PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"]["PendingRewardChannel"]
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
+    "PendingRewardChannel"
+]
 
 
 class RedeemRewardView(View):

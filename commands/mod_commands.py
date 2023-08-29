@@ -174,7 +174,6 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(num_winners="num_winners")
     @app_commands.describe(oprah="Oprah")
     async def gift(self, interaction: Interaction, oprah: str, num_winners: int):
-
         await interaction.response.send_message("Choosing random gifted sub winners...")
         potential_winners = []
         for member in interaction.channel.members:

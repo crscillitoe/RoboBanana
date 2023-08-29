@@ -9,7 +9,9 @@ import asyncio
 
 STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
 REWARD_ROLE_ID = Config.CONFIG["Discord"]["GoodMorning"]["RewardRole"]
-REWARD_REDEMPTION_CHANNEL_ID = Config.CONFIG["Discord"]["GoodMorning"]["RedemptionChannel"]
+REWARD_REDEMPTION_CHANNEL_ID = Config.CONFIG["Discord"]["GoodMorning"][
+    "RedemptionChannel"
+]
 GOOD_MORNING_EXPLANATION = "What's this message? <#1064317660084584619>"
 
 PACIFIC_TZ = timezone("US/Pacific")

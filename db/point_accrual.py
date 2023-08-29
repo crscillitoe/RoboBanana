@@ -2,7 +2,7 @@ from db.models import ChannelPoints
 from sqlalchemy import select, update, insert
 from sqlalchemy.orm import sessionmaker
 from datetime import timedelta, datetime
-from config import Config
+from config import YAMLConfig as Config
 from discord import Role
 
 import discord
@@ -13,12 +13,12 @@ POINTS_PER_ACCRUAL = 50
 
 
 ROLE_MULTIPLIERS: dict[str, int] = {
-    int(Config.CONFIG["Discord"]["Tier1RoleID"]): 2,
-    int(Config.CONFIG["Discord"]["GiftedTier1RoleID"]): 2,
-    int(Config.CONFIG["Discord"]["Tier2RoleID"]): 3,
-    int(Config.CONFIG["Discord"]["GiftedTier2RoleID"]): 3,
-    int(Config.CONFIG["Discord"]["Tier3RoleID"]): 4,
-    int(Config.CONFIG["Discord"]["GiftedTier3RoleID"]): 4,
+    Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"]: 2,
+    Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]: 2,
+    Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]: 3,
+    Config.CONFIG["Discord"]["Subscribers"]["GiftedTier2Role"]: 3,
+    Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]: 4,
+    Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]: 4,
 }
 
 

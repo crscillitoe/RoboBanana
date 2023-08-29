@@ -2,7 +2,7 @@ from typing import Optional
 from discord import Embed, app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord import Object
-from config import Config
+from config import YAMLConfig as Config
 import enum
 import logging
 import random
@@ -10,10 +10,10 @@ import random
 from controllers.temprole_controller import TempRoleController
 from controllers.vod_review_bank_controller import VODReviewBankController
 
-APPROVED_TAG = int(Config.CONFIG["VODApproval"]["ApprovedTag"])
-REJECTED_TAG = int(Config.CONFIG["VODApproval"]["RejectedTag"])
-APPROVED_ROLE = int(Config.CONFIG["VODApproval"]["ApprovedRole"])
-REJECTED_ROLE = int(Config.CONFIG["VODApproval"]["RejectedRole"])
+APPROVED_TAG = Config.CONFIG["Discord"]["VODReview"]["ApprovedTag"]
+REJECTED_TAG = Config.CONFIG["Discord"]["VODReview"]["RejectedTag"]
+APPROVED_ROLE = Config.CONFIG["Discord"]["VODReview"]["ApprovedRole"]
+REJECTED_ROLE = Config.CONFIG["Discord"]["VODReview"]["RejectedRole"]
 
 LOG = logging.getLogger(__name__)
 

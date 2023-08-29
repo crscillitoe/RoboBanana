@@ -20,7 +20,7 @@ from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
 from commands.reaction_commands import ReactionCommands
 from commands.vod_commands import VodCommands
-from config import Config
+from config import YAMLConfig as Config
 from controllers.reaction_controller import ReactionController
 from controllers.sub_controller import SubController
 from controllers.temprole_controller import TempRoleController
@@ -31,16 +31,18 @@ from threading import Thread
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
 COOL_URL = "http://localhost:3000/publish-cool"
-COOL_ID = Config.CONFIG["Discord"]["CoolEmojiID"]
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
-UNCOOL_ID = Config.CONFIG["Discord"]["UncoolEmojiID"]
-STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
-WELCOME_CHAT_ID = int(Config.CONFIG["Discord"]["WelcomeChannel"])
-PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
-GUILD_ID = int(Config.CONFIG["Discord"]["GuildID"])
-CROWD_MUTE_EMOJI_ID = int(Config.CONFIG["Discord"]["CrowdMuteEmojiID"])
-CROWD_MUTE_THRESHOLD = int(Config.CONFIG["Discord"]["CrowdMuteThreshold"])
-CROWD_MUTE_DURATION = int(Config.CONFIG["Discord"]["CrowdMuteDuration"])
+COOL_ID = Config.CONFIG["Discord"]["CoolMeter"]["CoolEmoji"]
+UNCOOL_ID = Config.CONFIG["Discord"]["CoolMeter"]["UncoolEmoji"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
+STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
+WELCOME_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Welcome"]
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
+    "PendingRewardChannel"
+]
+GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
+CROWD_MUTE_EMOJI_ID = Config.CONFIG["Discord"]["CrowdMute"]["Emoji"]
+CROWD_MUTE_THRESHOLD = Config.CONFIG["Discord"]["CrowdMute"]["Threshold"]
+CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
 FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
@@ -115,8 +117,8 @@ class RaffleBot(Client):
             await self.check_message_length(message)
 
             DB().accrue_channel_points(message.author.id, message.author.roles)
-            cool = COOL_ID in message.content
-            uncool = UNCOOL_ID in message.content
+            cool = str(COOL_ID) in message.content
+            uncool = str(UNCOOL_ID) in message.content
             if cool and not uncool:
                 Thread(
                     target=publish_cool,
@@ -181,7 +183,7 @@ async def main():
         tree.add_command(ReactionCommands(tree, client))
         tree.add_command(VodCommands(tree, client))
         tree.add_command(TemproleCommands(tree, client))
-        await client.start(Config.CONFIG["Discord"]["Token"])
+        await client.start(Config.CONFIG["Secrets"]["Discord"]["Token"])
 
 
 if __name__ == "__main__":

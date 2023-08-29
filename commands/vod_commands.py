@@ -1,13 +1,13 @@
 from typing import Optional
 from discord import app_commands, Interaction, Client, User
 from threading import Thread
-from config import Config
+from config import YAMLConfig as Config
 import requests
 import logging
 
 PUBLISH_URL = "http://localhost:3000/publish-vod"
 LOG = logging.getLogger(__name__)
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 
 @app_commands.guild_only()

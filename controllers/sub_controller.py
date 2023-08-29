@@ -2,31 +2,32 @@ from threading import Thread
 from discord import Message, Client
 from discord.ext import tasks
 import discord.utils
-from config import Config
+from config import YAMLConfig as Config
 import logging
 import requests
 from datetime import datetime
 import pytz
 
-STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
-BOT_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
-SIX_MONTH_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["6MonthTier3RoleID"])
-TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["Tier3RoleID"])
-GIFTED_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
-TWITCH_TIER_3_ROLE_ID = int(Config.CONFIG["Discord"]["TwitchTier3RoleID"])
-NA_OPEN_INHOUSE_CHANNEL_ID = int(Config.CONFIG["Discord"]["NAOpenInhouseChannel"])
-EU_OPEN_INHOUSE_CHANNEL_ID = int(Config.CONFIG["Discord"]["EUOpenInhouseChannel"])
+STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
+BOT_AUDIT_CHANNEL = Config.CONFIG["Discord"]["ChannelPoints"]["PointsAuditChannel"]
+SIX_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["6MonthTier3Role"]
+TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+GIFTED_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+TWITCH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
+NA_OPEN_INHOUSE_CHANNEL_ID = Config.CONFIG["Discord"]["Inhouses"]["NAOpenChannel"]
+EU_OPEN_INHOUSE_CHANNEL_ID = Config.CONFIG["Discord"]["Inhouses"]["EUOpenChannel"]
+GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
 
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_URL = "http://localhost:3000/publish-sub"
 PUBLISH_COUNT_URL = "http://localhost:3000/publish-sub-count"
 PREMIUM_IDS = list(
     map(
         int,
         [
-            Config.CONFIG["Discord"]["Tier1RoleID"],
-            Config.CONFIG["Discord"]["Tier2RoleID"],
-            Config.CONFIG["Discord"]["Tier3RoleID"],
+            Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"],
+            Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"],
+            Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"],
         ],
     )
 )
@@ -125,7 +126,7 @@ class SubController:
         eu_queues_open = day_of_year_east_brazil % 2 == 1
 
         # normal stuff here
-        guild = await self.client.fetch_guild(Config.CONFIG["Discord"]["GuildID"])
+        guild = await self.client.fetch_guild(GUILD_ID)
         t3_role_role = guild.get_role(TIER_3_ROLE_ID)
         gifted_t3_role = guild.get_role(GIFTED_TIER_3_ROLE_ID)
         twitch_t3 = guild.get_role(TWITCH_TIER_3_ROLE_ID)
@@ -136,15 +137,14 @@ class SubController:
 
         for t3 in t3_subs:
             await na_inhouses.set_permissions(t3, view_channel=na_queues_open)
-
             await eu_inhouses.set_permissions(t3, view_channel=eu_queues_open)
 
     @tasks.loop(minutes=1.0)
     async def send_count(self):
-        guild = await self.client.fetch_guild(Config.CONFIG["Discord"]["GuildID"])
+        guild = await self.client.fetch_guild(GUILD_ID)
         guild_members = guild.fetch_members(limit=None)
 
-        premium_id_count = {}
+        premium_id_count = {premium_id: 0 for premium_id in PREMIUM_IDS}
         async for member in guild_members:
             for role_id in PREMIUM_IDS:
                 if discord.utils.get(member.roles, id=role_id):
@@ -179,8 +179,11 @@ def publish_count(tier_1_count: int, tier_2_count: int, tier_3_count: int):
         "tier2Count": tier_2_count,
         "tier3Count": tier_3_count,
     }
-    response = requests.post(
-        url=PUBLISH_COUNT_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
-    )
-    if response.status_code != 200:
-        LOG.error(f"Failed to publish sub count: {response.text}")
+    try:
+        response = requests.post(
+            url=PUBLISH_COUNT_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+        )
+        if response.status_code != 200:
+            LOG.error(f"Failed to publish sub count: {response.text}")
+    except:
+        LOG.error(f"Failed to publish sub count - an exception occurred")

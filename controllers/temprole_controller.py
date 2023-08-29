@@ -7,13 +7,11 @@ from discord import Client, Colour, Embed, Guild, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
-from config import Config
+from config import YAMLConfig as Config
 from util.discord_utils import DiscordUtils
 from views.pagination.pagination_embed_view import PaginationEmbed, PaginationView
 
-EXPIRATION_CHECK_CADENCE = float(
-    Config.CONFIG["TempRoles"]["ExpirationCheckCadenceMinutes"]
-)
+EXPIRATION_CHECK_CADENCE = Config.CONFIG["Discord"]["TempRoles"]["ExpirationCheckCadenceMinutes"]
 
 LOG = logging.getLogger(__name__)
 

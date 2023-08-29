@@ -3,13 +3,13 @@ from discord import Client, Intents, Message
 
 from server.blueprints.chat import publish_chat
 
-from config import Config
+from config import YAMLConfig as Config
 import re
 
 LOG = logging.getLogger(__name__)
 
-GUILD_ID = int(Config.CONFIG["Predictions"]["GuildID"])
-STREAM_CHAT = int(Config.CONFIG["Discord"]["StreamChannel"])
+GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
+STREAM_CHAT = Config.CONFIG["Discord"]["Channels"]["Stream"]
 
 CUSTOM_EMOJI_PATTERN = re.compile(r"(<a?:[a-zA-Z0-9]+:([0-9]+)>)")
 USER_PATTERN = re.compile(r"(<@([0-9]+)>)")
@@ -142,7 +142,7 @@ class ServerBot(Client):
 
 async def start_discord_client(client: Client):
     async with client:
-        await client.start(Config.CONFIG["Discord"]["Token"])
+        await client.start(Config.CONFIG["Secrets"]["Discord"]["Token"])
 
 
 DISCORD_CLIENT = ServerBot()

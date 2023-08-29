@@ -2,14 +2,14 @@ from datetime import timezone
 from typing import Optional
 from discord import Client
 import requests
-from config import Config
+from config import YAMLConfig as Config
 from db.models import PredictionSummary
 from threading import Thread
 from db import DB
 import logging
 
 PUBLISH_URL = "http://localhost:3000/publish-prediction"
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 LOG = logging.getLogger(__name__)
 
 

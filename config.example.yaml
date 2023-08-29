@@ -1,0 +1,46 @@
+Database:
+  Host:
+  Name:
+  Username:
+Discord:
+  ChannelPoints:
+    PendingRewardChannel:
+    PointsAuditChannel:
+  Channels:
+    Stream:
+    Welcome:
+  CoolMeter:
+    CoolEmoji:
+    UncoolEmoji:
+  CrowdMute:
+    Duration: 1
+    Emoji:
+    Threshold: 1
+  GoodMorning:
+    RedemptionChannel:
+    RewardRequirement: 5
+    RewardRole:
+  GuildID:
+  Inhouses:
+    EUOpenChannel:
+    NAOpenChannel:
+  Predictions:
+    Channel:
+  Subscribers:
+    6MonthTier3Role:
+    GiftedTier1Role:
+    GiftedTier2Role:
+    GiftedTier3Role:
+    Tier1Role:
+    Tier2Role:
+    Tier3Role:
+    TwitchTier3Role:
+  TempRoles:
+    ExpirationCheckCadenceMinutes: 30
+  VODReview:
+    ApprovedRole:
+    ApprovedTag:
+    RejectedRole:
+    RejectedTag:
+    RewardHoursPerReview: 8
+    SubmissionChannel:

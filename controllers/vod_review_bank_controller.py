@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Optional
 from discord import Colour, Embed, Interaction, User
-from config import Config
+from config import YAMLConfig as Config
 from controllers.temprole_controller import TempRoleController
 from db import DB
 from pytimeparse.timeparse import timeparse
@@ -9,9 +9,9 @@ import logging
 
 from util.discord_utils import DiscordUtils
 
-HOURS_PER_REVIEW = int(Config.CONFIG["VODApproval"]["HoursPerReview"])
 LOG = logging.getLogger(__name__)
-GIFTED_T3_ROLE_ID = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
+HOURS_PER_REVIEW = Config.CONFIG["Discord"]["VODReview"]["RewardHoursPerReview"]
+GIFTED_T3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 SECONDS_IN_HOUR = 3600
 
 

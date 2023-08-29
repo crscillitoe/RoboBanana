@@ -3,9 +3,9 @@ from discord.ui import View, Button
 
 from db import DB
 from db.models import ChannelReward
-from config import Config
+from config import YAMLConfig as Config
 
-STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
+STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
 
 
 class PendingRewardView(View):

@@ -3,3 +3,6 @@ __pycache__
 .DS_Store
 *.ini
 .vscode/
+
+secrets.yaml
+config.yaml

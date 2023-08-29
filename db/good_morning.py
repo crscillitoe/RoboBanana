@@ -4,13 +4,11 @@ from sqlalchemy import select, update, insert
 from zoneinfo import ZoneInfo
 
 from db.models import MorningPoints
-from config import Config
+from config import YAMLConfig as Config
 
 
 MORNING_DELTA = timedelta(hours=10)
-MORNING_REWARD_REQUIREMENT = int(
-    Config.CONFIG["Discord"]["GoodMorningRewardRequirement"]
-)
+MORNING_REWARD_REQUIREMENT = Config.CONFIG["Discord"]["GoodMorning"]["RewardRequirement"]
 RESET_TIMESTAMP = datetime(year=1970, month=1, day=1)
 
 

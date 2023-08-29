@@ -8,14 +8,14 @@ from controllers.predictions.close_prediction_controller import (
 from controllers.predictions.payout_prediction_controller import (
     PayoutPredictionController,
 )
-from config import Config
+from config import YAMLConfig as Config
 import logging
 from db.models import PredictionChoice
 
 from server.models.quick_prediction import QuickPrediction
 
-GUILD_ID = int(Config.CONFIG["Predictions"]["GuildID"])
-PREDICTION_CHANNEL_ID = int(Config.CONFIG["Predictions"]["PredictionChannelID"])
+GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
+PREDICTION_CHANNEL_ID = Config.CONFIG["Discord"]["Predictions"]["Channel"]
 
 LOG = logging.getLogger(__name__)
 

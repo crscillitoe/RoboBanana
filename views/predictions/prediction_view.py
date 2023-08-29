@@ -2,13 +2,13 @@ import discord
 from discord import ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from db import DB
-from config import Config
+from config import YAMLConfig as Config
 from db.models import PredictionChoice
 
 from .prediction_embed import PredictionEmbed
 from .prediction_vote_modal import PredictionVoteModal
 
-PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"]["PendingRewardChannel"]
 
 
 class PredictionView(View):

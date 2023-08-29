@@ -4,7 +4,7 @@ from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
 from db import DB
-from config import Config
+from config import YAMLConfig as Config
 import logging
 from views.predictions.close_prediction_embed import ClosePredictionEmbed
 from views.predictions.close_prediction_view import ClosePredictionView
@@ -12,7 +12,9 @@ from views.predictions.close_prediction_view import ClosePredictionView
 from views.predictions.prediction_embed import PredictionEmbed
 from views.predictions.prediction_view import PredictionView
 
-PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
+    "PendingRewardChannel"
+]
 
 LOG = logging.getLogger(__name__)
 

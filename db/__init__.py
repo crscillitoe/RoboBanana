@@ -84,7 +84,7 @@ from .models import (
     TempRoles,
     VodSubmission,
 )
-from config import Config
+from config import YAMLConfig as Config
 
 
 class DB:
@@ -102,10 +102,10 @@ class DB:
 
         self.__initialized = True
 
-        username = Config.CONFIG["MySQL"]["Username"]
-        password = Config.CONFIG["MySQL"]["Password"]
-        db_host = Config.CONFIG["MySQL"]["Host"]
-        db_name = Config.CONFIG["MySQL"]["Name"]
+        username = Config.CONFIG["Database"]["Username"]
+        password = Config.CONFIG["Secrets"]["Database"]["Password"]
+        db_host = Config.CONFIG["Database"]["Host"]
+        db_name = Config.CONFIG["Database"]["Name"]
 
         self.engine = create_engine(
             f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}"

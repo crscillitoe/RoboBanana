@@ -3,13 +3,13 @@ from discord.ui import View, Select
 
 from db import DB
 from db.models import ChannelReward
-from config import Config
+from config import YAMLConfig as Config
 
 from .pending_reward_view import PendingRewardView
 
 
-STREAM_CHAT_ID = int(Config.CONFIG["Discord"]["StreamChannel"])
-PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
+STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"]["PendingRewardChannel"]
 
 
 class RedeemRewardView(View):

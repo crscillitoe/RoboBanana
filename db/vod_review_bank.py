@@ -2,9 +2,9 @@ from typing import Optional
 from db.models import VODReviewBank
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, insert, update
-from config import Config
+from config import YAMLConfig as Config
 
-HOURS_PER_REVIEW = Config.CONFIG["VODApproval"]["HoursPerReview"]
+HOURS_PER_REVIEW = Config.CONFIG["Discord"]["VODReview"]["RewardHoursPerReview"]
 
 
 def add_vod_review_balance(user_id: int, amount: int, session: sessionmaker):

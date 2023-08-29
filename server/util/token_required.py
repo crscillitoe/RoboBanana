@@ -1,5 +1,5 @@
 from functools import wraps
-from config import Config
+from config import YAMLConfig as Config
 from quart import request, make_response, jsonify
 import os
 import sys
@@ -10,6 +10,8 @@ parent_directory = os.path.dirname(current_directory)
 
 # setting path
 sys.path.append(parent_directory)
+
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 
 # Authentication decorator
@@ -25,7 +27,7 @@ def token_required(f):
                 jsonify({"message": "A valid token is missing!"}), 401
             )
 
-        if token != Config.CONFIG["Server"]["AuthToken"]:
+        if token != AUTH_TOKEN:
             return await make_response(
                 jsonify({"message": "A valid token is missing!"}), 401
             )

@@ -10,13 +10,13 @@ from views.rewards.redeem_reward_view import RedeemRewardView
 from threading import Thread
 import requests
 import logging
-from config import Config
+from config import YAMLConfig as Config
 
 from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
 
 LOG = logging.getLogger(__name__)
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll-answer"
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 
 @app_commands.guild_only()

@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 from typing import Optional
 from discord import Interaction, Member, User
 from db import DB, RaffleEntry, RaffleType
-from config import Config
+from config import YAMLConfig as Config
 import random
 
-VOD_APPROVED_ROLE_ID = int(Config.CONFIG["Discord"]["VODApprovedRoleID"])
-VOD_SUBMISSION_CHANNEL_ID = Config.CONFIG["Discord"]["VODSubmissionChannelID"]
+VOD_APPROVED_ROLE_ID = Config.CONFIG["Discord"]["VODReview"]["ApprovedRole"]
+VOD_SUBMISSION_CHANNEL_ID = Config.CONFIG["Discord"]["VODReview"]["SubmissionChannel"]
 
 
 class RaffleController:

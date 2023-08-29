@@ -4,15 +4,15 @@ from controllers.predictions.close_prediction_controller import (
     ClosePredictionController,
 )
 from db import DB
-from config import Config
+from config import YAMLConfig as Config
 
 from .payout_prediction_view import PayoutPredictionView
 from .close_prediction_embed import ClosePredictionEmbed
 from .prediction_embed import PredictionEmbed
 from .prediction_view import PredictionView
 
-STREAM_CHAT = int(Config.CONFIG["Discord"]["StreamChannel"])
-PENDING_REWARDS_CHAT_ID = int(Config.CONFIG["Discord"]["PendingRewardChannel"])
+STREAM_CHAT = Config.CONFIG["Discord"]["Channels"]["Stream"]
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"]["PendingRewardChannel"]
 
 
 class ClosePredictionView(View):

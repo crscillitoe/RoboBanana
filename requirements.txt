@@ -13,3 +13,4 @@ quart==0.18.4
 quart_cors==0.6.0
 hypercorn==0.14.4
 pytimeparse==1.1.8
+PyYAML==6.0.1

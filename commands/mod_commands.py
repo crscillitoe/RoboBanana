@@ -17,7 +17,7 @@ from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
-from config import Config
+from config import YAMLConfig as Config
 import logging
 import random
 from threading import Thread
@@ -27,9 +27,16 @@ import enum
 LOG = logging.getLogger(__name__)
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
-POINTS_AUDIT_CHANNEL = int(Config.CONFIG["Discord"]["PointsAuditChannel"])
+POINTS_AUDIT_CHANNEL = Config.CONFIG["Discord"]["ChannelPoints"]["PointsAuditChannel"]
+TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"]
+TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]
+TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+BOT_ROLE = Config.CONFIG["Discord"]["Roles"]["Bot"]
+GIFTED_TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]
+GIFTED_TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
-AUTH_TOKEN = Config.CONFIG["Server"]["AuthToken"]
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
 PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
 PUBLISH_CHESS_URL = "http://localhost:3000/publish-chess"
@@ -167,13 +174,6 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.describe(num_winners="num_winners")
     @app_commands.describe(oprah="Oprah")
     async def gift(self, interaction: Interaction, oprah: str, num_winners: int):
-        Tier1 = int(Config.CONFIG["Discord"]["Tier1RoleID"])
-        Tier2 = int(Config.CONFIG["Discord"]["Tier2RoleID"])
-        Tier3 = int(Config.CONFIG["Discord"]["Tier3RoleID"])
-        BotRole = int(Config.CONFIG["Discord"]["BotRoleID"])
-        GiftedTier1 = int(Config.CONFIG["Discord"]["GiftedTier1RoleID"])
-        GiftedTier3 = int(Config.CONFIG["Discord"]["GiftedTier3RoleID"])
-        Mod = int(Config.CONFIG["Discord"]["ModRoleID"])
 
         await interaction.response.send_message("Choosing random gifted sub winners...")
         potential_winners = []
@@ -181,13 +181,13 @@ class ModCommands(app_commands.Group, name="mod"):
             can_win = True
             for role in member.roles:
                 if role.id in [
-                    Tier1,
-                    Tier2,
-                    Tier3,
-                    BotRole,
-                    GiftedTier1,
-                    GiftedTier3,
-                    Mod,
+                    TIER1_ROLE,
+                    TIER2_ROLE,
+                    TIER3_ROLE,
+                    BOT_ROLE,
+                    GIFTED_TIER1_ROLE,
+                    GIFTED_TIER2_ROLE,
+                    MOD_ROLE,
                 ]:
                     can_win = False
 

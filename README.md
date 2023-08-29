@@ -10,6 +10,7 @@ Knowers only.
 
 ---
 - [Robo Banana](#robo-banana)
+- [Config Migration](#config-migration)
 - [How To Run The Bot Locally](#how-to-run-the-bot-locally)
   - [Discord](#discord)
     - [Create your own server](#create-your-own-server)
@@ -21,10 +22,20 @@ Knowers only.
       - [MySQL](#mysql)
       - [Redis](#redis)
   - [Required Code changes](#required-code-changes)
-    - [Config.ini required values](#configini-required-values)
+    - [Config.yaml required values](#configini-required-values)
   - [Server slash (/) commands.](#server-slash--commands)
   - [Run the bot](#run-the-bot)
 ---
+
+# Config Migration
+If you've previously run RoboBanana and used a `config.ini` file to configure the bot, please run our provided
+migration tool `config_converter.py` after reinstalling `requirements.txt`. This will generate two new files,
+`config.yaml` and `secrets.yaml`, which will be the new configuration files for RoboBanana.
+
+```bash
+pip install -r requirements.txt
+python config_converter.py
+```
 
 # How To Run The Bot Locally
 These setup instructions outline the essential steps for initializing the bot and enabling it to respond to commands from Discord clients.
@@ -81,26 +92,24 @@ You will also need MySQL and Redis for RoboBanana to connect to. This can be acc
 - [Running Redis using Docker](https://redis.io/docs/getting-started/install-stack/docker/)
 
 ## Required Code changes
-Move or Copy the config.ini.example file to be config.ini
+Copy the config.example.yaml file to be config.yaml. Copy the secrets.example.yaml file to be secrets.yaml. These should remain gitignored.
 
-### Config.ini required values
-`Token`: This is the token you saved when creating an application.
+### Config.yaml required values
+`Secrets.Discord.Token`: This is the token you saved when creating an application.
 
 Anything ending in Channel, or ChannelID will need an ID/Snowflake of a channel. For ease of set up these can all be the same ID.
 
 With Developer Mode on simply right click the channel name and select **Copy Channel ID**
 
-`BotRoleID`: Go to Roles, you should see a role there with your bots name. right click the role name and copy ID.
+`Discord.Roles.Bot`: Go to Roles, you should see a role there with your bots name. right click the role name and copy ID.
 
-`GiftedTier#RoleID and Tier#RoleID`: As above but now with the relevant role id for tiers.
+`Discord.Subscribers.GiftedTier#Role and Discord.Subscribers.Tier#Role`: As above but now with the relevant role id for tiers.
 
-`ModRoleID`: ID for the Mod role.
+`Discord.Roles.Mod`: ID for the Mod role.
 
-`GuildID`: Right click your server/server name **Copy Server ID**
+`Discord.GuildID`: Right click your server/server name **Copy Server ID**
 
-Use this same ID for both **GuildID** entries
-
-`MySQL`: Replace the values with what you set when running your mysql server
+`Database` / `Secrets.Database`: Replace the values with what you set when running your mysql server
 
 ## Server slash (/) commands.
 [Slash Command Documentation](https://discord.com/developers/docs/interactions/application-commands)

@@ -6,18 +6,24 @@ import sys
 
 LOG = logging.getLogger(__name__)
 
+
 class Config:
     CONFIG = configparser.ConfigParser()
     CONFIG.read(os.path.join(os.path.dirname(__file__), "config.ini"))
 
+
 class YAMLConfig:
     CONFIG = dict()
     try:
-        with open(os.path.join(os.path.dirname(__file__), "config.yaml")) as config_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "config.yaml")
+        ) as config_file:
             CONFIG = yaml.safe_load(config_file)
-        
+
         if CONFIG is not None:
-            with open(os.path.join(os.path.dirname(__file__), "secrets.yaml")) as secrets_file:
+            with open(
+                os.path.join(os.path.dirname(__file__), "secrets.yaml")
+            ) as secrets_file:
                 CONFIG["Secrets"] = yaml.safe_load(secrets_file)
     except FileNotFoundError:
         LOG.error(

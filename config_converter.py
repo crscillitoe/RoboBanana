@@ -20,7 +20,9 @@ CONFIG_MAPPING = {
     "Discord.VODSubmissionChannelID": "Discord.VODReview.SubmissionChannel",
     "Discord.GoodMorningRewardRequirement": "Discord.GoodMorning.RewardRequirement",
     "Discord.GoodMorningRewardRoleID": "Discord.GoodMorning.RewardRole",
-    "Discord.GoodMorningRewardRedemptionChannelID": "Discord.GoodMorning.RedemptionChannel",
+    "Discord.GoodMorningRewardRedemptionChannelID": (
+        "Discord.GoodMorning.RedemptionChannel"
+    ),
     "Discord.CrowdMuteEmojiID": "Discord.CrowdMute.Emoji",
     "Discord.CrowdMuteThreshold": "Discord.CrowdMute.Threshold",
     "Discord.CrowdMuteDuration": "Discord.CrowdMute.Duration",
@@ -33,7 +35,9 @@ CONFIG_MAPPING = {
     "Discord.BotRoleID": "Discord.Roles.Bot",
     "Discord.ModRoleID": "Discord.Roles.Mod",
     "Predictions.PredictionChannelID": "Discord.Predictions.Channel",
-    "TempRoles.ExpirationCheckCadenceMinutes": "Discord.TempRoles.ExpirationCheckCadenceMinutes",
+    "TempRoles.ExpirationCheckCadenceMinutes": (
+        "Discord.TempRoles.ExpirationCheckCadenceMinutes"
+    ),
     "VODApproval.ApprovedTag": "Discord.VODReview.ApprovedTag",
     "VODApproval.RejectedTag": "Discord.VODReview.RejectedTag",
     "VODApproval.ApprovedRole": "Discord.VODReview.ApprovedRole",
@@ -46,17 +50,20 @@ CONFIG_MAPPING = {
     "MySQL.Name": "Database.Name",
 }
 
-STRING_VALUES = set([
-    "Database.Username",
-    "Database.Host",
-    "Database.Name",
-    "Secrets.Discord.Token",
-    "Secrets.Server.Token",
-    "Secrets.Database.Password"
-])
+STRING_VALUES = set(
+    [
+        "Database.Username",
+        "Database.Host",
+        "Database.Name",
+        "Secrets.Discord.Token",
+        "Secrets.Server.Token",
+        "Secrets.Database.Password",
+    ]
+)
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 SECRETS_FILE = os.path.join(os.path.dirname(__file__), "secrets.yaml")
+
 
 def read_config_value(key: str, config: defaultdict):
     key_split = key.split(".")
@@ -64,6 +71,7 @@ def read_config_value(key: str, config: defaultdict):
     for key_part in key_split:
         curr_val = curr_val[key_part]
     return curr_val
+
 
 def write_config_value(key: str, value: any, config: defaultdict):
     key_split = key.split(".")
@@ -74,13 +82,16 @@ def write_config_value(key: str, value: any, config: defaultdict):
         value = int(value)
     curr_dict[key_split[-1]] = value
 
+
 def recursive_defaultdict():
     return defaultdict(recursive_defaultdict)
+
 
 def defaultdict_to_regular(d):
     if isinstance(d, defaultdict):
         d = {k: defaultdict_to_regular(v) for k, v in d.items()}
     return d
+
 
 def main():
     # This is absurdly janky and never belongs in
@@ -107,6 +118,7 @@ def main():
 
     with open(CONFIG_FILE, "w") as config_file:
         yaml.safe_dump(new_config, config_file)
+
 
 if __name__ == "__main__":
     main()

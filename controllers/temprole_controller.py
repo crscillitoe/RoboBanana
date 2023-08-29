@@ -11,7 +11,9 @@ from config import YAMLConfig as Config
 from util.discord_utils import DiscordUtils
 from views.pagination.pagination_embed_view import PaginationEmbed, PaginationView
 
-EXPIRATION_CHECK_CADENCE = Config.CONFIG["Discord"]["TempRoles"]["ExpirationCheckCadenceMinutes"]
+EXPIRATION_CHECK_CADENCE = Config.CONFIG["Discord"]["TempRoles"][
+    "ExpirationCheckCadenceMinutes"
+]
 
 LOG = logging.getLogger(__name__)
 

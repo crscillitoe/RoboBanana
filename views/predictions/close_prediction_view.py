@@ -12,7 +12,9 @@ from .prediction_embed import PredictionEmbed
 from .prediction_view import PredictionView
 
 STREAM_CHAT = Config.CONFIG["Discord"]["Channels"]["Stream"]
-PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"]["PendingRewardChannel"]
+PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
+    "PendingRewardChannel"
+]
 
 
 class ClosePredictionView(View):

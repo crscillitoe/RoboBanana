@@ -1,4 +1,4 @@
-from discord import Client
+from discord import ChannelType, Client
 from controllers.predictions.create_prediction_controller import (
     CreatePredictionController,
 )
@@ -28,13 +28,18 @@ class PredictionController:
 
         LOG.info("Creating new quick prediction")
         await client.wait_until_ready()
-        message = await client.get_channel(PREDICTION_CHANNEL_ID).send(
-            "STARTING NEW QUICK PREDICTION"
+        prediction_thread = await client.get_channel(
+            PREDICTION_CHANNEL_ID
+        ).create_thread(
+            name=prediction_details.description, type=ChannelType.public_thread
+        )
+        prediction_message = await prediction_thread.send(
+            prediction_details.description
         )
         await CreatePredictionController.create_prediction(
             GUILD_ID,
-            PREDICTION_CHANNEL_ID,
-            message,
+            prediction_thread.id,
+            prediction_message,
             prediction_details.description,
             prediction_details.option_one,
             prediction_details.option_two,

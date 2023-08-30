@@ -40,7 +40,10 @@ Discord:
   VODReview:
     ApprovedRole:
     ApprovedTag:
+    BannedRole:
+    NeedsReviewTag:
     RejectedRole:
     RejectedTag:
+    RulesAcceptedRole:
     RewardHoursPerReview: 8
     SubmissionChannel:

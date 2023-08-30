@@ -4,7 +4,14 @@ from datetime import datetime, timedelta
 from discord import Object
 import discord.utils
 
-from db import DB, VodSubmission
+from db import DB
+from config import YAMLConfig as Config
+
+VOD_BANNED_ROLE = Config.CONFIG["Discord"]["VODReview"]["BannedRole"]
+VOD_REJECTED_ROLE = Config.CONFIG["Discord"]["VODReview"]["RejectedRole"]
+VOD_RULES_ACCEPTED_ROLE = Config.CONFIG["Discord"]["VODReview"]["RulesAcceptedRole"]
+VOD_SUBMISSIONS_CHANNEL = Config.CONFIG["Discord"]["VODReview"]["SubmissionChannel"]
+VOD_NEEDS_REVIEW_TAG = Config.CONFIG["Discord"]["VODReview"]["NeedsReviewTag"]
 
 
 class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
@@ -58,8 +65,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         self.add_item(self.extra)
 
     async def on_submit(self, interaction: Interaction) -> None:
-        vod_rejected_role_id = 1055486151860953259
-        role = discord.utils.get(interaction.user.roles, id=vod_rejected_role_id)
+        role = discord.utils.get(interaction.user.roles, id=VOD_REJECTED_ROLE)
         if role is not None:
             await interaction.response.send_message(
                 f"You currently have the VOD REJECTED role! You cannot submit a VOD"
@@ -68,8 +74,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             )
             return
 
-        banned_role_id = 1058462071202787441
-        role = discord.utils.get(interaction.user.roles, id=banned_role_id)
+        role = discord.utils.get(interaction.user.roles, id=VOD_BANNED_ROLE)
         if role is not None:
             await interaction.response.send_message(
                 f"You currently have the BANNED role! You cannot submit a VOD at"
@@ -78,8 +83,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             )
             return
 
-        accepted_role = 1043260642968223794
-        role = discord.utils.get(interaction.user.roles, id=accepted_role)
+        role = discord.utils.get(interaction.user.roles, id=VOD_RULES_ACCEPTED_ROLE)
         if role is None:
             await interaction.response.send_message(
                 f"You have not accepted the VOD Review rules!", ephemeral=True
@@ -106,11 +110,9 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             return
 
         # Makes the post
-        vod_submissions_channel_id = 1055308028603269140
-
-        await self.client.get_channel(vod_submissions_channel_id).create_thread(
+        await self.client.get_channel(VOD_SUBMISSIONS_CHANNEL).create_thread(
             name=f"{self.title_input.value} | {interaction.user.name}",
-            applied_tags=[Object(id=1104453647053619200)],
+            applied_tags=[Object(id=VOD_NEEDS_REVIEW_TAG)],
             content=f"""
 Submission for {interaction.user.mention}
 

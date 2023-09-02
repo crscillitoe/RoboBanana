@@ -15,6 +15,7 @@ from discord import (
 )
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
+from commands.point_history_commands import PointHistoryCommands
 from commands.temprole_commands import TemproleCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
@@ -183,6 +184,7 @@ async def main():
         tree.add_command(ReactionCommands(tree, client))
         tree.add_command(VodCommands(tree, client))
         tree.add_command(TemproleCommands(tree, client))
+        tree.add_command(PointHistoryCommands(tree, client))
         await client.start(Config.CONFIG["Secrets"]["Discord"]["Token"])
 
 

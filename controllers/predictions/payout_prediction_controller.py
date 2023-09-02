@@ -1,6 +1,7 @@
 from typing import Generator, Tuple
 
 from discord import Client, Interaction
+from controllers.point_history_controller import PointHistoryController
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -11,6 +12,11 @@ from db.models import (
     PredictionEntry,
 )
 from db import DB
+import logging
+
+from models.transaction import Transaction
+
+LOG = logging.getLogger(__name__)
 
 
 class ReturnableGenerator:
@@ -82,7 +88,19 @@ class PayoutPredictionController:
         )
 
         for user_id, payout in payout_generator:
-            DB().deposit_points(user_id, payout)
+            success, new_balance = DB().deposit_points(user_id, payout)
+            if not success:
+                LOG.warn(f"Failed to give points to {user_id}")
+                continue
+            PointHistoryController.record_transaction(
+                Transaction(
+                    user_id,
+                    payout,
+                    new_balance - payout,
+                    new_balance,
+                    "Prediction Payout",
+                )
+            )
 
         total_points = payout_generator.return_value
 
@@ -135,7 +153,21 @@ class PayoutPredictionController:
         for entry in PayoutPredictionController.get_entries_for_prediction(
             prediction_id
         ):
-            DB().deposit_points(entry.user_id, entry.channel_points)
+            result, new_balance = DB().deposit_points(
+                entry.user_id, entry.channel_points
+            )
+            if not result:
+                LOG.warn(f"Failed to return points to {entry.user_id}")
+                continue
+            PointHistoryController.record_transaction(
+                Transaction(
+                    entry.user_id,
+                    entry.channel_points,
+                    new_balance - entry.channel_points,
+                    new_balance,
+                    "Prediction Refund",
+                )
+            )
 
         UpdatePredictionController.publish_prediction_end_summary(prediction_id)
 

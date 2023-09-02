@@ -1,9 +1,11 @@
 from discord import User, Client, ButtonStyle, Interaction
 from discord.ui import View, Button
+from controllers.point_history_controller import PointHistoryController
 
 from db import DB
 from db.models import ChannelReward
 from config import YAMLConfig as Config
+from models.transaction import Transaction
 
 STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
 
@@ -45,7 +47,16 @@ class PendingRewardView(View):
         await interaction.message.edit(content="Reward no longer pending", view=self)
 
     async def refund_reward_onclick(self, interaction: Interaction):
-        success, _ = DB().deposit_points(self.user.id, self.reward.point_cost)
+        success, new_balance = DB().deposit_points(self.user.id, self.reward.point_cost)
+        PointHistoryController.record_transaction(
+            Transaction(
+                self.user.id,
+                self.reward.point_cost,
+                new_balance - self.reward.point_cost,
+                new_balance,
+                "Reward Refund",
+            )
+        )
         if not success:
             return await interaction.response.send_message(
                 f"Failed to refund points to {self.user.mention} - please try again.",

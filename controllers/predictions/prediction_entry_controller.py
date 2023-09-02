@@ -1,5 +1,6 @@
 from discord import Client, Interaction
 from threading import Thread
+from controllers.point_history_controller import PointHistoryController
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -7,6 +8,7 @@ from db.models import (
     PredictionChoice,
 )
 from db import DB
+from models.transaction import Transaction
 
 
 class PredictionEntryController:
@@ -33,11 +35,21 @@ class PredictionEntryController:
                 f"You can only wager up to {point_balance} points", ephemeral=True
             )
 
-        result, _ = DB().withdraw_points(interaction.user.id, channel_points)
+        result, new_balance = DB().withdraw_points(interaction.user.id, channel_points)
         if not result:
             return await interaction.response.send_message(
                 "Unable to cast vote - please try again!", ephemeral=True
             )
+
+        PointHistoryController.record_transaction(
+            Transaction(
+                interaction.user.id,
+                -channel_points,
+                point_balance,
+                new_balance,
+                "Prediction Entry",
+            )
+        )
 
         success = DB().create_prediction_entry(
             interaction.guild_id, interaction.user.id, channel_points, guess.value

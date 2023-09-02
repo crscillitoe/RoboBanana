@@ -5,6 +5,7 @@ from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
 )
+from controllers.point_history_controller import PointHistoryController
 from controllers.predictions.close_prediction_controller import (
     ClosePredictionController,
 )
@@ -13,6 +14,7 @@ from controllers.predictions.payout_prediction_controller import (
 )
 from db import DB, RaffleType
 from db.models import PredictionChoice, PredictionOutcome
+from models.transaction import Transaction
 from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
@@ -488,13 +490,17 @@ class ModCommands(app_commands.Group, name="mod"):
                 "Please provide a reason for awarding points", ephemeral=True
             )
 
-        logging.info(POINTS_AUDIT_CHANNEL)
         await self.client.get_channel(POINTS_AUDIT_CHANNEL).send(audit_output)
-        success, _ = DB().deposit_points(user.id, points)
+        success, new_balance = DB().deposit_points(user.id, points)
         if not success:
             return await interaction.response.send_message(
                 "Failed to award points - please try again.", ephemeral=True
             )
+        PointHistoryController.record_transaction(
+            Transaction(
+                user.id, points, new_balance - points, new_balance, "Give Points"
+            )
+        )
         await interaction.response.send_message(
             "Successfully awarded points!", ephemeral=True
         )

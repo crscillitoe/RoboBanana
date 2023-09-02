@@ -1,9 +1,11 @@
 from discord import Client, SelectOption, Interaction
 from discord.ui import View, Select
+from controllers.point_history_controller import PointHistoryController
 
 from db import DB
 from db.models import ChannelReward
 from config import YAMLConfig as Config
+from models.transaction import Transaction
 
 from .pending_reward_view import PendingRewardView
 
@@ -59,6 +61,16 @@ class RedeemRewardView(View):
             return await interaction.response.send_message(
                 "Failed to redeem reward - please try again.", ephemeral=True
             )
+
+        PointHistoryController.record_transaction(
+            Transaction(
+                interaction.user.id,
+                -redeemed_reward.point_cost,
+                self.user_points,
+                balance,
+                "Redeemed Reward",
+            )
+        )
 
         await interaction.response.send_message(
             f"Redeemed! You have {balance} points remaining.", ephemeral=True

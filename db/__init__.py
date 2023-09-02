@@ -3,6 +3,7 @@ from discord import Role
 from sqlalchemy import create_engine, select, update, insert, func, DateTime
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
+from db.points_history import delete_transactions, get_transaction_history, record_transaction
 
 from db.temproles import (
     delete_temprole,
@@ -18,6 +19,7 @@ from db.vod_review_bank import (
     get_vod_review_balance,
     reset_vod_review_balance,
 )
+from models.transaction import Transaction
 
 from .vod_submissions import (
     get_latest_timestamp,
@@ -74,6 +76,7 @@ from .emoji_reactions import (
 )
 from .models import (
     Base,
+    PointsHistory,
     Prediction,
     PredictionEntry,
     PredictionSummary,
@@ -888,3 +891,32 @@ class DB:
             user_id (int): Discord User ID of user to reset balance for
         """
         return reset_vod_review_balance(user_id, self.session)
+
+    def record_transaction(self, transaction: Transaction):
+        """Record transaction into points history respecting maximum
+        maximum transaction limit
+
+        Args:
+            transaction (Transaction): Transaction data to record
+        """
+        return record_transaction(transaction, self.session)
+
+    def get_transaction_history(self, user_id: int):
+        """Get transaction history for user
+
+        Args:
+            user_id (int): Discord User ID of user
+
+        Returns:
+            list[PointsHistory]: Up to MAXIMUM_TRANSACTIONS most recent point transactions
+        """
+        return get_transaction_history(user_id, self.session)
+
+    def delete_transactions(self, transactions: list[PointsHistory]):
+        """Delete transactions from PointsHistory
+
+        Args:
+            transactions (list[PointsHistory]): Transactions to delete
+            session (sessionmaker): Open DB session
+        """
+        return delete_transactions(transactions, self.session)

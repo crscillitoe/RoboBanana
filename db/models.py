@@ -281,3 +281,27 @@ class VODReviewBank(Base):
 
     user_id = Column(BigInteger, primary_key=True, nullable=False)
     balance = Column(Integer, nullable=False)
+
+    def __repr__(self):
+        return f"VODReviewBank(id={self.user_id!r}, balance={self.balance!r})"
+
+
+class PointsHistory(Base):
+    __tablename__ = "points_history"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, nullable=False, index=True)
+    timestamp = Column(DateTime, nullable=False, default=func.now())
+    points_delta = Column(Integer, nullable=False)
+    starting_balance = Column(Integer, nullable=False)
+    ending_balance = Column(Integer, nullable=False)
+    reason = Column(VARCHAR(50), nullable=False)
+
+    def __repr__(self):
+        return (
+            f"PointsHistory(id={self.id!r}, user_id={self.user_id!r},"
+            f" timestamp={self.timestamp!r}, points_delta={self.points_delta!r},"
+            f" starting_balance={self.starting_balance!r}, ending_balance={self.ending_balnce!r},"
+            f" reason={self.reason!r}"
+            ")"
+        )

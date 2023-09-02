@@ -3,7 +3,11 @@ from discord import Role
 from sqlalchemy import create_engine, select, update, insert, func, DateTime
 from sqlalchemy.orm import sessionmaker
 from typing import Optional
-from db.points_history import delete_transactions, get_transaction_history, record_transaction
+from db.points_history import (
+    delete_transactions,
+    get_transaction_history,
+    record_transaction,
+)
 
 from db.temproles import (
     delete_temprole,

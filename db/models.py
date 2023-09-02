@@ -301,7 +301,6 @@ class PointsHistory(Base):
         return (
             f"PointsHistory(id={self.id!r}, user_id={self.user_id!r},"
             f" timestamp={self.timestamp!r}, points_delta={self.points_delta!r},"
-            f" starting_balance={self.starting_balance!r}, ending_balance={self.ending_balnce!r},"
-            f" reason={self.reason!r}"
-            ")"
+            f" starting_balance={self.starting_balance!r},"
+            f" ending_balance={self.ending_balnce!r}, reason={self.reason!r})"
         )

@@ -40,13 +40,17 @@ class PointHistoryCommands(app_commands.Group, name="points_history"):
     def format_reply(user_history: list[PointsHistory], user: User) -> Embed:
         timestamps = list(
             map(
-                lambda transaction: f"<t:{time.mktime(transaction.timestamp.timetuple()):.0f}:R>",
+                lambda transaction: (
+                    f"<t:{time.mktime(transaction.timestamp.timetuple()):.0f}:R>"
+                ),
                 user_history,
             )
         )
         balance_summary = list(
             map(
-                lambda transaction: f"{transaction.points_delta:+} ({str(transaction.starting_balance) + ' -> ' + str(transaction.ending_balance)})",
+                lambda transaction: (
+                    f"{transaction.points_delta:+} ({str(transaction.starting_balance) + ' -> ' + str(transaction.ending_balance)})"
+                ),
                 user_history,
             )
         )

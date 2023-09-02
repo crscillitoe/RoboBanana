@@ -98,7 +98,7 @@ class PayoutPredictionController:
                     payout,
                     new_balance - payout,
                     new_balance,
-                    "Prediction Payout",
+                    f"Prediction Payout ({option.name})",
                 )
             )
 

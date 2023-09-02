@@ -47,7 +47,7 @@ class PredictionEntryController:
                 -channel_points,
                 point_balance,
                 new_balance,
-                "Prediction Entry",
+                f"Prediction Entry ({guess.name})",
             )
         )
 

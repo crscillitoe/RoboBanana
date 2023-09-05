@@ -47,3 +47,8 @@ Discord:
     RulesAcceptedRole:
     RewardHoursPerReview: 8
     SubmissionChannel:
+Server:
+  Host: server
+  Port: 3000
+  Cache:
+    Host: cache

@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  bot:
+    build: .
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    configs:
+      - source: robobanana-config
+        target: /config.yaml
+    secrets:
+      - source: robobanana-secrets
+        target: /secrets.yaml
+  server:
+    build:
+      context: .
+      dockerfile: ./server/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - cache
+    ports:
+      - "3000:3000"
+    configs:
+      - source: robobanana-config
+        target: /config.yaml
+    secrets:
+      - source: robobanana-secrets
+        target: /secrets.yaml
+  cache:
+    image: redis:alpine
+    ports:
+      - '6379:6379'
+    volumes: 
+      - cache:/data
+    
+configs:
+  robobanana-config:
+    file: ./config.yaml
+secrets:
+  robobanana-secrets:
+    file: ./secrets.yaml
+volumes:
+  cache:

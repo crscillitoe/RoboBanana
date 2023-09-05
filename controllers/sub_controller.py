@@ -3,6 +3,7 @@ from discord import Message, Client
 from discord.ext import tasks
 import discord.utils
 from config import YAMLConfig as Config
+from util.server_utils import get_base_url
 import logging
 import requests
 from datetime import datetime
@@ -19,8 +20,8 @@ EU_OPEN_INHOUSE_CHANNEL_ID = Config.CONFIG["Discord"]["Inhouses"]["EUOpenChannel
 GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
 
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
-PUBLISH_URL = "http://localhost:3000/publish-sub"
-PUBLISH_COUNT_URL = "http://localhost:3000/publish-sub-count"
+PUBLISH_URL = f"{get_base_url()}/publish-sub"
+PUBLISH_COUNT_URL = f"{get_base_url()}/publish-sub-count"
 PREMIUM_IDS = list(
     map(
         int,

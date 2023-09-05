@@ -20,6 +20,7 @@ from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
 from config import YAMLConfig as Config
+from util.server_utils import get_base_url
 import logging
 import random
 from threading import Thread
@@ -39,9 +40,9 @@ GIFTED_TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
-PUBLISH_POLL_URL = "http://localhost:3000/publish-poll"
-PUBLISH_TIMER_URL = "http://localhost:3000/publish-timer"
-PUBLISH_CHESS_URL = "http://localhost:3000/publish-chess"
+PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
+PUBLISH_TIMER_URL = f"{get_base_url()}/publish-timer"
+PUBLISH_CHESS_URL = f"{get_base_url()}/publish-chess"
 
 
 class ChannelPerms(enum.Enum):

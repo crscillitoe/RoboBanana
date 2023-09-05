@@ -6,9 +6,10 @@ from config import YAMLConfig as Config
 from db.models import PredictionSummary
 from threading import Thread
 from db import DB
+from util.server_utils import get_base_url
 import logging
 
-PUBLISH_URL = "http://localhost:3000/publish-prediction"
+PUBLISH_URL = f"{get_base_url()}/publish-prediction"
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 LOG = logging.getLogger(__name__)
 

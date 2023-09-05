@@ -2,10 +2,11 @@ from typing import Optional
 from discord import app_commands, Interaction, Client, User
 from threading import Thread
 from config import YAMLConfig as Config
+from util.server_utils import get_base_url
 import requests
 import logging
 
-PUBLISH_URL = "http://localhost:3000/publish-vod"
+PUBLISH_URL = f"{get_base_url()}/publish-vod"
 LOG = logging.getLogger(__name__)
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 

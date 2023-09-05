@@ -27,11 +27,12 @@ from controllers.sub_controller import SubController
 from controllers.temprole_controller import TempRoleController
 from db import DB
 from threading import Thread
+from util.server_utils import get_base_url
 
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
-COOL_URL = "http://localhost:3000/publish-cool"
+COOL_URL = f"{get_base_url()}/publish-cool"
 COOL_ID = Config.CONFIG["Discord"]["CoolMeter"]["CoolEmoji"]
 UNCOOL_ID = Config.CONFIG["Discord"]["CoolMeter"]["UncoolEmoji"]
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]

@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  bot:
+    extends:
+      file: compose.yaml
+      service: bot
+    entrypoint: jurigged -v bot.py
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+  server:
+    extends:
+      file: compose.yaml
+      service: bot
+    entrypoint: hypercorn --bind 0.0.0.0:3000 --reload server.server:app
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+  db:
+    image: mysql
+    environment:
+      MYSQL_DATABASE: woohoojin
+      MYSQL_USER: woohoojinuser
+      MYSQL_PASSWORD: testpassword
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - robobanana-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 1s
+      interval: 1s
+      retries: 10
+volumes:
+  robobanana-db:

@@ -4,5 +4,6 @@ __pycache__
 *.ini
 .vscode/
 
+.env
 secrets.yaml
 config.yaml

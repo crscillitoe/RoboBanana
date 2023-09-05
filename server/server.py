@@ -13,15 +13,18 @@ from server.util.discord_client import DISCORD_CLIENT, start_discord_client
 from server.util.keep_alive import start_keepalive
 from threading import Thread
 from quart import Quart
+from config import YAMLConfig as Config
 
 import discord
 import logging
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
 
+CACHE_HOST = Config.CONFIG["Server"]["Cache"]["Host"]
+
 app = Quart(__name__)
 app = cors(app, allow_origin="*")
-app.config["REDIS_URL"] = "redis://localhost"
+app.config["REDIS_URL"] = f"redis://{CACHE_HOST}"
 
 app.register_blueprint(sse, url_prefix="/stream")
 app.register_blueprint(prediction_blueprint)

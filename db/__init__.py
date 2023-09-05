@@ -115,7 +115,7 @@ class DB:
         db_name = Config.CONFIG["Database"]["Name"]
 
         self.engine = create_engine(
-            f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}"
+            f"mysql+pymysql://{username}:{password}@{db_host}/{db_name}",
         )
         self.session = sessionmaker(self.engine, autoflush=True, autocommit=True)
 

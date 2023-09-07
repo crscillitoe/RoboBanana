@@ -11,20 +11,22 @@ Knowers only.
 ---
 - [Robo Banana](#robo-banana)
 - [Config Migration](#config-migration)
-- [How To Run The Bot Locally](#how-to-run-the-bot-locally)
+- [Development Guide](#how-to-run-the-bot-locally)
   - [Discord](#discord)
     - [Create your own server](#create-your-own-server)
     - [Enable Developer mode](#enable-developer-mode)
     - [Adding Roles](#adding-roles)
     - [Create an Application](#create-an-application)
+  - [Required Code changes](#required-code-changes)
+    - [Config.yaml required values](#configyaml-required-values)
+  - [Running via Docker Compose (Recommended)](#running-via-docker-compose-recommended)
+  - [Running Locally](#running-locally)
     - [Python Virtual Environment](#python-virtual-environment)
     - [Requirements](#requirements)
       - [MySQL](#mysql)
       - [Redis](#redis)
-  - [Required Code changes](#required-code-changes)
-    - [Config.yaml required values](#configini-required-values)
+    - [Run the bot](#run-the-bot)
   - [Server slash (/) commands.](#server-slash--commands)
-  - [Run the bot](#run-the-bot)
 ---
 
 # Config Migration
@@ -37,7 +39,7 @@ pip install -r requirements.txt
 python config_converter.py
 ```
 
-# How To Run The Bot Locally
+# Development Guide
 These setup instructions outline the essential steps for initializing the bot and enabling it to respond to commands from Discord clients.
 
 ## Discord
@@ -69,28 +71,6 @@ You will also need to add yourself as a member to all 4 roles. Mod must have a c
 
 To create an Application which is required to link Discord to your local code follow Step 1 from [this guide](https://discord.com/developers/docs/getting-started). Steps 2 and 3 are not required for this setup.
 
-
-### Python Virtual Environment
-We highly recommend you setup a venv to ensure that your RoboBanana environment is isolated from other projects you may be working on. [Creation of virtual environments](https://docs.python.org/3/library/venv.html)
-
-
-### Requirements
-
-With the venv active install the requirements
-```
-pip install -r requirements.txt
-```
-
-You will also need MySQL and Redis for RoboBanana to connect to. This can be accomplished a number of ways. Reference one of the tutorials below:
-
-#### MySQL
-- [Installing MySQL to your Operating System](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/)
-- [Running MySQL using Docker](https://hub.docker.com/_/mysql)
-
-#### Redis
-- [Installing Redis to your Operating System](https://redis.io/docs/getting-started/installation/)
-- [Running Redis using Docker](https://redis.io/docs/getting-started/install-stack/docker/)
-
 ## Required Code changes
 Copy the config.example.yaml file to be config.yaml. Copy the secrets.example.yaml file to be secrets.yaml. These should remain gitignored.
 
@@ -111,20 +91,49 @@ With Developer Mode on simply right click the channel name and select **Copy Cha
 
 `Database` / `Secrets.Database`: Replace the values with what you set when running your mysql server
 
-## Server slash (/) commands.
-[Slash Command Documentation](https://discord.com/developers/docs/interactions/application-commands)
+## Running via Docker Compose (Recommended)
+Ensure that you have Docker / Docker Compose installed. Follow the prerequisites of the [Try Docker Compose](https://docs.docker.com/compose/gettingstarted/) docs. Once this is done, it is highly recommended for convenience to create a `.env` file with the following contents:
 
-To import the required slash commands for RoboBanana to work open the **bot.py** file and uncomment the following 4 lines;
 ```
-# guild = discord.Object(id=GUILD_ID)
-# tree.clear_commands(guild=guild)
-# tree.copy_global_to(guild=guild)
-# await tree.sync(guild=guild)
+COMPOSE_FILE=compose.yaml:compose-dev.yaml
 ```
 
-After running the bot for the first time it is important to stop the bot and comment the lines out again. If this is not done then you may become rate limited by Discord.
+Then simply run 
+```
+docker compose up
+```
 
-## Run the bot
+This will start up the bot and server **with hot-reloading enabled.** Updates to commands and server endpoints should happen without the need to restart the containers. When adding new commands to the command tree, it is likely that the bot will need to be restarted with
+
+```
+docker compose restart bot
+```
+
+See [Server Slash Commands](#server-slash--commands) to make sure that commands are synced to your testing Discord server on the first run.
+
+## Running Locally
+To run the bot locally, there are a few extra setup steps required to get your environment ready. 
+### Python Virtual Environment
+We highly recommend you setup a venv to ensure that your RoboBanana environment is isolated from other projects you may be working on. [Creation of virtual environments](https://docs.python.org/3/library/venv.html)
+
+### Requirements
+
+With the venv active install the requirements
+```
+pip install -r requirements.txt
+```
+
+You will also need MySQL and Redis for RoboBanana to connect to. This can be accomplished a number of ways. Reference one of the tutorials below:
+
+#### MySQL
+- [Installing MySQL to your Operating System](https://dev.mysql.com/doc/mysql-installation-excerpt/5.7/en/)
+- [Running MySQL using Docker](https://hub.docker.com/_/mysql)
+
+#### Redis
+- [Installing Redis to your Operating System](https://redis.io/docs/getting-started/installation/)
+- [Running Redis using Docker](https://redis.io/docs/getting-started/install-stack/docker/)
+
+### Run the bot
 
 - Start the hypercorn server
 ```bash
@@ -151,3 +160,16 @@ Initiate an instance of the Bot:
 2023-08-27 13:08:22 INFO     root Logged in as my_robobanana#5138 (ID: 1143616097560580116)
 2023-08-27 13:08:22 INFO     controllers.temprole_controller [TEMPROLE TASK] Running expire roles...
 ```
+
+## Server slash (/) commands.
+[Slash Command Documentation](https://discord.com/developers/docs/interactions/application-commands)
+
+To import the required slash commands for RoboBanana to work open the **bot.py** file and uncomment the following 4 lines;
+```
+# guild = discord.Object(id=GUILD_ID)
+# tree.clear_commands(guild=guild)
+# tree.copy_global_to(guild=guild)
+# await tree.sync(guild=guild)
+```
+
+After running the bot for the first time it is important to stop the bot and comment the lines out again. If this is not done then you may become rate limited by Discord.

@@ -32,6 +32,11 @@ services:
       - '6379:6379'
     volumes: 
       - cache:/data
+    healthcheck:
+      test: ["CMD", "redis-cli","ping"]
+      timeout: 1s
+      interval: 1s
+      retries: 10
     
 configs:
   robobanana-config:

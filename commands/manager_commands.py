@@ -1,7 +1,6 @@
 from typing import Optional
 from discord import Embed, Guild, app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
-from discord import Object
 from config import YAMLConfig as Config
 import enum
 import logging

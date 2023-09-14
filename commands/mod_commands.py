@@ -15,6 +15,7 @@ from controllers.predictions.payout_prediction_controller import (
 from db import DB, RaffleType
 from db.models import PredictionChoice, PredictionOutcome
 from models.transaction import Transaction
+from util.discord_utils import DiscordUtils
 from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
@@ -81,16 +82,6 @@ class ModCommands(app_commands.Group, name="mod"):
         logging.error(error)
         return await super().on_error(interaction, error)
 
-    @app_commands.command(name="sync")
-    @app_commands.checks.has_role("Mod")
-    async def sync(self, interaction: Interaction) -> None:
-        """Manually sync slash commands to guild"""
-
-        guild = interaction.guild
-        self.tree.clear_commands(guild=guild)
-        self.tree.copy_global_to(guild=guild)
-        await self.tree.sync(guild=guild)
-        await interaction.response.send_message("Commands synced", ephemeral=True)
 
     @app_commands.command(name="reset_vod_submission")
     @app_commands.checks.has_role("Mod")

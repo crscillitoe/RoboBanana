@@ -1,3 +1,4 @@
+from copy import copy
 from typing import Optional
 from discord import Embed, Guild, app_commands, Interaction, Client, User, ForumTag
 from discord.app_commands.errors import AppCommandError, CheckFailure
@@ -156,14 +157,17 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await ManagerCommands.remove_incorrect_role(owner, interaction)
         await TempRoleController.set_role(owner, role, duration, interaction)
 
-        await interaction.channel.remove_tags(*interaction.channel.applied_tags)
         forum_tag = interaction.channel.parent.get_tag(tag_id)
-        await interaction.channel.add_tags(forum_tag)
         embed = Embed(
             title="Tag and Temprole",
             description=f"Applied {forum_tag.name} and {role.mention}.",
             color=0xF9D60D,
         )
+        await interaction.channel.add_tags(forum_tag)
+        tags_to_remove = copy(interaction.channel.applied_tags)
+        tags_to_remove.remove(forum_tag)
+        await interaction.channel.remove_tags(*tags_to_remove)
+
         await interaction.followup.send(embed=embed)
         await VODReviewBankController.increment_balance(interaction.user, interaction)
 

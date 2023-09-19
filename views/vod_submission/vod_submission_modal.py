@@ -52,7 +52,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
 
         # Paragraph
         self.i_agree = TextInput(
-            label="Please paste rule 11 here. And read it.",
+            label="Please paste rule 20 here. And read it.",
             placeholder="I have read all of the rules....",
             style=TextStyle.paragraph,
             required=True,

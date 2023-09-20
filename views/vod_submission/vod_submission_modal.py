@@ -28,8 +28,8 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
         )
 
         self.tracker_game_url = TextInput(
-            label="Tracker.gg Account + Game + Heatmap Images",
-            placeholder="tracker.gg/account\ntracker.gg/match\nimgur.com/heatmap.png",
+            label="Tracker.gg + Valoplant Info",
+            placeholder="tracker.gg/account\ntracker.gg/match\nimgur.com/heatmap.png\nvaloplant.gg/strategy",
             style=TextStyle.paragraph,
             required=True,
             min_length=1,
@@ -92,7 +92,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
 
         if "i have read all of the rules" not in self.i_agree.value.lower():
             await interaction.response.send_message(
-                f"You didn't paste in rule 11.", ephemeral=True
+                f"You didn't paste in the agreement.", ephemeral=True
             )
             return
 

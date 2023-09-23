@@ -81,6 +81,18 @@ class TempRoleController:
         if temprole is None:
             expiration += extension_duration
             DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+            # Add role to user
+            try:
+                await member.add_roles(role)
+            except:
+                temprole = DB().retrieve_temprole(user_id, role.id)
+                if temprole is not None:
+                    DB().delete_temprole(temprole.id)
+                return await interaction.response.send_message(
+                    f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
+                    " not above RoboBanana.",
+                    ephemeral=True,
+                )
         else:
             expiration = temprole.expiration + extension_duration
             DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)

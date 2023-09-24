@@ -71,7 +71,9 @@ class RaffleBot(Client):
         # tree.copy_global_to(guild=guild)
         # await tree.sync(guild=guild)
         SubController(self).send_count.start()
-        SubController(self).sync_channel_perms.start()
+        # Disable opening / closing inhouse queues at Ethan's request
+        # Leaving here for posterity
+        # SubController(self).sync_channel_perms.start()
         TempRoleController(self).expire_roles.start()
 
     async def on_message_edit(self, before: Message, message: Message):

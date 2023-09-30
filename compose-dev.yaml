@@ -10,6 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_healthy
     links:
       - db
   server:
@@ -21,6 +23,8 @@ services:
       - .:/app
     depends_on:
       db:
+        condition: service_healthy
+      cache:
         condition: service_healthy
     links:
       - db

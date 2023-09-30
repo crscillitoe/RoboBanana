@@ -9,6 +9,7 @@ from server.blueprints.cool import cool_blueprint
 from server.blueprints.poll import poll_blueprint
 from server.blueprints.sub import sub_blueprint
 from server.blueprints.tamagachi import tamagachi_blueprint
+from server.blueprints.overlay import overlay_blueprint
 from server.util.discord_client import DISCORD_CLIENT, start_discord_client
 from server.util.keep_alive import start_keepalive
 from threading import Thread
@@ -35,6 +36,7 @@ app.register_blueprint(cool_blueprint)
 app.register_blueprint(poll_blueprint)
 app.register_blueprint(sub_blueprint)
 app.register_blueprint(tamagachi_blueprint)
+app.register_blueprint(overlay_blueprint)
 
 
 LOG = logging.getLogger(__name__)

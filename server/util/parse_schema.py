@@ -1,5 +1,8 @@
 import enum
 from quart import Request
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 class SchemaValueType(enum.Enum):
@@ -21,10 +24,13 @@ async def parse_body(request: Request, schema: dict[str, SchemaValueType]):
     request_json = await request.get_json()
     parsed_body = dict()
     for key, value_type in schema.items():
+        request_value = request_json.get(key)
+        if request_value is None:
+            continue
         value = (
-            int(request_json[key])
+            int(request_value)
             if value_type == SchemaValueType.Integer
-            else request_json[key]
+            else request_value
         )
         parsed_body[key] = value
     return parsed_body

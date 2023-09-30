@@ -1,5 +1,5 @@
 import logging
-from discord import Client, Intents, Message
+from discord import Client, ClientUser, Intents, Message
 
 from server.blueprints.chat import publish_chat
 
@@ -45,6 +45,11 @@ class ServerBot(Client):
             if not should_send:
                 return
             modified_message_content = reference_author + message.content
+
+            roles = []
+            if type(message.author) != ClientUser:
+                roles = message.author.roles
+
             to_send = {
                 "content": modified_message_content,
                 "displayName": message.author.display_name,
@@ -57,7 +62,7 @@ class ServerBot(Client):
                         "id": r.id,
                         "name": r.name,
                     }
-                    for r in message.author.roles
+                    for r in roles
                 ],
                 "stickers": [{"url": s.url} for s in message.stickers],
                 "emojis": emoji_content,

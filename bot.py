@@ -15,7 +15,9 @@ from discord import (
 )
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
+from commands.overlay_commands import OverlayCommands
 from commands.point_history_commands import PointHistoryCommands
+from commands.sync_commands import SyncCommands
 from commands.temprole_commands import TemproleCommands
 from commands.viewer_commands import ViewerCommands
 from commands.manager_commands import ManagerCommands
@@ -27,7 +29,9 @@ from controllers.sub_controller import SubController
 from controllers.temprole_controller import TempRoleController
 from db import DB
 from threading import Thread
+from util.discord_utils import DiscordUtils
 from util.server_utils import get_base_url
+from util.sync_utils import SyncUtils
 
 
 discord.utils.setup_logging(level=logging.INFO, root=True)
@@ -180,14 +184,8 @@ def publish_cool(cool: int):
 
 async def main():
     async with client:
-        tree.add_command(MemeCommands(tree, client))
-        tree.add_command(ModCommands(tree, client))
-        tree.add_command(ViewerCommands(tree, client))
-        tree.add_command(ManagerCommands(tree, client))
-        tree.add_command(ReactionCommands(tree, client))
-        tree.add_command(VodCommands(tree, client))
-        tree.add_command(TemproleCommands(tree, client))
-        tree.add_command(PointHistoryCommands(tree, client))
+        tree.add_command(SyncCommands(tree, client))
+        SyncUtils.add_commands_to_tree(tree, client)
         await client.start(Config.CONFIG["Secrets"]["Discord"]["Token"])
 
 

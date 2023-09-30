@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Colour, Embed, Guild, Interaction, Role, User
+from discord import Client, Colour, Embed, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB

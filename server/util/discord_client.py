@@ -30,16 +30,7 @@ class ServerBot(Client):
         LOG.info(f"Logged in as {self.user} (ID: {self.user.id})")
 
     async def on_message(self, message: Message):
-        stream = False
-        test = False
         if message.channel.id == STREAM_CHAT:
-            test = True
-
-        if message.channel.id == 1037040541017309225:
-            stream = True
-
-        # Valorant Discussion Channel (high volume good for testing)
-        if stream or test:
             should_send, emoji_content = self.find_emojis(message.content)
             reference_author = await self.find_reference_author(message)
             if not should_send:
@@ -74,7 +65,7 @@ class ServerBot(Client):
                 "author_id": message.author.id,
             }
             LOG.debug(to_send)
-            await publish_chat(to_send, stream)
+            await publish_chat(to_send)
 
     def find_emojis(self, content: str):
         stream_content = []

@@ -82,7 +82,6 @@ class ModCommands(app_commands.Group, name="mod"):
         logging.error(error)
         return await super().on_error(interaction, error)
 
-
     @app_commands.command(name="reset_vod_submission")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(user="Discord User to reset vod submission for")

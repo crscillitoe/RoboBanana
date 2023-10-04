@@ -3,6 +3,7 @@ from discord import Message, Client
 from discord.ext import tasks
 import discord.utils
 from config import YAMLConfig as Config
+from controllers.temprole_controller import TempRoleController
 from util.server_utils import get_base_url
 import logging
 import requests
@@ -41,6 +42,10 @@ class SubController:
         self.client = client
 
     @staticmethod
+    async def _get_months_subscribed(role_sub_data: dict):
+        return role_sub_data.get("total_months_subscribed", 1)
+
+    @staticmethod
     async def subscribe(message: Message, client: Client):
         # fetch extra attached message info
         raw_msg = await client.http.get_message(
@@ -70,11 +75,11 @@ class SubController:
 
         name_prefix = "Thank you {name}"
         # create the thank you message
+        num_months_subscribed = SubController._get_months_subscribed(role_sub_data)
         if role_sub_data.get("is_renewal", False):
-            num_months = role_sub_data.get("total_months_subscribed", 1)
             thankyou_message = (
                 f"{name_prefix} for resubscribing to {role_name} for"
-                f" {num_months} months!"
+                f" {num_months_subscribed} months!"
             )
         else:
             thankyou_message = f"{name_prefix} for subscribing to {role_name}!"
@@ -87,9 +92,11 @@ class SubController:
         mention_thankyou = thankyou_message.format(name=message.author.mention)
         name_thankyou = thankyou_message.format(name=author_name)
 
-        if "6 months" in mention_thankyou and "THE ONES WHO" in mention_thankyou:
+        if num_months_subscribed > 6 and "THE ONES WHO" in mention_thankyou:
             t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
-            await message.author.add_roles(t3_6_month_role)
+            await TempRoleController.set_role(
+                message.author, t3_6_month_role, "31 days"
+            )
 
         Thread(
             target=publish_update,

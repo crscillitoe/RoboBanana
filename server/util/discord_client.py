@@ -35,6 +35,8 @@ class ServerBot(Client):
             reference_author = await self.find_reference_author(message)
             if not should_send:
                 return
+            if message.flags.ephemeral:
+                return
             modified_message_content = reference_author + message.content
 
             roles = []

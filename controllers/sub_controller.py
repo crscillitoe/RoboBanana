@@ -42,7 +42,7 @@ class SubController:
         self.client = client
 
     @staticmethod
-    async def _get_months_subscribed(role_sub_data: dict):
+    def _get_months_subscribed(role_sub_data: dict):
         return role_sub_data.get("total_months_subscribed", 1)
 
     @staticmethod

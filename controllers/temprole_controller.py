@@ -47,8 +47,10 @@ class TempRoleController:
                 DB().delete_temprole(temprole.id)
 
             error_message = (
-                f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
-                " not above RoboBanana.",
+                (
+                    f"Failed to assign {role.name} to {user.mention}. Ensure this role"
+                    " is not above RoboBanana."
+                ),
             )
             if interaction is not None:
                 return await interaction.response.send_message(

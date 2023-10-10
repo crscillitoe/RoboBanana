@@ -23,7 +23,9 @@ class TempRoleController:
         self.client = client
 
     @staticmethod
-    async def set_role(user: User, role: Role, duration: str, interaction: Interaction):
+    async def set_role(
+        user: User, role: Role, duration: str, interaction: Interaction | None
+    ):
         user_id = user.id
         delta = timedelta(seconds=timeparse(duration))
         expiration = datetime.now() + delta
@@ -43,11 +45,18 @@ class TempRoleController:
             temprole = DB().retrieve_temprole(user_id, role.id)
             if temprole is not None:
                 DB().delete_temprole(temprole.id)
-            return await interaction.response.send_message(
+
+            error_message = (
                 f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
                 " not above RoboBanana.",
-                ephemeral=True,
             )
+            if interaction is not None:
+                return await interaction.response.send_message(
+                    error_message,
+                    ephemeral=True,
+                )
+            else:
+                return LOG.error(error_message)
 
         unixtime = time.mktime(expiration.timetuple())
         embed = Embed(
@@ -58,7 +67,10 @@ class TempRoleController:
             ),
             color=Colour.green(),
         )
-        await DiscordUtils.reply(interaction, embed=embed)
+        if interaction is not None:
+            await DiscordUtils.reply(interaction, embed=embed)
+        else:
+            LOG.info(f"Assigned {role.name} to {user.mention} expiring {expiration}")
 
     @staticmethod
     async def extend_role(

@@ -92,7 +92,7 @@ class SubController:
         mention_thankyou = thankyou_message.format(name=message.author.mention)
         name_thankyou = thankyou_message.format(name=author_name)
 
-        if num_months_subscribed > 6 and "THE ONES WHO" in mention_thankyou:
+        if num_months_subscribed >= 6 and "THE ONES WHO" in mention_thankyou:
             t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
             await TempRoleController.set_role(
                 message.author, t3_6_month_role, "31 days"

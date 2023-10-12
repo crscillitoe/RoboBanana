@@ -49,6 +49,11 @@ class AllFields(Enum):
     preRollVideo = "preRollVideo"
 
 
+class FieldType(str, Enum):
+    TEXT = "text"
+    MEDIA = "media"
+
+
 class Switch(Enum):
     on = "on"
     off = "off"
@@ -65,9 +70,14 @@ class OverlayCommands(app_commands.Group, name="overlay"):
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(field="Overlay field to set")
     @app_commands.describe(text="Text to set field to")
-    async def set_text(self, interaction: Interaction, field: TextFields, text: str):
+    @app_commands.describe(color="Color of text")
+    async def set_text(
+        self, interaction: Interaction, field: TextFields, text: str, color: str = None
+    ):
         """Set overlay text field to specified value"""
-        OverlayController.publish_overlay({field.value: text})
+        OverlayController.publish_overlay(
+            {field.value: {"type": FieldType.TEXT, "value": text, "color": color}}
+        )
         await interaction.response.send_message(
             "Overlay text update sent!", ephemeral=True
         )
@@ -88,7 +98,9 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         if media is not None:
             media_url = media.url
 
-        OverlayController.publish_overlay({field.value: media_url})
+        OverlayController.publish_overlay(
+            {field.value: {"type": FieldType.MEDIA, "source": media_url}}
+        )
         await interaction.response.send_message(
             "Overlay image update sent!", ephemeral=True
         )

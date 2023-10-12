@@ -24,7 +24,7 @@ class TempRoleController:
 
     @staticmethod
     async def set_role(
-        user: User, role: Role, duration: str, interaction: Interaction | None
+        user: User, role: Role, duration: str, interaction: Interaction | None = None
     ):
         user_id = user.id
         delta = timedelta(seconds=timeparse(duration))

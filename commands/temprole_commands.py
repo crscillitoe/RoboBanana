@@ -1,6 +1,15 @@
-from discord import Role, app_commands, Interaction, Client, User, TextChannel
+from discord import (
+    Colour,
+    Embed,
+    Role,
+    app_commands,
+    Interaction,
+    Client,
+    User,
+)
 
 from controllers.temprole_controller import TempRoleController
+from util.discord_utils import DiscordUtils
 
 
 @app_commands.guild_only()
@@ -19,7 +28,19 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
-        await TempRoleController.set_role(user, role, duration, interaction)
+        success, message = await TempRoleController.set_role(user, role, duration)
+
+        if not success:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
+        embed = Embed(
+            title="Assigned Temprole",
+            description=message,
+            color=Colour.green(),
+        )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @app_commands.command(name="extend")
     @app_commands.checks.has_role("Mod")
@@ -30,7 +51,19 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
-        await TempRoleController.extend_role(user, role, duration, interaction)
+        success, message = await TempRoleController.extend_role(user, role, duration)
+
+        if not success:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
+        embed = Embed(
+            title="Assigned Temprole",
+            description=message,
+            color=Colour.green(),
+        )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @app_commands.command(name="remove")
     @app_commands.checks.has_role("Mod")
@@ -38,7 +71,19 @@ class TemproleCommands(app_commands.Group, name="temprole"):
     @app_commands.describe(role="Discord Role to remove")
     async def remove_role(self, interaction: Interaction, user: User, role: Role):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
-        await TempRoleController.remove_role(user, role, interaction)
+        success, message = await TempRoleController.remove_role(user, role)
+
+        if not success:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
+        embed = Embed(
+            title="Removed Temprole",
+            description=message,
+            color=Colour.red(),
+        )
+        await DiscordUtils.reply(interaction, embed=embed)
 
     @app_commands.command(name="status")
     @app_commands.checks.has_role("Mod")

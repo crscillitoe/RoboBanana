@@ -46,15 +46,16 @@ class TempRoleController:
                 DB().delete_temprole(temprole.id)
                 return (
                     False,
-                    f"Failed to assign {role.name} to {user.mention}. Ensure this role"
-                    " is not above RoboBanana.",
+                    (
+                        f"Failed to assign {role.name} to {user.mention}. Ensure this"
+                        " role is not above RoboBanana."
+                    ),
                 )
 
         unixtime = time.mktime(expiration.timetuple())
         return (
             True,
-            f"Assigned {role.mention} to {user.mention} expiring"
-            f" <t:{unixtime:.0f}:f>",
+            f"Assigned {role.mention} to {user.mention} expiring <t:{unixtime:.0f}:f>",
         )
 
     @staticmethod
@@ -86,8 +87,10 @@ class TempRoleController:
                     DB().delete_temprole(temprole.id)
                 return (
                     False,
-                    f"Failed to assign {role.name} to {user.mention}. Ensure this role"
-                    " is not above RoboBanana.",
+                    (
+                        f"Failed to assign {role.name} to {user.mention}. Ensure this"
+                        " role is not above RoboBanana."
+                    ),
                 )
         else:
             expiration = temprole.expiration + extension_duration
@@ -96,8 +99,10 @@ class TempRoleController:
         unixtime = time.mktime(expiration.timetuple())
         return (
             True,
-            f"Extended {role.mention} for {user.mention}. Now expiring"
-            f" <t:{unixtime:.0f}:f>",
+            (
+                f"Extended {role.mention} for {user.mention}. Now expiring"
+                f" <t:{unixtime:.0f}:f>"
+            ),
         )
 
     @staticmethod

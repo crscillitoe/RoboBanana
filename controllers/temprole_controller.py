@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Colour, Embed, Interaction, Role, User
+from discord import Client, Interaction, Role, User
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
@@ -23,21 +23,20 @@ class TempRoleController:
         self.client = client
 
     @staticmethod
-    async def set_role(
-        user: User, role: Role, duration: str, interaction: Interaction | None
-    ):
+    async def set_role(user: User, role: Role, duration: str) -> tuple[bool, str]:
         user_id = user.id
         delta = timedelta(seconds=timeparse(duration))
         expiration = datetime.now() + delta
+        guild = role.guild
 
-        member = interaction.guild.get_member(user_id)
+        member = guild.get_member(user_id)
         if member is None:
-            return await interaction.response.send_message(
-                f"Unable to find provided user - are they in this server?",
-                ephemeral=True,
+            return (
+                False,
+                "Unable to find provided user - are they in this server?",
             )
 
-        DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+        DB().set_temprole(user_id, role.id, guild.id, expiration)
 
         try:
             await member.add_roles(role)
@@ -45,45 +44,31 @@ class TempRoleController:
             temprole = DB().retrieve_temprole(user_id, role.id)
             if temprole is not None:
                 DB().delete_temprole(temprole.id)
-
-            error_message = (
-                f"Failed to assign {role.name} to {user.mention}. Ensure this role is"
-                " not above RoboBanana.",
-            )
-            if interaction is not None:
-                return await interaction.response.send_message(
-                    error_message,
-                    ephemeral=True,
+                return (
+                    False,
+                    (
+                        f"Failed to assign {role.name} to {user.mention}. Ensure this"
+                        " role is not above RoboBanana."
+                    ),
                 )
-            else:
-                return LOG.error(error_message)
 
         unixtime = time.mktime(expiration.timetuple())
-        embed = Embed(
-            title="Assigned Temprole",
-            description=(
-                f"Assigned {role.mention} to {user.mention} expiring"
-                f" <t:{unixtime:.0f}:f>"
-            ),
-            color=Colour.green(),
+        return (
+            True,
+            f"Assigned {role.mention} to {user.mention} expiring <t:{unixtime:.0f}:f>",
         )
-        if interaction is not None:
-            await DiscordUtils.reply(interaction, embed=embed)
-        else:
-            LOG.info(f"Assigned {role.name} to {user.mention} expiring {expiration}")
 
     @staticmethod
-    async def extend_role(
-        user: User, role: Role, duration: str, interaction: Interaction
-    ):
+    async def extend_role(user: User, role: Role, duration: str):
         user_id = user.id
         extension_duration = timedelta(seconds=timeparse(duration))
+        guild = role.guild
 
-        member = interaction.guild.get_member(user_id)
+        member = guild.get_member(user_id)
         if member is None:
-            return await interaction.response.send_message(
-                f"Unable to find provided user - are they in this server?",
-                ephemeral=True,
+            return (
+                False,
+                "Unable to find provided user - are they in this server?",
             )
 
         temprole = DB().retrieve_temprole(user_id, role.id)
@@ -92,7 +77,7 @@ class TempRoleController:
         # Set temprole if no existing role to extend
         if temprole is None:
             expiration += extension_duration
-            DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+            DB().set_temprole(user_id, role.id, guild.id, expiration)
             # Add role to user
             try:
                 await member.add_roles(role)
@@ -100,25 +85,25 @@ class TempRoleController:
                 temprole = DB().retrieve_temprole(user_id, role.id)
                 if temprole is not None:
                     DB().delete_temprole(temprole.id)
-                return await interaction.response.send_message(
-                    f"Failed to assign {role.name} to {user.mention}. Ensure this role"
-                    " is not above RoboBanana.",
-                    ephemeral=True,
+                return (
+                    False,
+                    (
+                        f"Failed to assign {role.name} to {user.mention}. Ensure this"
+                        " role is not above RoboBanana."
+                    ),
                 )
         else:
             expiration = temprole.expiration + extension_duration
-            DB().set_temprole(user_id, role.id, interaction.guild_id, expiration)
+            DB().set_temprole(user_id, role.id, guild.id, expiration)
 
         unixtime = time.mktime(expiration.timetuple())
-        embed = Embed(
-            title="Assigned Temprole",
-            description=(
+        return (
+            True,
+            (
                 f"Extended {role.mention} for {user.mention}. Now expiring"
                 f" <t:{unixtime:.0f}:f>"
             ),
-            color=Colour.green(),
         )
-        await DiscordUtils.reply(interaction, embed=embed)
 
     @staticmethod
     def user_has_temprole(user: User, role: Role):
@@ -126,27 +111,19 @@ class TempRoleController:
         return temprole is not None
 
     @staticmethod
-    async def remove_role(user: User, role: Role, interaction: Interaction):
+    async def remove_role(user: User, role: Role):
+        guild = role.guild
         temprole = DB().retrieve_temprole(user.id, role.id)
         if temprole is None:
-            return await interaction.response.send_message(
-                f"No temprole to remove for {user.mention}!", ephemeral=True
-            )
+            return False, f"No temprole to remove for {user.mention}!"
 
-        member = interaction.guild.get_member(user.id)
+        member = guild.get_member(user.id)
         if member is None:
-            return await interaction.response.send_message(
-                f"Could not find user {user.mention}!", ephemeral=True
-            )
+            return False, f"Could not find user {user.mention}!"
 
         await member.remove_roles(role)
         DB().delete_temprole(temprole.id)
-        embed = Embed(
-            title="Assigned Temprole",
-            description=f"Removed {role.mention} from {user.mention}.",
-            color=Colour.green(),
-        )
-        await DiscordUtils.reply(interaction, embed=embed)
+        return True, f"Removed {role.mention} from {user.mention}."
 
     @staticmethod
     async def view_temproles(user: User, interaction: Interaction):

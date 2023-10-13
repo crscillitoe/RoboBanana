@@ -1,5 +1,5 @@
 from threading import Thread
-from discord import Message, Client
+from discord import Colour, Embed, Message, Client
 from discord.ext import tasks
 import discord.utils
 from config import YAMLConfig as Config
@@ -44,6 +44,34 @@ class SubController:
     @staticmethod
     def _get_months_subscribed(role_sub_data: dict):
         return role_sub_data.get("total_months_subscribed", 1)
+
+    @staticmethod
+    async def _assign_6mo_t3(
+        client: Client,
+        message: Message,
+        num_months_subscribed: int,
+        mention_thankyou: str,
+    ):
+        if num_months_subscribed < 6 or "THE ONES WHO" not in mention_thankyou:
+            return
+
+        t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
+        success, message = await TempRoleController.set_role(
+            message.author, t3_6_month_role, "31 days"
+        )
+        if not success:
+            fail_embed = Embed(
+                title="Failed to assign 6mo T3",
+                description=message,
+                color=Colour.red(),
+            )
+            return await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
+        embed = Embed(
+            title="Assigned Temprole",
+            description=message,
+            color=Colour.green(),
+        )
+        await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=embed)
 
     @staticmethod
     async def subscribe(message: Message, client: Client):
@@ -91,12 +119,9 @@ class SubController:
         )
         mention_thankyou = thankyou_message.format(name=message.author.mention)
         name_thankyou = thankyou_message.format(name=author_name)
-
-        if num_months_subscribed >= 6 and "THE ONES WHO" in mention_thankyou:
-            t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
-            await TempRoleController.set_role(
-                message.author, t3_6_month_role, "31 days"
-            )
+        await SubController._assign_6mo_t3(
+            client, message, num_months_subscribed, mention_thankyou
+        )
 
         Thread(
             target=publish_update,

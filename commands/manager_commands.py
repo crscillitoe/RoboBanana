@@ -1,6 +1,14 @@
 from copy import copy
 from typing import Optional
-from discord import Embed, Guild, app_commands, Interaction, Client, User, ForumTag
+from discord import (
+    Color,
+    Embed,
+    Guild,
+    app_commands,
+    Interaction,
+    Client,
+    User,
+)
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from config import YAMLConfig as Config
 import enum
@@ -10,6 +18,7 @@ import re
 
 from controllers.temprole_controller import TempRoleController
 from controllers.vod_review_bank_controller import VODReviewBankController
+from util.discord_utils import DiscordUtils
 
 APPROVED_TAG = Config.CONFIG["Discord"]["VODReview"]["ApprovedTag"]
 REJECTED_TAG = Config.CONFIG["Discord"]["VODReview"]["RejectedTag"]
@@ -112,9 +121,9 @@ class ManagerCommands(app_commands.Group, name="manager"):
         rejected_role = interaction.guild.get_role(REJECTED_ROLE)
 
         if TempRoleController.user_has_temprole(user, approved_role):
-            await TempRoleController.remove_role(user, approved_role, interaction)
+            await TempRoleController.remove_role(user, approved_role)
         if TempRoleController.user_has_temprole(user, rejected_role):
-            await TempRoleController.remove_role(user, rejected_role, interaction)
+            await TempRoleController.remove_role(user, rejected_role)
 
     @staticmethod
     def get_owner(content: str, guild: Guild):
@@ -154,7 +163,18 @@ class ManagerCommands(app_commands.Group, name="manager"):
             )
 
         await ManagerCommands.remove_incorrect_role(owner, interaction)
-        await TempRoleController.set_role(owner, role, duration, interaction)
+        success, message = await TempRoleController.set_role(owner, role, duration)
+        if not success:
+            embed = Embed(
+                title="Failed to apply TempRole", description=message, color=Color.red()
+            )
+            return await DiscordUtils.reply(interaction, embed=embed)
+        embed = Embed(
+            title="Successfully Applied Temprole",
+            description=message,
+            color=Color.green(),
+        )
+        await DiscordUtils.reply(interaction, embed=embed)
 
         forum_tag = interaction.channel.parent.get_tag(tag_id)
         embed = Embed(

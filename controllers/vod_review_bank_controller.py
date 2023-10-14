@@ -1,6 +1,6 @@
 from datetime import timedelta
 from typing import Optional
-from discord import Colour, Embed, Interaction, User
+from discord import Color, Colour, Embed, Interaction, User
 from config import YAMLConfig as Config
 from controllers.temprole_controller import TempRoleController
 from db import DB
@@ -54,7 +54,20 @@ class VODReviewBankController:
             return await interaction.response.send_message(
                 f"Cannot find Gifted T3 role - check bot config!", ephemeral=True
             )
-        await TempRoleController.extend_role(user, role, duration, interaction)
+        success, message = await TempRoleController.extend_role(user, role, duration)
+        if not success:
+            embed = Embed(
+                title="Failed to extend Gifted T3",
+                description=message,
+                color=Color.red(),
+            )
+            return await DiscordUtils.reply(interaction, embed=embed)
+        embed = Embed(
+            title="Successfully extended Gifted T3",
+            description=message,
+            color=Color.green(),
+        )
+        await DiscordUtils.reply(interaction, embed=embed)
 
         duration_hours = duration_timedelta.total_seconds() / SECONDS_IN_HOUR
         DB().add_vod_review_balance(interaction.user.id, -duration_hours)

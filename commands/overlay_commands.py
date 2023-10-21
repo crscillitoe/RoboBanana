@@ -6,7 +6,6 @@ from discord import (
     Interaction,
     Client,
 )
-from config import YAMLConfig as Config
 import logging
 from enum import Enum
 
@@ -20,7 +19,6 @@ class TextFields(Enum):
     title = "title"
     headerLeft = "headerLeft"
     headerRight = "headerRight"
-    scrollingText = "scrollingText"
     sideBannerTextOne = "sideBannerTextOne"
     sideBannerTextTwo = "sideBannerTextTwo"
     sideBannerTextThree = "sideBannerTextThree"
@@ -32,6 +30,12 @@ class MediaFields(Enum):
     sideBannerIcon = "sideBannerIcon"
     backgroundVideo = "backgroundVideo"
     preRollVideo = "preRollVideo"
+    timerBackground = "timerBackground"
+
+
+class ListFields(Enum):
+    scrollingText = "scrollingText"
+    scrollingTextColors = "scrollingTextColors"
 
 
 class AllFields(Enum):
@@ -40,6 +44,7 @@ class AllFields(Enum):
     headerLeft = "headerLeft"
     headerRight = "headerRight"
     scrollingText = "scrollingText"
+    scrollingTextColors = "scrollingTextColors"
     sideBannerTextOne = "sideBannerTextOne"
     sideBannerTextTwo = "sideBannerTextTwo"
     sideBannerTextThree = "sideBannerTextThree"
@@ -47,6 +52,7 @@ class AllFields(Enum):
     sideBannerIcon = "sideBannerIcon"
     backgroundVideo = "backgroundVideo"
     preRollVideo = "preRollVideo"
+    timerBackground = "timerBackground"
 
 
 class FieldType(str, Enum):
@@ -105,6 +111,18 @@ class OverlayCommands(app_commands.Group, name="overlay"):
             "Overlay image update sent!", ephemeral=True
         )
 
+    @app_commands.command(name="set_list")
+    @app_commands.checks.has_role("Mod")
+    @app_commands.describe(field="Overlay field to set")
+    @app_commands.describe(csv="Comma separated string of values")
+    async def set_list(self, interaction: Interaction, field: ListFields, csv: str):
+        """Set overlay list field to specified value"""
+        values = csv.split(",")
+        OverlayController.publish_overlay({field.value: values})
+        await interaction.response.send_message(
+            "Overlay list update sent!", ephemeral=True
+        )
+
     @app_commands.command(name="clear_field")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(field="Overlay field to set")
@@ -118,9 +136,12 @@ class OverlayCommands(app_commands.Group, name="overlay"):
     @app_commands.command(name="timer")
     @app_commands.checks.has_role("Mod")
     @app_commands.describe(duration="Duration in seconds of timer")
-    async def timer(self, interaction: Interaction, duration: int):
+    @app_commands.describe(color="Color of text")
+    async def timer(self, interaction: Interaction, duration: int, color: str = None):
         """Start timer on overlay for specified seconds"""
-        OverlayController.publish_overlay({"timer": duration})
+        OverlayController.publish_overlay(
+            {"timer": {"duration": duration, "color": color}}
+        )
         await interaction.response.send_message("Overlay update sent!", ephemeral=True)
 
     @app_commands.command(name="toggle")

@@ -89,7 +89,7 @@ def twitch_message_received(msg):
                 "colorR": color[0],
                 "colorG": color[1],
                 "colorB": color[2],
-                "icon": "https://www.tailorbrands.com/wp-content/uploads/2021/04/twitch-logo.png",
+                "icon": "",
                 "id": 1,
                 "name": "Twitch Chatter",
             }

@@ -56,31 +56,34 @@ async def setup():
     Thread(target=async_setup()).start()
     Thread(target=start_listener).start()
 
+
 def async_setup():
     start_keepalive(app)
     loop = asyncio.get_event_loop()
     asyncio.ensure_future(start_discord_client(DISCORD_CLIENT), loop=loop)
 
+
 @app.route("/")
 async def index():
     return ("OK", 200)
 
+
 def twitch_message_received(msg):
     logging.info(msg)
-    logging.info(msg['color'])
-    logging.info(msg['display-name'])
-    logging.info(msg['message'])
+    logging.info(msg["color"])
+    logging.info(msg["display-name"])
+    logging.info(msg["message"])
 
-    if msg['color'] != "":
-        color = tuple(int(msg['color'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+    if msg["color"] != "":
+        color = tuple(int(msg["color"].lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
     else:
         color = (218, 165, 32)
 
     logging.info(color)
 
     to_send = {
-        "content": msg['message'],
-        "displayName": msg['display-name'],
+        "content": msg["message"],
+        "displayName": msg["display-name"],
         "roles": [
             {
                 "colorR": color[0],
@@ -94,7 +97,7 @@ def twitch_message_received(msg):
         "stickers": [],
         "emojis": [],
         "mentions": [],
-        "author_id": msg['user-id'],
+        "author_id": msg["user-id"],
         "platform": "twitch",
     }
 
@@ -105,9 +108,11 @@ def twitch_message_received(msg):
     if response.status_code != 200:
         LOG.error(f"Failed to publish chat: {response.text}")
 
+
 def start_listener():
     twitch = twitch_chat_irc.TwitchChatIRC()
-    twitch.listen('woohoojin', on_message=twitch_message_received)
+    twitch.listen("woohoojin", on_message=twitch_message_received)
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=3000)

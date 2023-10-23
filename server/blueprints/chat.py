@@ -13,6 +13,7 @@ CUSTOM_EMOJI_PATTERN = re.compile(r"<:[a-zA-Z]+:[0-9]+>")
 
 chat_blueprint = Blueprint("chat", __name__)
 
+
 @chat_blueprint.route("/publish-chat", methods=["POST"])
 @token_required
 async def receive_chat():
@@ -22,6 +23,7 @@ async def receive_chat():
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)
+
 
 async def publish_chat(chat_message):
     try:

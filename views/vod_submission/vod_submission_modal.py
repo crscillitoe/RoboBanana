@@ -116,7 +116,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             content=f"""
 Submission for {interaction.user.mention}
 
-Account + Match + Consistency Heatmap:
+Account + Match + Consistency Heatmap + Valoplant:
 {self.tracker_game_url.value}
 
 VOD URL + POSITIVITY TIMESTAMP:

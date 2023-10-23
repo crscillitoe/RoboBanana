@@ -1,4 +1,7 @@
+from collections import namedtuple
+from operator import attrgetter
 from threading import Thread
+from typing import Optional
 from discord import Colour, Embed, Message, Client
 from discord.ext import tasks
 import discord.utils
@@ -13,6 +16,9 @@ import pytz
 STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
 BOT_AUDIT_CHANNEL = Config.CONFIG["Discord"]["ChannelPoints"]["PointsAuditChannel"]
 SIX_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["6MonthTier3Role"]
+TWELVE_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"][
+    "12MonthTier3Role"
+]
 TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
@@ -34,6 +40,17 @@ PREMIUM_IDS = list(
     )
 )
 
+SubDurationReward = namedtuple("SubDurationReward", "duration role_id")
+
+SUB_DURATION_REWARDS = sorted(
+    [
+        SubDurationReward(duration=12, role_id=TWELVE_MONTH_TIER_3_ROLE_ID),
+        SubDurationReward(duration=6, role_id=SIX_MONTH_TIER_3_ROLE_ID),
+    ],
+    key=attrgetter("duration"),
+    reverse=True,
+)
+
 LOG = logging.getLogger(__name__)
 
 
@@ -46,22 +63,36 @@ class SubController:
         return role_sub_data.get("total_months_subscribed", 1)
 
     @staticmethod
-    async def _assign_6mo_t3(
+    def _get_duration_reward_role(
+        num_months_subscribed: int, mention_thankyou: str
+    ) -> Optional[int]:
+        if "THE ONES WHO" not in mention_thankyou:
+            return None
+        for duration, role_id in SUB_DURATION_REWARDS:
+            if num_months_subscribed >= duration:
+                return role_id
+        return None
+
+    @staticmethod
+    async def _assign_duration_reward(
         client: Client,
         message: Message,
         num_months_subscribed: int,
         mention_thankyou: str,
     ):
-        if num_months_subscribed < 6 or "THE ONES WHO" not in mention_thankyou:
+        role_id = SubController._get_duration_reward_role(
+            num_months_subscribed, mention_thankyou
+        )
+        if role_id is None:
             return
 
-        t3_6_month_role = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
+        duration_reward_role = message.guild.get_role(role_id)
         success, message = await TempRoleController.set_role(
-            message.author, t3_6_month_role, "31 days"
+            message.author, duration_reward_role, "31 days"
         )
         if not success:
             fail_embed = Embed(
-                title="Failed to assign 6mo T3",
+                title="Failed to assign duration reward role",
                 description=message,
                 color=Colour.red(),
             )
@@ -119,7 +150,7 @@ class SubController:
         )
         mention_thankyou = thankyou_message.format(name=message.author.mention)
         name_thankyou = thankyou_message.format(name=author_name)
-        await SubController._assign_6mo_t3(
+        await SubController._assign_duration_reward(
             client, message, num_months_subscribed, mention_thankyou
         )
 

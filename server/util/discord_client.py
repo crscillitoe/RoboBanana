@@ -65,6 +65,7 @@ class ServerBot(Client):
                     + self.find_roles(modified_message_content)
                 ),
                 "author_id": message.author.id,
+                "platform": "discord",
             }
             LOG.debug(to_send)
             await publish_chat(to_send)

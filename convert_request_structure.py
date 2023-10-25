@@ -28,6 +28,7 @@ def convert_timer(duration: int | None):
         return None
     return {"duration": duration}
 
+
 def convert_title(value: str):
     try:
         result = urlparse(value)
@@ -36,6 +37,7 @@ def convert_title(value: str):
         return convert_to_text(value)
     except:
         return convert_to_text(value)
+
 
 def stay_same(value: any):
     return value

@@ -4,6 +4,7 @@ SQLAlchemy==1.4.42
 PyMySQL==1.0.2
 cffi==1.15.1
 Flask==2.2.2
+Werkzeug==2.2.2
 Flask-SSE==1.0.0
 gevent==22.10.2
 requests==2.28.1
@@ -15,3 +16,4 @@ hypercorn==0.14.4
 pytimeparse==1.1.8
 PyYAML==6.0.1
 jurigged==0.5.6
+twitch-chat-irc==0.0.4

@@ -1,4 +1,6 @@
 import json
+from os import listdir
+from urllib.parse import urlparse
 
 TEXT_FIELDS = set(
     [
@@ -21,16 +23,26 @@ def convert_to_media(source: str):
     return {"type": "media", "source": source}
 
 
-def convert_timer(duration: int):
+def convert_timer(duration: int | None):
+    if duration is None:
+        return None
     return {"duration": duration}
 
+def convert_title(value: str):
+    try:
+        result = urlparse(value)
+        if all([result.scheme, result.netloc]):
+            return convert_to_media(value)
+        return convert_to_text(value)
+    except:
+        return convert_to_text(value)
 
 def stay_same(value: any):
     return value
 
 
 CONVERSION_MAPPING = {
-    "title": convert_to_media,
+    "title": convert_title,
     "timer": convert_timer,
     "display": stay_same,
     "scrollingText": stay_same,
@@ -48,13 +60,15 @@ CONVERSION_MAPPING = {
 
 def main():
     new_contents = {}
-    with open("./input.json", "r") as f:
-        original_contents: dict = json.loads(f.read())
-        for key, value in original_contents.items():
-            new_contents[key] = CONVERSION_MAPPING[key](value)
+    input_files = listdir("./old_requests")
+    for input_file in input_files:
+        with open(f"./old_requests/{input_file}", "r") as f:
+            original_contents: dict = json.loads(f.read())
+            for key, value in original_contents.items():
+                new_contents[key] = CONVERSION_MAPPING[key](value)
 
-    with open("./output.json", "w") as f:
-        f.write(json.dumps(new_contents, indent=2))
+        with open(f"./new_requests/{input_file}", "w") as f:
+            f.write(json.dumps(new_contents, indent=2))
 
 
 if __name__ == "__main__":

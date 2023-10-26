@@ -14,7 +14,6 @@ LOG = logging.getLogger(__name__)
 async def publish_overlay():
     try:
         request_json = await request.get_json()
-        LOG.info(f"{request_json=}")
         await sse.publish(request_json, type=OVERLAY_TYPE, channel=EVENTS_CHANNEL)
         return ("OK", 200)
     except (KeyError, ValueError):

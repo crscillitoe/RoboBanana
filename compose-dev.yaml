@@ -35,8 +35,6 @@ services:
       MYSQL_USER: woohoojinuser
       MYSQL_PASSWORD: testpassword
       MYSQL_ROOT_HOST: '%'
-    ports:
-      - '3306:3306'
     expose:
       - '3306'
     volumes:

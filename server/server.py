@@ -69,17 +69,17 @@ async def index():
 
 
 def twitch_message_received(msg):
-    logging.info(msg)
-    logging.info(msg["color"])
-    logging.info(msg["display-name"])
-    logging.info(msg["message"])
+    logging.debug(msg)
+    logging.debug(msg["color"])
+    logging.debug(msg["display-name"])
+    logging.debug(msg["message"])
 
     if msg["color"] != "":
         color = tuple(int(msg["color"].lstrip("#")[i : i + 2], 16) for i in (0, 2, 4))
     else:
         color = (218, 165, 32)
 
-    logging.info(color)
+    logging.debug(color)
 
     to_send = {
         "content": msg["message"],
@@ -89,7 +89,7 @@ def twitch_message_received(msg):
                 "colorR": color[0],
                 "colorG": color[1],
                 "colorB": color[2],
-                "icon": "",
+                "icon": None,
                 "id": 1,
                 "name": "Twitch Chatter",
             }
@@ -111,7 +111,7 @@ def twitch_message_received(msg):
 
 def start_listener():
     twitch = twitch_chat_irc.TwitchChatIRC()
-    twitch.listen("woohoojin", on_message=twitch_message_received)
+    twitch.listen("cloudzydev", on_message=twitch_message_received)
 
 
 if __name__ == "__main__":

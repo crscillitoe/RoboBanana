@@ -13,6 +13,11 @@ POLLS_TYPE = "polls"
 # Track the cool level of current VOD
 COOL_TYPE = "cool"
 
+# A bit of an antipattern, but this type will be used to send
+# multiple types of data to enable significantly faster frontend feature development
+# avoid using this channel for major features, keep it to minor visual toggles.
+STREAMDECK_TYPE = "streamdeck"
+
 VOD_REVIEW_TYPE = "vod-reviews"
 
 TIMER_TYPE = "timer"

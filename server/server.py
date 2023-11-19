@@ -8,6 +8,7 @@ from server.blueprints.chess import chess_blueprint
 from server.blueprints.cool import cool_blueprint
 from server.blueprints.poll import poll_blueprint
 from server.blueprints.chat import chat_blueprint
+from server.blueprints.streamdeck import streamdeck_blueprint
 from server.blueprints.sub import sub_blueprint
 from server.blueprints.tamagachi import tamagachi_blueprint
 from server.blueprints.overlay import overlay_blueprint
@@ -44,6 +45,7 @@ app.register_blueprint(chat_blueprint)
 app.register_blueprint(cool_blueprint)
 app.register_blueprint(poll_blueprint)
 app.register_blueprint(sub_blueprint)
+app.register_blueprint(streamdeck_blueprint)
 app.register_blueprint(tamagachi_blueprint)
 app.register_blueprint(overlay_blueprint)
 

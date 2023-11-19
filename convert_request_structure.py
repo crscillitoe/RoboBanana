@@ -2,15 +2,13 @@ import json
 from os import listdir
 from urllib.parse import urlparse
 
-TEXT_FIELDS = set(
-    [
-        "headerLeft",
-        "headerRight",
-        "sideBannerTextOne",
-        "sideBannerTextTwo",
-        "sideBannerTextThree",
-    ]
-)
+TEXT_FIELDS = set([
+    "headerLeft",
+    "headerRight",
+    "sideBannerTextOne",
+    "sideBannerTextTwo",
+    "sideBannerTextThree",
+])
 
 MEDIA_FIELDS = set(["backgroundVideo", "preRollVideo", "headerIcon", "sideBannerIcon"])
 

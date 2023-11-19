@@ -50,16 +50,14 @@ CONFIG_MAPPING = {
     "MySQL.Name": "Database.Name",
 }
 
-STRING_VALUES = set(
-    [
-        "Database.Username",
-        "Database.Host",
-        "Database.Name",
-        "Secrets.Discord.Token",
-        "Secrets.Server.Token",
-        "Secrets.Database.Password",
-    ]
-)
+STRING_VALUES = set([
+    "Database.Username",
+    "Database.Host",
+    "Database.Name",
+    "Secrets.Discord.Token",
+    "Secrets.Server.Token",
+    "Secrets.Database.Password",
+])
 
 CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.yaml")
 SECRETS_FILE = os.path.join(os.path.dirname(__file__), "secrets.yaml")

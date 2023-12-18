@@ -11,8 +11,16 @@ DEFAULT_EMOJI_REACTION_DELAY = (
 
 
 class ReactionController:
+    """
+    Applies configured reactions to messages sent by
+    specified users
+    """
+
     @staticmethod
     async def apply_reactions(message: Message):
+        """
+        Lookup configured reactions for the provided message author and apply them
+        """
         emojis = DB().get_reactions_for_user(message.author.id)
         if len(emojis) == 0:
             return  # prevents further DB calls if user does not have any Robomojis

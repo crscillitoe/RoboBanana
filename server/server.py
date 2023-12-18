@@ -12,6 +12,7 @@ from server.blueprints.streamdeck import streamdeck_blueprint
 from server.blueprints.sub import sub_blueprint
 from server.blueprints.tamagachi import tamagachi_blueprint
 from server.blueprints.overlay import overlay_blueprint
+from server.blueprints.connect_four import connect_four_blueprint
 from server.util.discord_client import DISCORD_CLIENT, start_discord_client
 from server.util.keep_alive import start_keepalive
 from server.blueprints.chat import publish_chat
@@ -48,6 +49,7 @@ app.register_blueprint(sub_blueprint)
 app.register_blueprint(streamdeck_blueprint)
 app.register_blueprint(tamagachi_blueprint)
 app.register_blueprint(overlay_blueprint)
+app.register_blueprint(connect_four_blueprint)
 
 
 LOG = logging.getLogger(__name__)

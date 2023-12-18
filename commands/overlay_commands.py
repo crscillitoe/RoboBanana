@@ -81,9 +81,9 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         self, interaction: Interaction, field: TextFields, text: str, color: str = None
     ):
         """Set overlay text field to specified value"""
-        OverlayController.publish_overlay({
-            field.value: {"type": FieldType.TEXT, "value": text, "color": color}
-        })
+        OverlayController.publish_overlay(
+            {field.value: {"type": FieldType.TEXT, "value": text, "color": color}}
+        )
         await interaction.response.send_message(
             "Overlay text update sent!", ephemeral=True
         )
@@ -104,9 +104,9 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         if media is not None:
             media_url = media.url
 
-        OverlayController.publish_overlay({
-            field.value: {"type": FieldType.MEDIA, "source": media_url}
-        })
+        OverlayController.publish_overlay(
+            {field.value: {"type": FieldType.MEDIA, "source": media_url}}
+        )
         await interaction.response.send_message(
             "Overlay image update sent!", ephemeral=True
         )
@@ -139,9 +139,9 @@ class OverlayCommands(app_commands.Group, name="overlay"):
     @app_commands.describe(color="Color of text")
     async def timer(self, interaction: Interaction, duration: int, color: str = None):
         """Start timer on overlay for specified seconds"""
-        OverlayController.publish_overlay({
-            "timer": {"duration": duration, "color": color}
-        })
+        OverlayController.publish_overlay(
+            {"timer": {"duration": duration, "color": color}}
+        )
         await interaction.response.send_message("Overlay update sent!", ephemeral=True)
 
     @app_commands.command(name="toggle")

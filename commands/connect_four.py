@@ -54,7 +54,8 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         start_game = self.orchestrator.challenge(interaction.user.id, opponent.id)
         if not start_game:
             return await interaction.response.send_message(
-                "Challenge submitted! A game will start once your opponent challenges you back.",
+                "Challenge submitted! A game will start once your opponent challenges"
+                " you back.",
                 ephemeral=True,
             )
 

@@ -1,10 +1,15 @@
+from datetime import datetime
+
+
 class GameOrchestrator:
     def __init__(self):
         self.challenges: dict[int, int] = dict()
         self.active_game = False
         self.active_players = set()
+        self.last_played = None
 
     def reopen_challenges(self):
+        self.last_played = None
         self.active_game = False
         self.active_players = set()
 
@@ -15,6 +20,9 @@ class GameOrchestrator:
     def active_player(self, player_id: int):
         """Check if provided player is one of the challengers in the active game"""
         return player_id in self.active_players
+
+    def update_last_played(self):
+        self.last_played = datetime.now()
 
     def challenge(self, challenger: int, opponent: int) -> bool:
         """Challenge opponent to game of ConnectFour. If the opponent

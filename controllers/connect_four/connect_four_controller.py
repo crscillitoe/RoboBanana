@@ -37,6 +37,9 @@ class ConnectFourController:
         del self.games[game_state.player_one_id]
         del self.games[game_state.player_two_id]
 
+    def reset(self):
+        self.games = dict()
+
     def move(
         self, move_player_id: int, column: int
     ) -> tuple[bool, Optional[MoveSummary]]:

@@ -113,7 +113,7 @@ def twitch_message_received(msg):
 
 def start_listener():
     twitch = twitch_chat_irc.TwitchChatIRC()
-    twitch.listen("cloudzydev", on_message=twitch_message_received)
+    twitch.listen("woohoojin", on_message=twitch_message_received)
 
 
 if __name__ == "__main__":

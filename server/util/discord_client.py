@@ -117,9 +117,9 @@ class ServerBot(Client):
             if channel is None:
                 LOG.warn(f"Unable to find channel {channel_id=}")
                 continue
-            stream_content.append({
-                "mention_text": channel_text, "display_name": f"# {channel.name}"
-            })
+            stream_content.append(
+                {"mention_text": channel_text, "display_name": f"# {channel.name}"}
+            )
         return stream_content
 
     async def find_reference_author(self, message: Message) -> str:

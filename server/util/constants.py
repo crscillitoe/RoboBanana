@@ -3,6 +3,7 @@ PREDICTIONS_TYPE = "predictions"
 SUBS_TYPE = "subs"
 SUBS_COUNT_TYPE = "subs-count"
 CHESS_TYPE = "chess"
+CONNECT_FOUR_TYPE = "connect-four"
 
 # User responses to current active poll
 POLL_ANSWERS_TYPE = "poll-answers"

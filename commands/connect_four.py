@@ -59,7 +59,8 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         start_game = self.orchestrator.challenge(interaction.user.id, opponent.id)
         if not start_game:
             return await interaction.response.send_message(
-                f"{interaction.user.mention} challenged {opponent.mention} to Connect Four!"
+                f"{interaction.user.mention} challenged {opponent.mention} to Connect"
+                " Four!"
             )
 
         success, first_move_player_id = self.controller.new_game(

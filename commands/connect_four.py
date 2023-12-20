@@ -1,4 +1,5 @@
-import enum
+from datetime import timedelta, datetime
+from discord.ext import tasks
 import logging
 from discord import Client, Interaction, User, app_commands
 import requests
@@ -30,6 +31,9 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         """Allow users to challenge each other to Connect Four"""
         self.enabled = True
         self.orchestrator.reopen_challenges()
+        self.controller.reset()
+        self.expire_game.start()
+        publish_accepting_challenges()
         await interaction.response.send_message("Connect Four Enabled!", ephemeral=True)
 
     @app_commands.command()
@@ -37,6 +41,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
     async def disable(self, interaction: Interaction):
         """Prevent users from challenging each other to Connect Four"""
         self.enabled = False
+        self.expire_game.stop()
         await interaction.response.send_message(
             "Connect Four Disabled!", ephemeral=True
         )
@@ -54,9 +59,8 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         start_game = self.orchestrator.challenge(interaction.user.id, opponent.id)
         if not start_game:
             return await interaction.response.send_message(
-                "Challenge submitted! A game will start once your opponent challenges"
-                " you back.",
-                ephemeral=True,
+                f"{interaction.user.mention} challenged {opponent.mention} to Connect"
+                " Four!"
             )
 
         success, first_move_player_id = self.controller.new_game(
@@ -64,6 +68,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         )
         if not success:
             self.orchestrator.reopen_challenges()
+            self.controller.reset()
             return await interaction.response.send_message(
                 "Faled to start game of Connect Four"
             )
@@ -77,6 +82,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
 
         publish_new_game(first_move_user, second_move_user)
 
+        self.orchestrator.update_last_played()
         await interaction.response.send_message(
             f"Game started! {first_move_user.mention} plays first!"
         )
@@ -101,6 +107,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
                 f"Invalid move", ephemeral=True
             )
 
+        self.orchestrator.update_last_played()
         publish_move(interaction.user, column - 1, move_summary.row, move_summary.win)
 
         if move_summary.win:
@@ -112,6 +119,32 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         await interaction.response.send_message(
             f"{interaction.user.mention} played {column}"
         )
+
+    @tasks.loop(minutes=0.5)
+    async def expire_game(self):
+        if self.orchestrator.last_played is None:
+            return
+        now = datetime.now()
+        move_timer = now - self.orchestrator.last_played
+        if move_timer < timedelta(minutes=1):
+            return
+        LOG.info(f"Reopening challenges...")
+        self.orchestrator.reopen_challenges()
+        self.controller.reset()
+        publish_accepting_challenges()
+
+
+def publish_accepting_challenges():
+    payload = {
+        "action": "accepting_challenges",
+    }
+    response = requests.post(
+        url=PUBLISH_CONNECT_FOUR_URL,
+        json=payload,
+        headers={"x-access-token": AUTH_TOKEN},
+    )
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish connect four updates: {response.text}")
 
 
 def publish_move(player: User, column: int, row: int, win: bool):

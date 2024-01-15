@@ -23,8 +23,11 @@ class TempRoleController:
         self.client = client
 
     @staticmethod
-    async def set_role(user: User, role: Role, duration: str) -> tuple[bool, str]:
-        user_id = user.id
+    async def set_role(user: User | str, role: Role, duration: str) -> tuple[bool, str]:
+        if isinstance(user, User):
+            user_id = user.id
+        else:
+            user_id = user
         delta = timedelta(seconds=timeparse(duration))
         expiration = datetime.now() + delta
         guild = role.guild

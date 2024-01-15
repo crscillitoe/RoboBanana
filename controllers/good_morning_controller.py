@@ -1,10 +1,11 @@
 from discord import Interaction, Thread
 from db import DB
 from config import YAMLConfig as Config
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import mktime as epochtime
 from pytz import timezone
 import asyncio
+from controllers.temprole_controller import TempRoleController
 
 
 STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
@@ -18,6 +19,7 @@ PACIFIC_TZ = timezone("US/Pacific")
 UTC_TZ = timezone("UTC")
 START_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=9, minute=0)).time()
 END_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=14, minute=0)).time()
+GM_TEMPROLE_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=23, minute=0)).time()
 
 
 class GoodMorningController:
@@ -90,13 +92,17 @@ class GoodMorningController:
 
         progress_threshold = 0.25
 
+        current_time = datetime.now(tz = PACIFIC_TZ)
+        day_delta = 6 - current_time.weekday()
+        if day_delta is 0: # If it is currently sunday, manually add 7 days since we want the upcoming sunday, not the current one
+            day_delta = 7
+        upcoming_sunday = current_time + timedelta(days = day_delta)
+        upcoming_sunday = upcoming_sunday.replace(hour=GM_TEMPROLE_TIME.hour, minute=GM_TEMPROLE_TIME.minute)
+        temprole_duration = int((upcoming_sunday - current_time) / timedelta(minutes=1)) # Convert to how many minutes are in this delta, then to int to drop any decimals eventhough there shouldn't be any
+
         # Assign roles
         for idx, user_id in enumerate(rewarded_user_ids):
-            member = interaction.guild.get_member(user_id)
-            if member is None:
-                continue
-
-            await member.add_roles(reward_role)
+            await TempRoleController.set_role(str(user_id), reward_role, str(temprole_duration))
 
             num_rewarded = idx + 1
             if (num_rewarded / reward_count) > progress_threshold:

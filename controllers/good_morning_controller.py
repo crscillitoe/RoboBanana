@@ -94,7 +94,7 @@ class GoodMorningController:
 
         current_time = datetime.now(tz = PACIFIC_TZ)
         day_delta = 6 - current_time.weekday()
-        if day_delta is 0: # If it is currently sunday, manually add 7 days since we want the upcoming sunday, not the current one
+        if day_delta == 0: # If it is currently sunday, manually add 7 days since we want the upcoming sunday, not the current one
             day_delta = 7
         upcoming_sunday = current_time + timedelta(days = day_delta)
         upcoming_sunday = upcoming_sunday.replace(hour=GM_TEMPROLE_TIME.hour, minute=GM_TEMPROLE_TIME.minute)
@@ -102,7 +102,7 @@ class GoodMorningController:
 
         # Assign roles
         for idx, user_id in enumerate(rewarded_user_ids):
-            await TempRoleController.set_role(str(user_id), reward_role, str(temprole_duration))
+            await TempRoleController.set_role(str(user_id), reward_role, str(temprole_duration)+"m")
 
             num_rewarded = idx + 1
             if (num_rewarded / reward_count) > progress_threshold:

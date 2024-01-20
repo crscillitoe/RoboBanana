@@ -23,8 +23,8 @@ class TempRoleController:
         self.client = client
 
     @staticmethod
-    async def set_role(user: User | str, role: Role, duration: str) -> tuple[bool, str]:
-        if isinstance(user, User):
+    async def set_role(user: User | int, role: Role, duration: str) -> tuple[bool, str]:
+        if hasattr(user, "id"):
             user_id = user.id
         else:
             user_id = user
@@ -50,7 +50,7 @@ class TempRoleController:
                 return (
                     False,
                     (
-                        f"Failed to assign {role.name} to {user.mention}. Ensure this"
+                        f"Failed to assign {role.name} to {member.mention}. Ensure this"
                         " role is not above RoboBanana."
                     ),
                 )
@@ -58,7 +58,7 @@ class TempRoleController:
         unixtime = time.mktime(expiration.timetuple())
         return (
             True,
-            f"Assigned {role.mention} to {user.mention} expiring <t:{unixtime:.0f}:f>",
+            f"Assigned {role.mention} to {member.mention} expiring <t:{unixtime:.0f}:f>",
         )
 
     @staticmethod

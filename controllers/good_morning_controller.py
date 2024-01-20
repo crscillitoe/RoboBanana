@@ -102,7 +102,7 @@ class GoodMorningController:
 
         # Assign roles
         for idx, user_id in enumerate(rewarded_user_ids):
-            await TempRoleController.set_role(str(user_id), reward_role, str(temprole_duration)+"m")
+            await TempRoleController.set_role(user_id, reward_role, str(temprole_duration)+"m")
 
             num_rewarded = idx + 1
             if (num_rewarded / reward_count) > progress_threshold:

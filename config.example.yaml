@@ -27,7 +27,13 @@ Discord:
     NAOpenChannel:
   Predictions:
     Channel:
+  PointsHistory:
+    MaximumTransactions: 5
+  Roles:
+    Bot: 
+    Mod: 
   Subscribers:
+    12MonthTier3Role:
     6MonthTier3Role:
     GiftedTier1Role:
     GiftedTier2Role:

@@ -102,7 +102,9 @@ class RaffleBot(Client):
 
         # The content we get might contain custom emoji, which will be displayed like this: <:hoojKEKW:1059961649412460575>
         # Since an emoji isn't actually that long (the ID and brackets are 20+ chars), we run a regex to count emoji and remove 20*x chars from the length for leniency
-        custom_emoji_count = len(re.findall(CUSTOM_EMOJI_PATTERN, message.clean_content))
+        custom_emoji_count = len(
+            re.findall(CUSTOM_EMOJI_PATTERN, message.clean_content)
+        )
         length = length - (20 * custom_emoji_count)
 
         if length > MAX_CHARACTER_LENGTH:

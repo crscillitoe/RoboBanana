@@ -10,6 +10,7 @@ from controllers.predictions.create_prediction_controller import (
 
 LOG = logging.getLogger(__name__)
 
+
 class CreatePredictionModal(Modal, title="Start new prediction"):
     def __init__(self, client: Client, set_nickname=False):
         super().__init__(timeout=None)
@@ -36,7 +37,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             required=True,
             min_length=1,
         )
-        self.set_nickname=set_nickname
+        self.set_nickname = set_nickname
 
         self.add_item(self.description)
         self.add_item(self.option_one)

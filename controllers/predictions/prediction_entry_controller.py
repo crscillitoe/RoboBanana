@@ -14,7 +14,6 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-
 class PredictionEntryController:
     @staticmethod
     async def create_prediction_entry(
@@ -83,16 +82,26 @@ class PredictionEntryController:
 
         if prediction_summary.set_nickname == True:
             member = interaction.user
-            if isinstance(member, Member): # Don't proceed if we somehow get a regular User
+            if isinstance(
+                member, Member
+            ):  # Don't proceed if we somehow get a regular User
                 old_name = member.display_name
                 split = old_name.split(" ")
-                if split[0].lower() != chosen_option.lower(): # Only proceed if the user doesn't have the tag already
+                if (
+                    split[0].lower() != chosen_option.lower()
+                ):  # Only proceed if the user doesn't have the tag already
                     try:
                         await member.edit(nick=f"{chosen_option} {old_name}")
-                    except Forbidden: # This should only ever happen if we try to edit the Guild Owner
-                        LOG.error(f"[PREDICTION] Couldn't set nickname of user {member.id}. We are forbidden from editing the member.")
+                    except (
+                        Forbidden
+                    ):  # This should only ever happen if we try to edit the Guild Owner
+                        LOG.error(
+                            f"[PREDICTION] Couldn't set nickname of user {member.id}. We are forbidden from editing the member."
+                        )
                     except Exception as e:
-                        LOG.error(f"[PREDICTION] Couldn't set nickname of user {member.id}. {e}")
+                        LOG.error(
+                            f"[PREDICTION] Couldn't set nickname of user {member.id}. {e}"
+                        )
 
         prediction_message = await client.get_channel(channel_id).fetch_message(
             message_id

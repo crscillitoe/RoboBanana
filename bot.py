@@ -27,6 +27,7 @@ from config import YAMLConfig as Config
 from controllers.reaction_controller import ReactionController
 from controllers.sub_controller import SubController
 from controllers.temprole_controller import TempRoleController
+from controllers.good_morning_controller import GoodMorningController
 from db import DB
 from threading import Thread
 from util.discord_utils import DiscordUtils
@@ -79,6 +80,7 @@ class RaffleBot(Client):
         # Leaving here for posterity
         # SubController(self).sync_channel_perms.start()
         TempRoleController(self).expire_roles.start()
+        GoodMorningController(self).auto_reward_users.start()
 
     async def on_message_edit(self, before: Message, message: Message):
         # Don't respond to ourselves

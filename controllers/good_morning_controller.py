@@ -24,15 +24,19 @@ UTC_TZ = timezone("UTC")
 START_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=8, minute=30)).time()
 END_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=14, minute=0)).time()
 # The time on the upcoming sunday the temporary GM role will expire. Setting this AFTER the automatic distribution time ensures a seamless role transition.
-GM_TEMPROLE_TARGET_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=23, minute=30, second=0, microsecond=0)).time()
+GM_TEMPROLE_TARGET_TIME = PACIFIC_TZ.localize(
+    datetime.utcnow().replace(hour=23, minute=30, second=0, microsecond=0)
+).time()
 # The time each day we run the `auto_reward_users` method. The method itself checks if it's sunday as that seems to be the easiest way to only do this on sundays.
-GM_TEMPROLE_AUTO_TIME = PACIFIC_TZ.localize(datetime.utcnow().replace(hour=23, minute=00, second=0, microsecond=0)).time()
+GM_TEMPROLE_AUTO_TIME = PACIFIC_TZ.localize(
+    datetime.utcnow().replace(hour=23, minute=00, second=0, microsecond=0)
+).time()
 
 
 class GoodMorningController:
     def __init__(self, client: Client):
         self.client = client
-        
+
     async def get_morning_points(interaction: Interaction):
         points = DB().get_morning_points(interaction.user.id)
         await interaction.response.send_message(
@@ -96,7 +100,9 @@ class GoodMorningController:
             name="Good Morning Reward Progress"
         )
 
-        await GoodMorningController.tempreward_upcoming_sunday(thread, rewarded_user_ids, reward_role)
+        await GoodMorningController.tempreward_upcoming_sunday(
+            thread, rewarded_user_ids, reward_role
+        )
 
         reward_message = (
             f"Congrats {reward_role.mention}!"
@@ -110,9 +116,9 @@ class GoodMorningController:
         if current_weekday != 6:
             # fail silently as it is not sunday
             return
-        
+
         LOG.info("[AUTO GM TASK] Running automatic GM reward distribution...")
-        
+
         rewarded_user_ids = DB().get_morning_reward_winners()
         if len(rewarded_user_ids) == 0:
             LOG.info("[AUTO GM TASK] No users to reward")
@@ -145,17 +151,25 @@ class GoodMorningController:
 
         progress_threshold = 0.25
 
-        current_time = datetime.now(tz = PACIFIC_TZ)
+        current_time = datetime.now(tz=PACIFIC_TZ)
         day_delta = 6 - current_time.weekday()
-        if day_delta == 0: # If it is currently sunday, manually add 7 days since we want the upcoming sunday, not the current one
+        if (
+            day_delta == 0
+        ):  # If it is currently sunday, manually add 7 days since we want the upcoming sunday, not the current one
             day_delta = 7
-        upcoming_sunday = current_time + timedelta(days = day_delta)
-        upcoming_sunday = upcoming_sunday.replace(hour=GM_TEMPROLE_TARGET_TIME.hour, minute=GM_TEMPROLE_TARGET_TIME.minute)
-        temprole_duration = int((upcoming_sunday - current_time) / timedelta(minutes=1)) # Convert to how many minutes are in this delta, then to int to drop any decimals eventhough there shouldn't be any
+        upcoming_sunday = current_time + timedelta(days=day_delta)
+        upcoming_sunday = upcoming_sunday.replace(
+            hour=GM_TEMPROLE_TARGET_TIME.hour, minute=GM_TEMPROLE_TARGET_TIME.minute
+        )
+        temprole_duration = int(
+            (upcoming_sunday - current_time) / timedelta(minutes=1)
+        )  # Convert to how many minutes are in this delta, then to int to drop any decimals eventhough there shouldn't be any
 
         # Assign roles
         for idx, user_id in enumerate(rewarded_user_ids):
-            await TempRoleController.set_role(user_id, reward_role, str(temprole_duration)+"m")
+            await TempRoleController.set_role(
+                user_id, reward_role, str(temprole_duration) + "m"
+            )
 
             num_rewarded = idx + 1
             if (num_rewarded / reward_count) > progress_threshold:

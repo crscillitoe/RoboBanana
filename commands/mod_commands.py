@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 from discord import app_commands, Interaction, Client, User, TextChannel
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.good_morning_controller import (
@@ -281,13 +282,14 @@ class ModCommands(app_commands.Group, name="mod"):
 
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_role("Mod")
-    async def start_prediction(self, interaction: Interaction):
+    @app_commands.describe(set_nickname="Whether to prepend users names with their choice")
+    async def start_prediction(self, interaction: Interaction, set_nickname: Optional[bool] = False):
         """Start new prediction"""
         if DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
                 "There is already an ongoing prediction!", ephemeral=True
             )
-        await interaction.response.send_modal(CreatePredictionModal(self.client))
+        await interaction.response.send_modal(CreatePredictionModal(self.client, set_nickname))
 
     @app_commands.command(name="refund_prediction")
     @app_commands.checks.has_role("Mod")

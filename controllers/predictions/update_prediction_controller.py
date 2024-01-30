@@ -40,6 +40,7 @@ class UpdatePredictionController:
             "optionOnePoints": prediction_summary.option_one_points,
             "optionTwoPoints": prediction_summary.option_two_points,
             "endTime": prediction_summary.end_time.astimezone(timezone.utc).isoformat(),
+            "setNickname": prediction_summary.set_nickname,
             "acceptingEntries": prediction_summary.accepting_entries,
             "ended": prediction_summary.ended,
         }

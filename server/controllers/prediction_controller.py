@@ -44,6 +44,7 @@ class PredictionController:
             prediction_details.option_one,
             prediction_details.option_two,
             prediction_details.duration,
+            False,
             client,
         )
         return True

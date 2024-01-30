@@ -1,4 +1,4 @@
-from discord import Client, Interaction
+from discord import Client, Forbidden, Interaction, Member
 from threading import Thread
 from controllers.point_history_controller import PointHistoryController
 from controllers.predictions.update_prediction_controller import (
@@ -9,6 +9,10 @@ from db.models import (
 )
 from db import DB
 from models.transaction import Transaction
+import logging
+
+LOG = logging.getLogger(__name__)
+
 
 
 class PredictionEntryController:
@@ -76,6 +80,20 @@ class PredictionEntryController:
             if guess == PredictionChoice.left
             else prediction_summary.option_two
         )
+
+        if prediction_summary.set_nickname == True:
+            member = interaction.user
+            if isinstance(member, Member): # Don't proceed if we somehow get a regular User
+                old_name = member.display_name
+                split = old_name.split(" ")
+                if split[0].lower() != chosen_option.lower(): # Only proceed if the user doesn't have the tag already
+                    try:
+                        await member.edit(nick=f"{chosen_option} {old_name}")
+                    except Forbidden: # This should only ever happen if we try to edit the Guild Owner
+                        LOG.error(f"[PREDICTION] Couldn't set nickname of user {member.id}. We are forbidden from editing the member.")
+                    except Exception as e:
+                        LOG.error(f"[PREDICTION] Couldn't set nickname of user {member.id}. {e}")
+
         prediction_message = await client.get_channel(channel_id).fetch_message(
             message_id
         )

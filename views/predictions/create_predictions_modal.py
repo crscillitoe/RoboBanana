@@ -1,14 +1,17 @@
 from discord import ChannelType, TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
 from datetime import datetime, timedelta
+from typing import Optional
+import logging
 
 from controllers.predictions.create_prediction_controller import (
     CreatePredictionController,
 )
 
+LOG = logging.getLogger(__name__)
 
 class CreatePredictionModal(Modal, title="Start new prediction"):
-    def __init__(self, client: Client):
+    def __init__(self, client: Client, set_nickname=False):
         super().__init__(timeout=None)
         self.client = client
         self.description = TextInput(
@@ -33,6 +36,7 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             required=True,
             min_length=1,
         )
+        self.set_nickname=set_nickname
 
         self.add_item(self.description)
         self.add_item(self.option_one)
@@ -63,5 +67,6 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             self.option_one.value,
             self.option_two.value,
             duration,
+            self.set_nickname,
             self.client,
         )

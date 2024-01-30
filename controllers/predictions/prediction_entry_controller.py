@@ -89,7 +89,8 @@ class PredictionEntryController:
                 split = old_name.split(" ")
                 if (
                     split[0].lower() != chosen_option.lower()
-                ):  # Only proceed if the user doesn't have the tag already
+                    and (len(old_name) + len(chosen_option) + 1) <= 32
+                ):  # Only proceed if the user doesn't have the tag already and the tag would fit
                     try:
                         await member.edit(nick=f"{chosen_option} {old_name}")
                     except (

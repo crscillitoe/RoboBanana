@@ -20,6 +20,7 @@ Discord:
     RedemptionChannel:
     RewardRequirement: 5
     RewardRole:
+    ProgressChannel:
   GuildID:
   Inhouses:
     EUOpenChannel:

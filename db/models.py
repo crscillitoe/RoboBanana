@@ -42,6 +42,7 @@ class PredictionSummary:
         option_one_points: int,
         option_two_points: int,
         end_time: datetime,
+        set_nickname: bool,
         accepting_entries: bool,
         ended: bool,
     ):
@@ -51,6 +52,7 @@ class PredictionSummary:
         self.option_one_points = option_one_points
         self.option_two_points = option_two_points
         self.end_time = end_time
+        self.set_nickname = set_nickname
         self.accepting_entries = accepting_entries
         self.ended = ended
 
@@ -185,6 +187,7 @@ class Prediction(Base):
     description = Column(VARCHAR(100), nullable=False)
     option_one = Column(VARCHAR(100), nullable=False)
     option_two = Column(VARCHAR(100), nullable=False)
+    set_nickname = Column(Boolean, nullable=False, default=False)
     winning_option = Column(SmallInteger, nullable=True)
 
     entries = relationship("PredictionEntry", back_populates="prediction")

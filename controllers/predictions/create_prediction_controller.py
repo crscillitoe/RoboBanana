@@ -35,6 +35,7 @@ class CreatePredictionController:
         option_one: str,
         option_two: str,
         duration: int,
+        set_nickname: bool,
         client: Client,
     ):
         end_time = datetime.now() + timedelta(seconds=duration)
@@ -46,6 +47,7 @@ class CreatePredictionController:
             option_one,
             option_two,
             end_time,
+            set_nickname,
         )
         prediction_id = DB().get_ongoing_prediction_id(guild_id)
         UpdatePredictionController.publish_prediction_summary(prediction_id)

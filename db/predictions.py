@@ -13,6 +13,7 @@ def create_prediction(
     option_one: str,
     option_two: str,
     end_time: datetime,
+    set_nickname: bool,
     session: sessionmaker,
 ) -> None:
     if has_ongoing_prediction(guild_id, session):
@@ -28,6 +29,7 @@ def create_prediction(
                 option_one=option_one,
                 option_two=option_two,
                 end_time=end_time,
+                set_nickname=set_nickname,
             )
         )
 
@@ -249,6 +251,7 @@ def get_prediction_summary(
             option_one_points,
             option_two_points,
             prediction.end_time,
+            prediction.set_nickname,
             prediction.accepting_entries,
             prediction.ended,
         )

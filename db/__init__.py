@@ -533,6 +533,7 @@ class DB:
         option_one: str,
         option_two: str,
         end_time: datetime,
+        set_nickname: bool,
     ):
         """Create new prediction for users to enter channel points into
 
@@ -552,6 +553,7 @@ class DB:
             option_one,
             option_two,
             end_time,
+            set_nickname,
             self.session,
         )
 

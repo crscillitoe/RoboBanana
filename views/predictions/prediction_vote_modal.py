@@ -54,8 +54,14 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
         await prediction_message.edit(embed=self.parent)
 
         append = ""
-        if len(interaction.user.display_name) + len(self.guess.name) + 1 > 32:
-            append = "\nCould not set your nickname, as it would exceed the nickname length limit of 32."
+        oldname = interaction.user.display_name
+        chosen = prediction_summary.option_one if self.guess.name == "left" else prediction_summary.option_two
+        if prediction_summary.set_nickname:
+            if len(oldname) + len(chosen) + 1 > 32:
+                append = "\nCould not set your nickname, as it would exceed the nickname length limit of 32."
+            else:
+                oldname = oldname.replace(f"{chosen} ", "", 1)
+                append = f"\nTo change your name back to your original name, use the `/nick` slash commands with the value `{oldname}`"
 
         await interaction.response.send_message(
             f"Vote cast with {channel_points} points!{append}", ephemeral=True

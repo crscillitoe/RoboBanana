@@ -47,11 +47,16 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
         prediction_message_id = DB().get_prediction_message_id(prediction_id)
+        prediction_summary = DB().get_prediction_summary(prediction_id)
         prediction_message = await interaction.channel.fetch_message(
             prediction_message_id
         )
         await prediction_message.edit(embed=self.parent)
 
+        append = ""
+        if len(interaction.user.display_name) + len(self.guess.name) + 1 > 32:
+            append = "\nCould not set your nickname, as it would exceed the nickname length limit of 32."
+
         await interaction.response.send_message(
-            f"Vote cast with {channel_points} points!", ephemeral=True
+            f"Vote cast with {channel_points} points!{append}", ephemeral=True
         )

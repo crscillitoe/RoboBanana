@@ -39,6 +39,8 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
                 "Invalid point value", ephemeral=True
             )
             return
+        
+        await interaction.response.defer(ephemeral=True, thinking=True)
 
         await PredictionEntryController.create_prediction_entry(
             channel_points, self.guess, interaction, self.client
@@ -52,6 +54,6 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
         )
         await prediction_message.edit(embed=self.parent)
 
-        await interaction.response.send_message(
+        await interaction.followup.send(
             f"Vote cast with {channel_points} points!", ephemeral=True
         )

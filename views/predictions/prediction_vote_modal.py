@@ -61,7 +61,7 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
                 append = "\nCould not set your nickname, as it would exceed the nickname length limit of 32."
             else:
                 oldname = oldname.replace(f"{chosen} ", "", 1)
-                append = f"\nTo change your name back to your original name, use the `/nick` slash commands with the value `{oldname}`"
+                append = f"\nNickname set to include choice.\nTo change your name back to your original name, use the `/nick` slash commands with the value `{oldname}`"
 
         await interaction.response.send_message(
             f"Vote cast with {channel_points} points!{append}", ephemeral=True

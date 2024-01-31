@@ -54,9 +54,9 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
         await prediction_message.edit(embed=self.parent)
 
         append = ""
-        oldname = interaction.user.display_name
-        chosen = prediction_summary.option_one if self.guess.name == "left" else prediction_summary.option_two
         if prediction_summary.set_nickname:
+            oldname = interaction.user.display_name
+            chosen = prediction_summary.option_one if self.guess.name == "left" else prediction_summary.option_two
             if len(oldname) + len(chosen) + 1 > 32:
                 append = "\nCould not set your nickname, as it would exceed the nickname length limit of 32."
             else:

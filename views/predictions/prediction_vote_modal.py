@@ -40,6 +40,8 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
             )
             return
 
+        await interaction.response.defer(ephemeral=True, thinking=True)
+
         await PredictionEntryController.create_prediction_entry(
             channel_points, self.guess, interaction, self.client
         )
@@ -65,4 +67,5 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
 
         await interaction.response.send_message(
             f"Vote cast with {channel_points} points!{append}", ephemeral=True
+
         )

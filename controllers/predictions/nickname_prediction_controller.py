@@ -70,8 +70,8 @@ class NicknameAccumulator:
                 rename = self._queue.popleft()
                 member = self.guild.get_member(rename[0])
                 prepend = rename[1]
-                
-                if (member.display_name.lower().startswith(prepend.lower())):
+
+                if member.display_name.lower().startswith(prepend.lower()):
                     member = None
 
             except IndexError:  # Increment fail counter to eventually stop the loop

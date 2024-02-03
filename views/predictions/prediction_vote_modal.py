@@ -39,7 +39,7 @@ class PredictionVoteModal(Modal, title="Cast your vote!"):
                 "Invalid point value", ephemeral=True
             )
             return
-        
+
         await interaction.response.defer(ephemeral=True, thinking=True)
 
         await PredictionEntryController.create_prediction_entry(

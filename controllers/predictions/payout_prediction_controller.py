@@ -2,7 +2,9 @@ from typing import Generator, Tuple
 
 from discord import Client, Interaction
 from controllers.point_history_controller import PointHistoryController
-from controllers.predictions.nickname_prediction_controller import NicknamePredictionController
+from controllers.predictions.nickname_prediction_controller import (
+    NicknamePredictionController,
+)
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -185,7 +187,7 @@ class PayoutPredictionController:
         await reply_to_initial_message(prediction_id, client, refund_message)
 
         prediction_summary = DB().get_prediction_summary(prediction_id)
-        
+
         if prediction_summary.set_nickname == True:
             guild = client.get_guild(guild_id)
             acc = NicknamePredictionController.get_accumulator(prediction_id, guild)

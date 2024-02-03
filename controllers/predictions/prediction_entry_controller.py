@@ -2,7 +2,9 @@ from discord import Client, Forbidden, Interaction, Member
 from threading import Thread
 from config import YAMLConfig as Config
 from controllers.point_history_controller import PointHistoryController
-from controllers.predictions.nickname_prediction_controller import NicknamePredictionController
+from controllers.predictions.nickname_prediction_controller import (
+    NicknamePredictionController,
+)
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -14,6 +16,7 @@ from models.transaction import Transaction
 import logging
 
 LOG = logging.getLogger(__name__)
+
 
 class PredictionEntryController:
     @staticmethod
@@ -59,9 +62,7 @@ class PredictionEntryController:
             interaction.guild_id, interaction.user.id, channel_points, guess.value
         )
         if not success:
-            await interaction.followup.send(
-                "Unable to cast vote", ephemeral=True
-            )
+            await interaction.followup.send("Unable to cast vote", ephemeral=True)
             return False
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
@@ -85,13 +86,18 @@ class PredictionEntryController:
         if prediction_summary.set_nickname == True:
             if len(f"{chosen_option} {interaction.user.display_name}") > 32:
                 append = f"\nPlease manually set your nickname using the `/nick` command to include {chosen_option} at the start of your name."
-            elif interaction.user.display_name.split(" ")[0].lower() == chosen_option.lower():
+            elif (
+                interaction.user.display_name.split(" ")[0].lower()
+                == chosen_option.lower()
+            ):
                 pass
             else:
-                acc = NicknamePredictionController.get_accumulator(prediction_id, interaction.guild)
+                acc = NicknamePredictionController.get_accumulator(
+                    prediction_id, interaction.guild
+                )
                 queue_size = acc.add(interaction.user.id, chosen_option)
-            
-                if queue_size == -1: # No more space left in the queue
+
+                if queue_size == -1:  # No more space left in the queue
                     append = f"\nPlease manually set your nickname using the `/nick` command to include {chosen_option} at the start of your name."
                 else:
                     append = f"\nYour nickname will automatically be set to `{chosen_option} {interaction.user.display_name}` in approximately {queue_size} seconds."
@@ -100,12 +106,12 @@ class PredictionEntryController:
         prediction_message = await client.get_channel(channel_id).fetch_message(
             message_id
         )
-        
+
         await prediction_message.reply(
             f"{interaction.user.mention} bet {channel_points} hooj bucks on"
             f" {chosen_option}"
         )
-        
+
         await interaction.followup.send(
             f"Vote cast with {channel_points} points!{append}", ephemeral=True
         )

@@ -54,8 +54,8 @@ class NicknameAccumulator:
 
     @tasks.loop(seconds=1)
     async def process_nicknames(self):
-        member: Member
-        prepend: str
+        member: Member = None
+        prepend: str = ""
 
         if self.loop_fails >= 15:
             self.cancel()
@@ -70,6 +70,9 @@ class NicknameAccumulator:
                 rename = self._queue.popleft()
                 member = self.guild.get_member(rename[0])
                 prepend = rename[1]
+                
+                if (member.display_name.lower().startswith(prepend.lower())):
+                    member = None
 
             except IndexError:  # Increment fail counter to eventually stop the loop
                 self.loop_fails += 1
@@ -114,8 +117,8 @@ class NicknameAccumulator:
 
     @tasks.loop(seconds=1)
     async def process_reset(self):
-        member: Member
-        prepend: str
+        member: Member = None
+        prepend: str = ""
 
         if self.reset_loop_fails >= 15:
             self.process_reset.cancel()

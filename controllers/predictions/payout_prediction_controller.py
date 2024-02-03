@@ -10,6 +10,7 @@ from db.models import (
     PredictionChoice,
     PredictionOutcome,
     PredictionEntry,
+    PredictionSummary,
 )
 from db import DB
 import logging
@@ -80,6 +81,7 @@ class PayoutPredictionController:
         prediction_id: int,
         option: PredictionChoice,
         client: Client,
+        guild_id: int,
     ):
         payout_generator = ReturnableGenerator(
             PayoutPredictionController.get_payout_for_option(
@@ -119,6 +121,13 @@ class PayoutPredictionController:
             f"Payout complete! {total_points} points distributed to {paid_option}."
         )
         await reply_to_initial_message(prediction_id, client, payout_message)
+
+        if prediction_summary.set_nickname == True:
+            await PayoutPredictionController._reset_prediction_nicknames(
+                client, prediction_id, prediction_summary, guild_id
+            )
+            payout_message = payout_message + "\nNicknames reset."
+
         return payout_message
 
     @staticmethod
@@ -133,7 +142,7 @@ class PayoutPredictionController:
 
         prediction_id = DB().get_ongoing_prediction_id(guild_id)
         payout_message = await PayoutPredictionController._perform_payout(
-            prediction_id, option, client
+            prediction_id, option, client, guild_id
         )
 
         DB().complete_prediction(guild_id, option.value)
@@ -149,7 +158,7 @@ class PayoutPredictionController:
         return await interaction.response.send_message(message, ephemeral=True)
 
     @staticmethod
-    async def _perform_refund(prediction_id: int, client: Client):
+    async def _perform_refund(prediction_id: int, client: Client, guild_id: int):
         for entry in PayoutPredictionController.get_entries_for_prediction(
             prediction_id
         ):
@@ -173,6 +182,14 @@ class PayoutPredictionController:
 
         refund_message = "Prediction has been refunded!"
         await reply_to_initial_message(prediction_id, client, refund_message)
+
+        prediction_summary = DB().get_prediction_summary(prediction_id)
+        if prediction_summary.set_nickname == True:
+            await PayoutPredictionController._reset_prediction_nicknames(
+                client, prediction_id, prediction_summary, guild_id
+            )
+            refund_message = refund_message + "\nNicknames reset."
+
         return refund_message
 
     @staticmethod
@@ -185,7 +202,7 @@ class PayoutPredictionController:
 
         prediction_id = DB().get_ongoing_prediction_id(guild_id)
         refund_message = await PayoutPredictionController._perform_refund(
-            prediction_id, client
+            prediction_id, client, guild_id
         )
 
         DB().complete_prediction(guild_id, PredictionOutcome.refund.value)
@@ -254,6 +271,37 @@ class PayoutPredictionController:
 
         DB().set_prediction_outcome(prediction.id, option.value)
         await interaction.response.send_message(reply_message, ephemeral=True)
+
+    @staticmethod
+    async def _reset_prediction_nicknames(
+        client: Client,
+        prediction_id: int,
+        prediction_summary: PredictionSummary,
+        guild_id: int,
+    ):
+        guild = client.get_guild(guild_id)
+        if not guild:
+            LOG.error(f"Couldn't find guild {guild_id}, skipping nickname reset")
+            return
+
+        opt_one = prediction_summary.option_one
+        opt_two = prediction_summary.option_two
+
+        for entry in PayoutPredictionController.get_entries_for_prediction(
+            prediction_id
+        ):
+            member = guild.get_member(entry.user_id)
+            member_name = member.display_name
+            split_name = member_name.split(" ")
+
+            if split_name[0].lower() == opt_one.lower():
+                member_name = member_name.replace(f"{opt_one} ", "", 1)
+            elif split_name[0].lower() == opt_two.lower():
+                member_name = member_name.replace(f"{opt_two} ", "", 1)
+            else:
+                continue
+
+            await member.edit(nick=member_name)
 
 
 async def reply_to_initial_message(prediction_id: int, client: Client, message: str):

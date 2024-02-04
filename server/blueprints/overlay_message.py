@@ -15,7 +15,9 @@ async def publish_poll():
     }
     try:
         to_publish = await parse_body(request, valid_request)
-        await OverlayMessageController.send_message(to_publish["message"], to_publish["token"])
+        await OverlayMessageController.send_message(
+            to_publish["message"], to_publish["token"]
+        )
         return ("OK", 200)
     except (KeyError, ValueError):
         return ("Bad Request", 400)

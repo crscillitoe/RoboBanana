@@ -8,6 +8,7 @@ from server.util.constants import (
 from .sse import sse
 import re
 import logging
+
 LOG = logging.getLogger(__name__)
 
 CUSTOM_EMOJI_PATTERN = re.compile(r"<:[a-zA-Z]+:[0-9]+>")

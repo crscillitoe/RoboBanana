@@ -75,7 +75,10 @@ class OverlayMessageController:
 
         stream_channel = Config.CONFIG["Discord"]["Channels"]["Stream"]
 
-        await DISCORD_CLIENT.get_channel(stream_channel).send(f"[<@{user_id}>] {message.replace('@', '')}", allowed_mentions=AllowedMentions.none())
+        await DISCORD_CLIENT.get_channel(stream_channel).send(
+            f"[<@{user_id}>] {message.replace('@', '')}",
+            allowed_mentions=AllowedMentions.none(),
+        )
 
         await publish_chat(to_send)
 

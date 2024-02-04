@@ -30,6 +30,9 @@ class ServerBot(Client):
         LOG.info(f"Logged in as {self.user} (ID: {self.user.id})")
 
     async def on_message(self, message: Message):
+        if message.author.id == self.user.id:
+            return
+
         if message.channel.id == STREAM_CHAT:
             should_send, emoji_content = self.find_emojis(message.content)
             reference_author = await self.find_reference_author(message)

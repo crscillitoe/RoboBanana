@@ -5,6 +5,7 @@ from server.util.constants import CHAT_MESSAGE_STREAM_TYPE, EVENTS_CHANNEL
 from server.util.discord_client import DISCORD_CLIENT
 import logging
 import requests
+from discord import AllowedMentions
 
 from util.server_utils import get_base_url
 
@@ -71,6 +72,10 @@ class OverlayMessageController:
             "author_id": user_id,
             "platform": "overlay",
         }
+
+        stream_channel = Config.CONFIG["Discord"]["Channels"]["Stream"]
+
+        await DISCORD_CLIENT.get_channel(stream_channel).send(f"[<@{user_id}>] {message.replace('@', '')}", allowed_mentions=AllowedMentions.none())
 
         await publish_chat(to_send)
 

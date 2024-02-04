@@ -8,6 +8,7 @@ from server.util.constants import (
 from .sse import sse
 import re
 import logging
+LOG = logging.getLogger(__name__)
 
 CUSTOM_EMOJI_PATTERN = re.compile(r"<:[a-zA-Z]+:[0-9]+>")
 
@@ -18,6 +19,7 @@ chat_blueprint = Blueprint("chat", __name__)
 @token_required
 async def receive_chat():
     try:
+        LOG.info("received chat message")
         json = await request.get_json()
         await sse.publish(json, type=CHAT_MESSAGE_STREAM_TYPE, channel=EVENTS_CHANNEL)
         return ("OK", 200)

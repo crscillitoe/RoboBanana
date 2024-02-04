@@ -44,9 +44,14 @@ class OverlayMessageController:
         # Ugly check for T3 subs for now, feature is not complete and I don't want
         # to deal with the army of users explaining to me why it's 'broken'
         t3_role = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+        gifted_t3_role = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+        twitch_t3_role = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
+
+        valid_roles = [t3_role, gifted_t3_role, twitch_t3_role]
+
         can_send = False
         for role in member.roles:
-            if role.id == t3_role:
+            if role.id in valid_roles:
                 can_send = True
                 break
         if not can_send:

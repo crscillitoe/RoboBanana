@@ -304,7 +304,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await PayoutPredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="close_prediction")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_any_role("THE ONES WHO KNOW A LOT (12 Month T3)", "Mod")
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
         await ClosePredictionController.close_prediction(interaction.guild_id)

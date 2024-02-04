@@ -1,5 +1,7 @@
 from bot import AUTH_TOKEN
 from config import YAMLConfig as Config
+from server.blueprints.sse import sse
+from server.util.constants import CHAT_MESSAGE_STREAM_TYPE, EVENTS_CHANNEL
 from server.util.discord_client import DISCORD_CLIENT
 import logging
 import requests
@@ -26,7 +28,7 @@ class OverlayMessageController:
        return user_id
 
     @staticmethod
-    def send_message(message: str, token: str):
+    async def send_message(message: str, token: str):
        user_id = OverlayMessageController._get_user_id(token)
        guild = DISCORD_CLIENT.get_guild(GUILD_ID)
        if guild is None:
@@ -59,12 +61,16 @@ class OverlayMessageController:
        LOG.info(f"{to_send=}")
 
        LOG.info(f"About to send request...: {PUBLISH_URL=}")
-       response = requests.post(
-           url=PUBLISH_URL, json=to_send, headers={"x-access-token": AUTH_TOKEN}
-       )
+       await publish_chat(to_send)
 
        LOG.info("Done with request...")
-       if response.status_code != 200:
-           LOG.error(f"Failed to publish chat: {response.text}")
         
         
+async def publish_chat(chat_message):
+    try:
+        await sse.publish(
+            chat_message, type=CHAT_MESSAGE_STREAM_TYPE, channel=EVENTS_CHANNEL
+        )
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)

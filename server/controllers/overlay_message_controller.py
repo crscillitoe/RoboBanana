@@ -39,6 +39,18 @@ class OverlayMessageController:
         member = guild.get_member(user_id)
         if member is None:
             return
+
+        # Ugly check for T3 subs for now, feature is not complete and I don't want
+        # to deal with the army of users explaining to me why it's 'broken'
+        t3_role = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+        can_send = False
+        for role in member.roles:
+            if role.id == t3_role:
+                can_send = True
+                break
+        if not can_send:
+            return
+
         to_send = {
             "content": message,
             "displayName": member.display_name,

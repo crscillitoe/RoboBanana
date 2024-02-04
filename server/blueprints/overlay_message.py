@@ -8,7 +8,7 @@ overlay_message_blueprint = Blueprint("overlay_message", __name__)
 
 
 @overlay_message_blueprint.route("/publish-overlay-message", methods=["POST"])
-async def publish_poll():
+async def publish_overlay_message():
     valid_request = {
         "token": SchemaValueType.String,
         "message": SchemaValueType.String,

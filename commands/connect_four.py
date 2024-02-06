@@ -11,6 +11,7 @@ from util.server_utils import get_base_url
 
 PUBLISH_CONNECT_FOUR_URL = f"{get_base_url()}/publish-connect-four"
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 LOG = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         self.controller = ConnectFourController()
 
     @app_commands.command()
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def enable(self, interaction: Interaction):
         """Allow users to challenge each other to Connect Four"""
         self.enabled = True
@@ -37,7 +38,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         await interaction.response.send_message("Connect Four Enabled!", ephemeral=True)
 
     @app_commands.command()
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def disable(self, interaction: Interaction):
         """Prevent users from challenging each other to Connect Four"""
         self.enabled = False

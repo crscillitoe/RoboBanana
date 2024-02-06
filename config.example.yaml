@@ -32,6 +32,7 @@ Discord:
   Roles:
     Bot: 
     Mod: 
+    CM:
   Subscribers:
     12MonthTier3Role:
     6MonthTier3Role:
@@ -54,6 +55,7 @@ Discord:
     RulesAcceptedRole:
     RewardHoursPerReview: 8
     SubmissionChannel:
+    ReviewerRole: 
 Server:
   Host: server
   Port: 3000

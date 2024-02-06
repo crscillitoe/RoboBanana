@@ -28,8 +28,15 @@ class TempRoleController:
             user_id = user.id
         else:
             user_id = user
-        delta = timedelta(seconds=timeparse(duration))
-        expiration = datetime.now() + delta
+        
+        try:
+            delta = timedelta(seconds=timeparse(duration))
+            expiration = datetime.now() + delta
+        except:
+            return (
+                False,
+                "Unable to assing role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)"
+            )
         guild = role.guild
 
         member = guild.get_member(user_id)

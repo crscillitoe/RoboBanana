@@ -71,7 +71,15 @@ class TempRoleController:
     @staticmethod
     async def extend_role(user: User, role: Role, duration: str):
         user_id = user.id
-        extension_duration = timedelta(seconds=timeparse(duration))
+        
+        try:
+            extension_duration = timedelta(seconds=timeparse(duration))
+        except:
+            return (
+                False,
+                "Unable to extend role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)"
+            )
+            
         guild = role.guild
 
         member = guild.get_member(user_id)

@@ -143,7 +143,7 @@ class PayoutPredictionController:
 
             if DB().accepting_prediction_entries(guild_id):
                 return False, "Please close prediction from entries before paying out!"
-    
+
             prediction_id = DB().get_ongoing_prediction_id(guild_id)
             payout_message = await PayoutPredictionController._perform_payout(
                 prediction_id, option, client, guild_id
@@ -155,7 +155,6 @@ class PayoutPredictionController:
             return False, "Failed to payout prediction!"
         finally:
             PREDICTION_LOCK.release()
-        
 
     @staticmethod
     async def payout_prediction(

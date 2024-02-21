@@ -28,12 +28,13 @@ Discord:
   Predictions:
     Channel:
     MaxNicknameQueue:
+    AuditChannel:
   PointsHistory:
     MaximumTransactions: 5
   Roles:
     Bot: 
     Mod: 
-    CM:
+    CMChatModerator:
   Subscribers:
     12MonthTier3Role:
     6MonthTier3Role:

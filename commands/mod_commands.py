@@ -1,7 +1,14 @@
 from asyncio import Lock
 from datetime import datetime, timedelta
 from typing import Optional
-from discord import app_commands, Interaction, Client, User, TextChannel
+from discord import (
+    AllowedMentions,
+    app_commands,
+    Interaction,
+    Client,
+    User,
+    TextChannel,
+)
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from controllers.good_morning_controller import (
     GoodMorningController,
@@ -34,6 +41,7 @@ LOG = logging.getLogger(__name__)
 JOEL_DISCORD_ID = 112386674155122688
 HOOJ_DISCORD_ID = 82969926125490176
 POINTS_AUDIT_CHANNEL = Config.CONFIG["Discord"]["ChannelPoints"]["PointsAuditChannel"]
+PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
 TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"]
 TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
@@ -319,6 +327,12 @@ class ModCommands(app_commands.Group, name="mod"):
         prediction_message = await self.client.get_channel(
             prediction_channel_id
         ).fetch_message(prediction_message_id)
+
+        audit_channel = interaction.guild.get_channel(PREDICTION_AUDIT_CHANNEL)
+        await audit_channel.send(
+            f"{interaction.user.mention} closed the current prediction.",
+            allowed_mentions=AllowedMentions.none(),
+        )
 
         await prediction_message.reply("Prediction closed!")
         await interaction.response.send_message("Prediction closed!", ephemeral=True)

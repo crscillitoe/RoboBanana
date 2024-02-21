@@ -1,14 +1,14 @@
-from discord import ChannelType, TextStyle, Interaction, Client
+from discord import AllowedMentions, ChannelType, TextStyle, Interaction, Client
 from discord.ui import Modal, TextInput
-from datetime import datetime, timedelta
-from typing import Optional
 import logging
+from config import YAMLConfig as Config
 
 from controllers.predictions.create_prediction_controller import (
     CreatePredictionController,
 )
 
 LOG = logging.getLogger(__name__)
+PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
 
 
 class CreatePredictionModal(Modal, title="Start new prediction"):
@@ -57,6 +57,12 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             name=self.description.value, type=ChannelType.public_thread
         )
         prediction_message = await prediction_thread.send(self.description.value)
+
+        audit_channel = interaction.guild.get_channel(PREDICTION_AUDIT_CHANNEL)
+        await audit_channel.send(
+            f"{interaction.user.mention} started prediction `{self.description.value}` here: {prediction_thread.mention} (In {prediction_thread.parent.mention}).",
+            allowed_mentions=AllowedMentions.none(),
+        )
 
         await interaction.response.send_message("Starting prediction", ephemeral=True)
 

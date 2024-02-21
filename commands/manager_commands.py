@@ -25,7 +25,7 @@ REJECTED_TAG = Config.CONFIG["Discord"]["VODReview"]["RejectedTag"]
 APPROVED_ROLE = Config.CONFIG["Discord"]["VODReview"]["ApprovedRole"]
 REJECTED_ROLE = Config.CONFIG["Discord"]["VODReview"]["RejectedRole"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
-CM_ROLE = Config.CONFIG["Discord"]["Roles"]["CM"]
+CM_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 VOD_TEAM_ROLE = Config.CONFIG["Discord"]["VODReview"]["ReviewerRole"]
 USER_ID_PATTERN = re.compile(r"(<@([0-9]+)>)")
 

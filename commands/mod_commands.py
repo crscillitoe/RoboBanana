@@ -1,3 +1,4 @@
+from asyncio import Lock
 from datetime import datetime, timedelta
 from typing import Optional
 from discord import app_commands, Interaction, Client, User, TextChannel
@@ -48,6 +49,8 @@ PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
 PUBLISH_TIMER_URL = f"{get_base_url()}/publish-timer"
 PUBLISH_CHESS_URL = f"{get_base_url()}/publish-chess"
 
+PERMISSION_LOCK = Lock()
+
 
 class ChannelPerms(enum.Enum):
     t3jail = 1
@@ -86,7 +89,7 @@ class ModCommands(app_commands.Group, name="mod"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="reset_vod_submission")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(user="Discord User to reset vod submission for")
     async def reset_vod_submission(self, interaction: Interaction, user: User) -> None:
         """Allows the given userID to submit a VOD."""
@@ -94,7 +97,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Success!", ephemeral=True)
 
     @app_commands.command(name="chess")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(open_value="1 for yes 0 for no")
     @app_commands.describe(na_score="-1 for no change")
     @app_commands.describe(eu_score="-1 for no change")
@@ -114,7 +117,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Chess event sent!", ephemeral=True)
 
     @app_commands.command(name="timer")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(time="Time in seconds")
     async def timer(
         self,
@@ -134,7 +137,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Timer created!", ephemeral=True)
 
     @app_commands.command(name="poll")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(title="title")
     @app_commands.describe(option_one="option_one")
     @app_commands.describe(option_two="option_two")
@@ -164,7 +167,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Poll created!", ephemeral=True)
 
     @app_commands.command(name="gift")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(num_winners="num_winners")
     @app_commands.describe(oprah="Oprah")
     async def gift(self, interaction: Interaction, oprah: str, num_winners: int):
@@ -194,7 +197,7 @@ class ModCommands(app_commands.Group, name="mod"):
             )
 
     @app_commands.command(name="start")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(raffle_type="Raffle Type (default: normal)")
     async def start(
         self, interaction: Interaction, raffle_type: RaffleType = RaffleType.normal
@@ -211,7 +214,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="end")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def end(
         self,
         interaction: Interaction,
@@ -238,14 +241,14 @@ class ModCommands(app_commands.Group, name="mod"):
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
     @app_commands.command(name="add_reward")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def add_reward(self, interaction: Interaction):
         """Creates new channel reward for redemption"""
         modal = AddRewardModal()
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="remove_reward")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(name="Name of reward to remove")
     async def remove_reward(self, interaction: Interaction, name: str):
         """Removes channel reward for redemption"""
@@ -255,7 +258,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="allow_redemptions")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def allow_redemptions(self, interaction: Interaction):
         """Allow rewards to be redeemed"""
         DB().allow_redemptions()
@@ -264,7 +267,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="pause_redemptions")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def pause_redemptions(self, interaction: Interaction):
         """Pause rewards from being redeemed"""
         DB().pause_redemptions()
@@ -273,7 +276,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="check_redemption_status")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def check_redemption_status(self, interaction: Interaction):
         """Check whether or not rewards are eligible to be redeemed"""
         status = DB().check_redemption_status()
@@ -300,13 +303,13 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="refund_prediction")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
         await PayoutPredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="close_prediction")
-    @app_commands.checks.has_any_role(TIER3_ROLE_12MO, MOD_ROLE)
+    @app_commands.checks.has_any_role(TIER3_ROLE_12MO, MOD_ROLE, CHAT_MOD_ROLE)
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
         await ClosePredictionController.close_prediction(interaction.guild_id)
@@ -321,7 +324,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Prediction closed!", ephemeral=True)
 
     @app_commands.command(name="payout_prediction")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(option="Option to payout")
     async def payout_prediction(
         self, interaction: Interaction, option: PredictionChoice
@@ -332,147 +335,155 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="redo_payout")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(option="Option to payout")
     async def redo_payout(self, interaction: Interaction, option: PredictionOutcome):
         """Redo the last prediction's payout"""
         await PayoutPredictionController.redo_payout(option, interaction, self.client)
 
     @app_commands.command(name="set_chat_mode")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(mode="Chat Mode")
     @app_commands.describe(channel="Channel")
     async def set_chat_mode(
         self, interaction: Interaction, mode: ChannelPerms, channel: TextChannel
     ):
-        await interaction.response.send_message("Updating chat mode...", ephemeral=True)
-
-        t3_role_role = interaction.guild.get_role(1036807951484203099)
-        gifted_t3_role = interaction.guild.get_role(1045466382470484040)
-        twitch_t3 = interaction.guild.get_role(935319103302926409)
-
-        discord_t2 = interaction.guild.get_role(1036807522457231384)
-        gifted_t2 = interaction.guild.get_role(1046886011071905933)
-        t2_good_morning = interaction.guild.get_role(1069255940181856327)
-
-        discord_t1 = interaction.guild.get_role(1036801694564102174)
-        gifted_t1 = interaction.guild.get_role(1038174011034710128)
-        twitch_sub = interaction.guild.get_role(935319103302926406)
-
-        t3_subs = [t3_role_role, gifted_t3_role, twitch_t3]
-        t2_subs = [discord_t2, gifted_t2, t2_good_morning]
-        t1_subs = [discord_t1, gifted_t1, twitch_sub]
-
-        all_subs = t3_subs + t2_subs + t1_subs
-
-        everyone = interaction.guild.get_role(915336728707989534)
-
-        channel = self.client.get_channel(channel.id)
-
-        if mode == ChannelPerms.t3jail:
-            for t3 in t3_subs:
-                await channel.set_permissions(
-                    t3, send_messages=False, view_channel=True
-                )
-
-            for t2 in t2_subs:
-                await channel.set_permissions(t2, view_channel=True)
-
-            for t1 in t1_subs:
-                await channel.set_permissions(t1, view_channel=True)
-
-            await channel.set_permissions(
-                everyone,
-                create_private_threads=False,
-                create_public_threads=False,
-                use_external_emojis=False,
-                embed_links=False,
-                attach_files=False,
-                use_external_stickers=False,
+        await PERMISSION_LOCK.acquire()
+        try:
+            await interaction.response.send_message(
+                "Updating chat mode...", ephemeral=True
             )
 
-        if mode == ChannelPerms.t3chat:
-            for t3 in t3_subs:
-                await channel.set_permissions(t3, send_messages=True, view_channel=True)
+            t3_role_role = interaction.guild.get_role(1036807951484203099)
+            gifted_t3_role = interaction.guild.get_role(1045466382470484040)
+            twitch_t3 = interaction.guild.get_role(935319103302926409)
 
-            for t2 in t2_subs:
+            discord_t2 = interaction.guild.get_role(1036807522457231384)
+            gifted_t2 = interaction.guild.get_role(1046886011071905933)
+            t2_good_morning = interaction.guild.get_role(1069255940181856327)
+
+            discord_t1 = interaction.guild.get_role(1036801694564102174)
+            gifted_t1 = interaction.guild.get_role(1038174011034710128)
+            twitch_sub = interaction.guild.get_role(935319103302926406)
+
+            t3_subs = [t3_role_role, gifted_t3_role, twitch_t3]
+            t2_subs = [discord_t2, gifted_t2, t2_good_morning]
+            t1_subs = [discord_t1, gifted_t1, twitch_sub]
+
+            all_subs = t3_subs + t2_subs + t1_subs
+
+            everyone = interaction.guild.get_role(915336728707989534)
+
+            channel = self.client.get_channel(channel.id)
+
+            if mode == ChannelPerms.t3jail:
+                for t3 in t3_subs:
+                    await channel.set_permissions(
+                        t3, send_messages=False, view_channel=True
+                    )
+
+                for t2 in t2_subs:
+                    await channel.set_permissions(t2, view_channel=True)
+
+                for t1 in t1_subs:
+                    await channel.set_permissions(t1, view_channel=True)
+
                 await channel.set_permissions(
-                    t2, send_messages=False, view_channel=False
+                    everyone,
+                    create_private_threads=False,
+                    create_public_threads=False,
+                    use_external_emojis=False,
+                    embed_links=False,
+                    attach_files=False,
+                    use_external_stickers=False,
                 )
 
-            for t1 in t1_subs:
+            if mode == ChannelPerms.t3chat:
+                for t3 in t3_subs:
+                    await channel.set_permissions(
+                        t3, send_messages=True, view_channel=True
+                    )
+
+                for t2 in t2_subs:
+                    await channel.set_permissions(
+                        t2, send_messages=False, view_channel=False
+                    )
+
+                for t1 in t1_subs:
+                    await channel.set_permissions(
+                        t1, send_messages=False, view_channel=False
+                    )
+
                 await channel.set_permissions(
-                    t1, send_messages=False, view_channel=False
+                    everyone,
+                    view_channel=False,
+                    create_private_threads=False,
+                    create_public_threads=False,
+                    send_messages=False,
+                    use_external_emojis=False,
+                    embed_links=False,
+                    attach_files=False,
+                    use_external_stickers=False,
                 )
 
-            await channel.set_permissions(
-                everyone,
-                view_channel=False,
-                create_private_threads=False,
-                create_public_threads=False,
-                send_messages=False,
-                use_external_emojis=False,
-                embed_links=False,
-                attach_files=False,
-                use_external_stickers=False,
-            )
+            if mode == ChannelPerms.off:
+                for sub in all_subs:
+                    await channel.set_permissions(
+                        sub, send_messages=False, view_channel=False
+                    )
 
-        if mode == ChannelPerms.off:
-            for sub in all_subs:
                 await channel.set_permissions(
-                    sub, send_messages=False, view_channel=False
+                    everyone,
+                    view_channel=False,
+                    create_private_threads=False,
+                    create_public_threads=False,
+                    send_messages=False,
+                    use_external_emojis=False,
+                    embed_links=False,
+                    attach_files=False,
+                    use_external_stickers=False,
                 )
 
-            await channel.set_permissions(
-                everyone,
-                view_channel=False,
-                create_private_threads=False,
-                create_public_threads=False,
-                send_messages=False,
-                use_external_emojis=False,
-                embed_links=False,
-                attach_files=False,
-                use_external_stickers=False,
-            )
+            if mode == ChannelPerms.everyonechat:
+                for sub in all_subs:
+                    await channel.set_permissions(
+                        sub, send_messages=True, view_channel=True
+                    )
 
-        if mode == ChannelPerms.everyonechat:
-            for sub in all_subs:
                 await channel.set_permissions(
-                    sub, send_messages=True, view_channel=True
+                    everyone,
+                    view_channel=True,
+                    create_private_threads=False,
+                    create_public_threads=False,
+                    send_messages=True,
+                    use_external_emojis=False,
+                    embed_links=False,
+                    attach_files=False,
+                    use_external_stickers=False,
                 )
 
-            await channel.set_permissions(
-                everyone,
-                view_channel=True,
-                create_private_threads=False,
-                create_public_threads=False,
-                send_messages=True,
-                use_external_emojis=False,
-                embed_links=False,
-                attach_files=False,
-                use_external_stickers=False,
-            )
+            if mode == ChannelPerms.subchat:
+                for sub in all_subs:
+                    await channel.set_permissions(
+                        sub, send_messages=True, view_channel=True
+                    )
 
-        if mode == ChannelPerms.subchat:
-            for sub in all_subs:
                 await channel.set_permissions(
-                    sub, send_messages=True, view_channel=True
+                    everyone,
+                    view_channel=False,
+                    create_private_threads=False,
+                    create_public_threads=False,
+                    send_messages=False,
+                    use_external_emojis=False,
+                    embed_links=False,
+                    attach_files=False,
+                    use_external_stickers=False,
                 )
-
-            await channel.set_permissions(
-                everyone,
-                view_channel=False,
-                create_private_threads=False,
-                create_public_threads=False,
-                send_messages=False,
-                use_external_emojis=False,
-                embed_links=False,
-                attach_files=False,
-                use_external_stickers=False,
-            )
+        finally:
+            PERMISSION_LOCK.release()
 
     @app_commands.command(name="give_points")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(user="User ID to award points")
     @app_commands.describe(points="Number of points to award")
     @app_commands.describe(reason="Reason for awarding points")
@@ -505,7 +516,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="good_morning_count")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def good_morning_count(self, interaction: Interaction):
         """Check how many users have said good morning today!"""
         count = DB().get_today_morning_count()
@@ -514,26 +525,26 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="good_morning_reward")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def good_morning_reward(self, interaction: Interaction):
         """Reward users who have met the 'Good Morning' threshold"""
         await GoodMorningController.reward_users(interaction)
 
     @app_commands.command(name="good_morning_reset")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def good_morning_reset(self, interaction: Interaction):
         """Reset all weekly good morning points to 0"""
         await GoodMorningController.reset_all_morning_points(interaction)
 
     @app_commands.command(name="good_morning_increment")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(points="Number of points to award")
     async def good_morning_increment(self, interaction: Interaction, points: int):
         """Give all users a fixed number of good morning points"""
         await GoodMorningController.good_morning_increment(points, interaction)
 
     @app_commands.command(name="remove_raffle_winner")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(user="User ID to remove win from")
     async def remove_raffle_winner(self, interaction: Interaction, user: User):
         one_week_ago = datetime.now().date() - timedelta(days=6)

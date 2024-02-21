@@ -1,7 +1,10 @@
 from discord import app_commands, Interaction, Client
 import random
 
+from config import YAMLConfig as Config
+
 HOOJ_DISCORD_ID = 82969926125490176
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
 def get_processed_string(string):
@@ -41,7 +44,7 @@ class MemeCommands(app_commands.Group, name="meme"):
         return interaction.user.id == HOOJ_DISCORD_ID
 
     @app_commands.command(name="generate_chain")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def generate_chain(self, interaction: Interaction) -> None:
         if not self.check_hooj(interaction):
             return
@@ -74,7 +77,7 @@ class MemeCommands(app_commands.Group, name="meme"):
         await interaction.response.send_message("Chain generated!", ephemeral=True)
 
     @app_commands.command(name="hooj_message")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(length="length of message")
     async def hooj_message(self, interaction: Interaction, length: int) -> None:
         if not self.check_hooj(interaction):

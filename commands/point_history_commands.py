@@ -6,9 +6,12 @@ from discord import (
     Client,
     User,
 )
+from config import YAMLConfig as Config
 
 from controllers.point_history_controller import PointHistoryController
 from db.models import PointsHistory
+
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
 @app_commands.guild_only()
@@ -28,7 +31,7 @@ class PointHistoryCommands(app_commands.Group, name="points_history"):
         await interaction.response.send_message(embed=embed)
 
     @app_commands.command(name="user")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(user="User to check point transaction history for")
     async def user(self, interaction: Interaction, user: User):
         """View point transaction history for specified user"""

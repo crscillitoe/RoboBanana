@@ -55,6 +55,7 @@ FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
 CUSTOM_EMOJI_PATTERN = re.compile("<a?:\w+:(\d{17,19}>)?")
+MAX_EMOJI_COUNT = 5
 
 LOG = logging.getLogger(__name__)
 
@@ -114,6 +115,14 @@ class RaffleBot(Client):
                 "Hey! Keep your messages in the stream chat under"
                 f" {MAX_CHARACTER_LENGTH} characters please! Your message was"
                 f" {length} characters long! Thanks! Here's your message: {content}."
+            )
+        if custom_emoji_count > MAX_EMOJI_COUNT:
+            content = message.content
+            await message.delete()
+            await message.author.send(
+                "Hey! Keep your emoji count for messages in the stream chat under"
+                f" {MAX_EMOJI_COUNT} emoji please! Your message included"
+                f" {custom_emoji_count} emoji! Thanks! Here's your message: {content}."
             )
 
     async def on_message(self, message: Message):

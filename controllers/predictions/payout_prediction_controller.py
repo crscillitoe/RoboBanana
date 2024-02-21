@@ -1,7 +1,11 @@
+from asyncio import Lock
 from typing import Generator, Tuple
 
 from discord import Client, Interaction
 from controllers.point_history_controller import PointHistoryController
+from controllers.predictions.nickname_prediction_controller import (
+    NicknamePredictionController,
+)
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -18,6 +22,7 @@ import logging
 from models.transaction import Transaction
 
 LOG = logging.getLogger(__name__)
+PREDICTION_LOCK = Lock()
 
 
 class ReturnableGenerator:
@@ -123,10 +128,10 @@ class PayoutPredictionController:
         await reply_to_initial_message(prediction_id, client, payout_message)
 
         if prediction_summary.set_nickname == True:
-            await PayoutPredictionController._reset_prediction_nicknames(
-                client, prediction_id, prediction_summary, guild_id
-            )
-            payout_message = payout_message + "\nNicknames reset."
+            guild = client.get_guild(guild_id)
+            acc = NicknamePredictionController.get_accumulator(prediction_id, guild)
+            acc.process_reset.start()
+            payout_message = payout_message + "\nNickname reset in progress."
 
         return payout_message
 
@@ -134,19 +139,25 @@ class PayoutPredictionController:
     async def payout_prediction_for_guild(
         option: PredictionChoice, guild_id: int, client: Client
     ):
-        if not DB().has_ongoing_prediction(guild_id):
-            return False, "No ongoing prediction!"
+        await PREDICTION_LOCK.acquire()
+        try:
+            if not DB().has_ongoing_prediction(guild_id):
+                return False, "No ongoing prediction!"
 
-        if DB().accepting_prediction_entries(guild_id):
-            return False, "Please close prediction from entries before paying out!"
+            if DB().accepting_prediction_entries(guild_id):
+                return False, "Please close prediction from entries before paying out!"
 
-        prediction_id = DB().get_ongoing_prediction_id(guild_id)
-        payout_message = await PayoutPredictionController._perform_payout(
-            prediction_id, option, client, guild_id
-        )
+            prediction_id = DB().get_ongoing_prediction_id(guild_id)
+            payout_message = await PayoutPredictionController._perform_payout(
+                prediction_id, option, client, guild_id
+            )
 
-        DB().complete_prediction(guild_id, option.value)
-        return True, payout_message
+            DB().complete_prediction(guild_id, option.value)
+            return True, payout_message
+        except:
+            return False, "Failed to payout prediction!"
+        finally:
+            PREDICTION_LOCK.release()
 
     @staticmethod
     async def payout_prediction(
@@ -184,29 +195,36 @@ class PayoutPredictionController:
         await reply_to_initial_message(prediction_id, client, refund_message)
 
         prediction_summary = DB().get_prediction_summary(prediction_id)
+
         if prediction_summary.set_nickname == True:
-            await PayoutPredictionController._reset_prediction_nicknames(
-                client, prediction_id, prediction_summary, guild_id
-            )
-            refund_message = refund_message + "\nNicknames reset."
+            guild = client.get_guild(guild_id)
+            acc = NicknamePredictionController.get_accumulator(prediction_id, guild)
+            acc.process_reset.start()
+            refund_message = refund_message + "\nNicknames reset in progress."
 
         return refund_message
 
     @staticmethod
     async def refund_prediction_for_guild(guild_id: int, client: Client):
-        if not DB().has_ongoing_prediction(guild_id):
-            return False, "No ongoing prediction!"
+        await PREDICTION_LOCK.acquire()
+        try:
+            if not DB().has_ongoing_prediction(guild_id):
+                return False, "No ongoing prediction!"
 
-        if DB().accepting_prediction_entries(guild_id):
-            return False, "Please close prediction from entries before refunding!"
+            if DB().accepting_prediction_entries(guild_id):
+                return False, "Please close prediction from entries before refunding!"
 
-        prediction_id = DB().get_ongoing_prediction_id(guild_id)
-        refund_message = await PayoutPredictionController._perform_refund(
-            prediction_id, client, guild_id
-        )
+            prediction_id = DB().get_ongoing_prediction_id(guild_id)
+            refund_message = await PayoutPredictionController._perform_refund(
+                prediction_id, client, guild_id
+            )
 
-        DB().complete_prediction(guild_id, PredictionOutcome.refund.value)
-        return True, refund_message
+            DB().complete_prediction(guild_id, PredictionOutcome.refund.value)
+            return True, refund_message
+        except:
+            return False, "Failed to refund prediction!"
+        finally:
+            PREDICTION_LOCK.release()
 
     @staticmethod
     async def refund_prediction(interaction: Interaction, client: Client):

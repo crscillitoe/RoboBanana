@@ -1,8 +1,11 @@
 from discord import Interaction, app_commands, Client
+from config import YAMLConfig as Config
 from util.sync_utils import SyncUtils
 import logging
 
 LOG = logging.getLogger(__name__)
+
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
 @app_commands.guild_only()
@@ -13,7 +16,7 @@ class SyncCommands(app_commands.Group, name="sync"):
         self.client = client
 
     @app_commands.command(name="sync")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def sync(self, interaction: Interaction) -> None:
         """Manually sync slash commands to guild"""
         guild = interaction.guild

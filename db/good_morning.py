@@ -145,7 +145,9 @@ def manual_increment_morning_points(value: int, session: sessionmaker):
         session (sessionmaker): Open DB session
     """
     with session() as sess:
-        sess.query(MorningPoints).update({
-            MorningPoints.weekly_count: MorningPoints.weekly_count + value,
-            MorningPoints.total_count: MorningPoints.total_count + value,
-        })
+        sess.query(MorningPoints).update(
+            {
+                MorningPoints.weekly_count: MorningPoints.weekly_count + value,
+                MorningPoints.total_count: MorningPoints.total_count + value,
+            }
+        )

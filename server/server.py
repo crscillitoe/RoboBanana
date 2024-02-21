@@ -13,6 +13,7 @@ from server.blueprints.sub import sub_blueprint
 from server.blueprints.tamagachi import tamagachi_blueprint
 from server.blueprints.overlay import overlay_blueprint
 from server.blueprints.connect_four import connect_four_blueprint
+from server.blueprints.overlay_message import overlay_message_blueprint
 from server.util.discord_client import DISCORD_CLIENT, start_discord_client
 from server.util.keep_alive import start_keepalive
 from server.blueprints.chat import publish_chat
@@ -50,6 +51,7 @@ app.register_blueprint(streamdeck_blueprint)
 app.register_blueprint(tamagachi_blueprint)
 app.register_blueprint(overlay_blueprint)
 app.register_blueprint(connect_four_blueprint)
+app.register_blueprint(overlay_message_blueprint)
 
 
 LOG = logging.getLogger(__name__)
@@ -88,14 +90,16 @@ def twitch_message_received(msg):
     to_send = {
         "content": msg["message"],
         "displayName": msg["display-name"],
-        "roles": [{
-            "colorR": color[0],
-            "colorG": color[1],
-            "colorB": color[2],
-            "icon": None,
-            "id": 1,
-            "name": "Twitch Chatter",
-        }],
+        "roles": [
+            {
+                "colorR": color[0],
+                "colorG": color[1],
+                "colorB": color[2],
+                "icon": None,
+                "id": 1,
+                "name": "Twitch Chatter",
+            }
+        ],
         "stickers": [],
         "emojis": [],
         "mentions": [],

@@ -27,6 +27,7 @@ Discord:
     NAOpenChannel:
   Predictions:
     Channel:
+    MaxNicknameQueue:
   PointsHistory:
     MaximumTransactions: 5
   Roles:

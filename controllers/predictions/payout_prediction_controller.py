@@ -3,6 +3,9 @@ from typing import Generator, Tuple
 
 from discord import Client, Interaction
 from controllers.point_history_controller import PointHistoryController
+from controllers.predictions.nickname_prediction_controller import (
+    NicknamePredictionController,
+)
 from controllers.predictions.update_prediction_controller import (
     UpdatePredictionController,
 )
@@ -125,10 +128,10 @@ class PayoutPredictionController:
         await reply_to_initial_message(prediction_id, client, payout_message)
 
         if prediction_summary.set_nickname == True:
-            await PayoutPredictionController._reset_prediction_nicknames(
-                client, prediction_id, prediction_summary, guild_id
-            )
-            payout_message = payout_message + "\nNicknames reset."
+            guild = client.get_guild(guild_id)
+            acc = NicknamePredictionController.get_accumulator(prediction_id, guild)
+            acc.process_reset.start()
+            payout_message = payout_message + "\nNickname reset in progress."
 
         return payout_message
 
@@ -192,11 +195,12 @@ class PayoutPredictionController:
         await reply_to_initial_message(prediction_id, client, refund_message)
 
         prediction_summary = DB().get_prediction_summary(prediction_id)
+
         if prediction_summary.set_nickname == True:
-            await PayoutPredictionController._reset_prediction_nicknames(
-                client, prediction_id, prediction_summary, guild_id
-            )
-            refund_message = refund_message + "\nNicknames reset."
+            guild = client.get_guild(guild_id)
+            acc = NicknamePredictionController.get_accumulator(prediction_id, guild)
+            acc.process_reset.start()
+            refund_message = refund_message + "\nNicknames reset in progress."
 
         return refund_message
 

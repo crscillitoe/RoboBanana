@@ -90,14 +90,16 @@ def twitch_message_received(msg):
     to_send = {
         "content": msg["message"],
         "displayName": msg["display-name"],
-        "roles": [{
-            "colorR": color[0],
-            "colorG": color[1],
-            "colorB": color[2],
-            "icon": None,
-            "id": 1,
-            "name": "Twitch Chatter",
-        }],
+        "roles": [
+            {
+                "colorR": color[0],
+                "colorG": color[1],
+                "colorB": color[2],
+                "icon": None,
+                "id": 1,
+                "name": "Twitch Chatter",
+            }
+        ],
         "stickers": [],
         "emojis": [],
         "mentions": [],

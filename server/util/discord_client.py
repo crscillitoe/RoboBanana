@@ -92,10 +92,12 @@ class ServerBot(Client):
             if member is None:
                 LOG.warn(f"Unable to find user {user_id=}")
                 continue
-            stream_content.append({
-                "mention_text": user_text,
-                "display_name": f"@{member.display_name}",
-            })
+            stream_content.append(
+                {
+                    "mention_text": user_text,
+                    "display_name": f"@{member.display_name}",
+                }
+            )
         return stream_content
 
     def find_roles(self, content: str):
@@ -106,10 +108,12 @@ class ServerBot(Client):
             if role is None:
                 LOG.warn(f"Unable to find role {role_id=}")
                 continue
-            stream_content.append({
-                "mention_text": role_text,
-                "display_name": f"@{role.name}",
-            })
+            stream_content.append(
+                {
+                    "mention_text": role_text,
+                    "display_name": f"@{role.name}",
+                }
+            )
         return stream_content
 
     def find_channels(self, content: str):

@@ -7,6 +7,7 @@ LOG = logging.getLogger(__name__)
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+
 @app_commands.guild_only()
 class SyncCommands(app_commands.Group, name="sync"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

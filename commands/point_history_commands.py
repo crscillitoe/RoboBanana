@@ -13,6 +13,7 @@ from db.models import PointsHistory
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+
 @app_commands.guild_only()
 class PointHistoryCommands(app_commands.Group, name="points_history"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

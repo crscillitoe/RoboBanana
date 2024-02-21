@@ -6,6 +6,7 @@ from db import DB
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+
 @app_commands.guild_only()
 class ReactionCommands(app_commands.Group, name="reactions"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

@@ -14,6 +14,7 @@ from util.discord_utils import DiscordUtils
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+
 @app_commands.guild_only()
 class TemproleCommands(app_commands.Group, name="temprole"):
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:

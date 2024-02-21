@@ -17,6 +17,7 @@ LOG = logging.getLogger(__name__)
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+
 class TextFields(Enum):
     title = "title"
     headerLeft = "headerLeft"

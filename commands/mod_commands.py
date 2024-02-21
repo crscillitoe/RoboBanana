@@ -37,6 +37,8 @@ POINTS_AUDIT_CHANNEL = Config.CONFIG["Discord"]["ChannelPoints"]["PointsAuditCha
 TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"]
 TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+TIER3_ROLE_12MO = Config.CONFIG["Discord"]["Subscribers"]["12MonthTier3Role"]
+CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 BOT_ROLE = Config.CONFIG["Discord"]["Roles"]["Bot"]
 GIFTED_TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]
 GIFTED_TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
@@ -284,7 +286,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="start_prediction")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(TIER3_ROLE_12MO, MOD_ROLE, CHAT_MOD_ROLE)
     @app_commands.describe(
         set_nickname="Whether to prepend users names with their choice"
     )
@@ -307,7 +309,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await PayoutPredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="close_prediction")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(TIER3_ROLE_12MO, MOD_ROLE, CHAT_MOD_ROLE)
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
         await ClosePredictionController.close_prediction(interaction.guild_id)

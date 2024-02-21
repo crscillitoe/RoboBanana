@@ -9,6 +9,7 @@ import logging
 PUBLISH_URL = f"{get_base_url()}/publish-vod"
 LOG = logging.getLogger(__name__)
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
 @app_commands.guild_only()
@@ -19,7 +20,7 @@ class VodCommands(app_commands.Group, name="vod"):
         self.client = client
 
     @app_commands.command(name="start")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     @app_commands.describe(user="Discord User")
     @app_commands.describe(riotid="riotid")
     @app_commands.describe(rank="rank")
@@ -47,7 +48,7 @@ class VodCommands(app_commands.Group, name="vod"):
         await interaction.response.send_message("VOD start event sent!", ephemeral=True)
 
     @app_commands.command(name="end")
-    @app_commands.checks.has_role("Mod")
+    @app_commands.checks.has_role(MOD_ROLE)
     async def complete(self, interaction: Interaction) -> None:
         """Start a VOD review for the given username"""
         Thread(

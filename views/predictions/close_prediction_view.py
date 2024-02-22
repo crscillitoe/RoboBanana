@@ -1,4 +1,4 @@
-from discord import ButtonStyle, Interaction, Client
+from discord import AllowedMentions, ButtonStyle, Interaction, Client
 from discord.ui import View, Button
 from controllers.predictions.close_prediction_controller import (
     ClosePredictionController,
@@ -15,6 +15,7 @@ STREAM_CHAT = Config.CONFIG["Discord"]["Channels"]["Stream"]
 PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
     "PendingRewardChannel"
 ]
+PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
 
 
 class ClosePredictionView(View):
@@ -55,6 +56,12 @@ class ClosePredictionView(View):
         ).fetch_message(prediction_message_id)
         await prediction_message.edit(embed=self.entry_embed, view=self.entry_view)
         await interaction.message.edit(content="", embed=self.parent, view=self)
+
+        audit_channel = interaction.guild.get_channel(PREDICTION_AUDIT_CHANNEL)
+        await audit_channel.send(
+            f"{interaction.user.mention} closed the current prediction.",
+            allowed_mentions=AllowedMentions.none(),
+        )
 
         payout_prediction_view = PayoutPredictionView(
             self.entry_view.option_one, self.entry_view.option_two, self.client

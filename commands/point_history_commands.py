@@ -28,7 +28,7 @@ class PointHistoryCommands(app_commands.Group, name="points_history"):
             interaction.user.id
         )
         embed = PointHistoryCommands.format_reply(user_history, interaction.user)
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="user")
     @app_commands.checks.has_role(MOD_ROLE)

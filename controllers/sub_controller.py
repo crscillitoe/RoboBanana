@@ -20,6 +20,7 @@ TWELVE_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"][
     "12MonthTier3Role"
 ]
 TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+EIGHTEEN_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 GIFTED_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
 NA_OPEN_INHOUSE_CHANNEL_ID = Config.CONFIG["Discord"]["Inhouses"]["NAOpenChannel"]
@@ -44,6 +45,7 @@ SubDurationReward = namedtuple("SubDurationReward", "duration role_id")
 
 SUB_DURATION_REWARDS = sorted(
     [
+        SubDurationReward(duration=18, role_id=EIGHTEEN_MONTH_TIER_3_ROLE_ID),
         SubDurationReward(duration=12, role_id=TWELVE_MONTH_TIER_3_ROLE_ID),
         SubDurationReward(duration=6, role_id=SIX_MONTH_TIER_3_ROLE_ID),
     ],

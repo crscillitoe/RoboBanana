@@ -20,7 +20,9 @@ TWELVE_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"][
     "12MonthTier3Role"
 ]
 TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
-EIGHTEEN_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
+EIGHTEEN_MONTH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"][
+    "18MonthTier3Role"
+]
 GIFTED_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_TIER_3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
 NA_OPEN_INHOUSE_CHANNEL_ID = Config.CONFIG["Discord"]["Inhouses"]["NAOpenChannel"]

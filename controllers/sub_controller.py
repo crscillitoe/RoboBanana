@@ -92,6 +92,8 @@ class SubController:
         success, message = await TempRoleController.set_role(
             message.author, duration_reward_role, "31 days"
         )
+
+
         if not success:
             fail_embed = Embed(
                 title="Failed to assign duration reward role",
@@ -99,6 +101,23 @@ class SubController:
                 color=Colour.red(),
             )
             return await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
+
+        # Always assign the 6 month role, this is to ensure there is a shared
+        # Role across all longer term T3 subs that we can use for embed permissions and
+        # Other things, such as pinging all longer term subscribers easily.
+        six_month = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
+        success, message = await TempRoleController.set_role(
+            message.author, six_month, "31 days"
+        )
+
+        if not success:
+            fail_embed = Embed(
+                title="Failed to assign duration reward role",
+                description=message,
+                color=Colour.red(),
+            )
+            return await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
+
         embed = Embed(
             title="Assigned Temprole",
             description=message,

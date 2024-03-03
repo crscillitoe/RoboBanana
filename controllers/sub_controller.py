@@ -95,7 +95,6 @@ class SubController:
             message.author, duration_reward_role, "31 days"
         )
 
-
         if not success:
             fail_embed = Embed(
                 title="Failed to assign duration reward role",

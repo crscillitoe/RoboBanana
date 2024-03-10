@@ -19,6 +19,7 @@ from util.discord_utils import DiscordUtils
 
 from views.rewards.redeem_tts_view import RedeemTTSView
 
+
 class VoiceAI(enum.Enum):
     Brad = "XPbvdPpvVOOvvOgaEkUH"
     Penflash = "wfj4mbx3FyRr0vexLOne"
@@ -51,9 +52,7 @@ class T3Commands(app_commands.Group, name="tier3"):
     @app_commands.command(name="tts")
     @app_commands.checks.has_any_role(T3_ROLE, GIFTED_T3_ROLE, TWITCH_T3_ROLE)
     @app_commands.describe(voice="Voice")
-    async def flag_vod(
-        self, interaction: Interaction, voice: VoiceAI
-    ) -> None:
+    async def flag_vod(self, interaction: Interaction, voice: VoiceAI) -> None:
         """Submit a phrase to be read out on stream by TTS system"""
 
         user_points = DB().get_point_balance(interaction.user.id)
@@ -61,7 +60,8 @@ class T3Commands(app_commands.Group, name="tier3"):
         required_points = 10000
         if user_points < required_points:
             return await interaction.response.send_message(
-                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}", ephemeral=True
+                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                ephemeral=True,
             )
 
         modal = RedeemTTSView(user_points, voice.value, required_points, self.client)

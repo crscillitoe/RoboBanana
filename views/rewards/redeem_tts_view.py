@@ -20,10 +20,9 @@ STREAM_CHAT_ID = Config.CONFIG["Discord"]["Channels"]["Stream"]
 
 LOG = logging.getLogger(__name__)
 
+
 class RedeemTTSView(Modal, title="Redeem a TTS Message"):
-    def __init__(
-        self, user_points: int, voice: str, cost: int, client: Client
-    ):
+    def __init__(self, user_points: int, voice: str, cost: int, client: Client):
         super().__init__(timeout=None)
 
         self.cost = cost
@@ -46,9 +45,7 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
         self.add_item(self.text)
 
     async def on_submit(self, interaction: Interaction):
-        success, balance = DB().withdraw_points(
-            interaction.user.id, self.cost
-        )
+        success, balance = DB().withdraw_points(interaction.user.id, self.cost)
         if not success:
             return await interaction.response.send_message(
                 "Failed to redeem reward - please try again.", ephemeral=True
@@ -66,16 +63,13 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
 
         Thread(
             target=publish_tts,
-            args=(
-                self.voice,
-                self.text.value,
-                interaction.user.display_name
-            ),
+            args=(self.voice, self.text.value, interaction.user.display_name),
         ).start()
 
         await interaction.response.send_message(
             f"TTS Redeemed! You have {balance} points remaining.", ephemeral=True
         )
+
 
 def publish_tts(voice_id: str, message: str, sender_nickname: str):
     payload = {

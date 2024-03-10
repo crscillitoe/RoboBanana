@@ -22,11 +22,19 @@ LOG = logging.getLogger(__name__)
 
 
 class RedeemTTSView(Modal, title="Redeem a TTS Message"):
-    def __init__(self, user_points: int, voice: str, cost: int, client: Client):
+    def __init__(
+        self,
+        user_points: int,
+        voice_id: str,
+        voice_name: str,
+        cost: int,
+        client: Client,
+    ):
         super().__init__(timeout=None)
 
         self.cost = cost
-        self.voice = voice
+        self.voice_id = voice_id
+        self.voice_name = voice_name
         self.client = client
         self.user_points = user_points
 
@@ -63,7 +71,12 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
 
         Thread(
             target=publish_tts,
-            args=(self.voice, self.text.value, interaction.user.display_name),
+            args=(
+                self.voice_id,
+                self.voice_name,
+                self.text.value,
+                interaction.user.display_name,
+            ),
         ).start()
 
         await interaction.response.send_message(
@@ -71,10 +84,11 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
         )
 
 
-def publish_tts(voice_id: str, message: str, sender_nickname: str):
+def publish_tts(voice_id: str, voice_name: str, message: str, sender_nickname: str):
     payload = {
         "type": "tts",
         "voice_id": voice_id,
+        "voice_name": voice_name,
         "message": message,
         "sender_nickname": sender_nickname,
     }

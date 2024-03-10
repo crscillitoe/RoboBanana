@@ -68,5 +68,7 @@ class T3Commands(app_commands.Group, name="tier3"):
                 ephemeral=True,
             )
 
-        modal = RedeemTTSView(user_points, voice.value, required_points, self.client)
+        modal = RedeemTTSView(
+            user_points, voice.value, voice.name, required_points, self.client
+        )
         await interaction.response.send_modal(modal)

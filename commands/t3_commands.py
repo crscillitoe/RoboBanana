@@ -15,7 +15,6 @@ import enum
 from db import DB
 from config import YAMLConfig as Config
 import logging
-from util.discord_utils import DiscordUtils
 
 from views.rewards.redeem_tts_view import RedeemTTSView
 
@@ -36,6 +35,7 @@ class VoiceAI(enum.Enum):
 T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
+T3_TTS_ENABLED = True
 
 
 @app_commands.guild_only()
@@ -58,6 +58,12 @@ class T3Commands(app_commands.Group, name="tier3"):
     @app_commands.describe(voice="Voice")
     async def flag_vod(self, interaction: Interaction, voice: VoiceAI) -> None:
         """Submit a phrase to be read out on stream by TTS system"""
+
+        if T3_TTS_ENABLED == False:
+            return await interaction.response.send_message(
+                f"The TTS redemption is currently disabled.",
+                ephemeral=True,
+            )
 
         user_points = DB().get_point_balance(interaction.user.id)
 

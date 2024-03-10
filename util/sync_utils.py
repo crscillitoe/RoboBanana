@@ -8,6 +8,7 @@ from commands.point_history_commands import PointHistoryCommands
 from commands.reaction_commands import ReactionCommands
 from commands.temprole_commands import TemproleCommands
 from commands.viewer_commands import ViewerCommands
+from commands.t3_commands import T3Commands
 from commands.vod_commands import VodCommands
 import logging
 
@@ -28,6 +29,7 @@ class SyncUtils:
         tree.add_command(TemproleCommands(tree, client), override=override)
         tree.add_command(PointHistoryCommands(tree, client), override=override)
         tree.add_command(ConnectFourCommands(tree, client), override=override)
+        tree.add_command(T3Commands(tree, client), override=override)
         overlay_commands = OverlayCommands(tree, client)
         # LOG.info("---------------------------------------------")
         # for command in overlay_commands.walk_commands():

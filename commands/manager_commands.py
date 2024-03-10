@@ -10,7 +10,6 @@ from discord import (
     User,
 )
 from discord.app_commands.errors import AppCommandError, CheckFailure
-from commands import t3_commands
 from config import YAMLConfig as Config
 import enum
 import logging
@@ -229,23 +228,3 @@ class ManagerCommands(app_commands.Group, name="manager"):
             )
 
         await interaction.response.send_message(returnString, ephemeral=True)
-
-    @app_commands.command(name="disable_tts_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
-    async def disable_tts_redemptions(self, interaction: Interaction) -> None:
-        """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
-        t3_commands.T3_TTS_ENABLED = False
-
-        await interaction.response.send_message(
-            "T3 TTS redemption disabled!", ephemeral=True
-        )
-
-    @app_commands.command(name="enable_tts_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
-    async def enable_tts_redemptions(self, interaction: Interaction) -> None:
-        """Enables the T3 TTS redemption"""
-        t3_commands.T3_TTS_ENABLED = True
-
-        await interaction.response.send_message(
-            "T3 TTS redemption enabled!", ephemeral=True
-        )

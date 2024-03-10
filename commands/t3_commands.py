@@ -26,6 +26,10 @@ class VoiceAI(enum.Enum):
     Dunkel = "fdbOZcQA0oWqnGGHHQWX"
     Lily = "9s2MtAKWAcnqeGs40PUF"
     Zendikar = "4buL9d7MYa8n9JHLaR33"
+    Gallomancer = "DNeMEYNTm7bcNbHypgqb"
+    Doran = "KUQLVcPb4XIWEYZ3k5KH"
+    Rare = "mkCayQGnpQ76siqz2ADL"
+    Bread = "IFuhhf9MMNJdHeGo5gmc"
 
 
 T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]

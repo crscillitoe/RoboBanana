@@ -9,6 +9,7 @@ from controllers.predictions.create_prediction_controller import (
 
 LOG = logging.getLogger(__name__)
 PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
+PREDICTION_THREAD_TARGET_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["Channel"]
 
 
 class CreatePredictionModal(Modal, title="Start new prediction"):
@@ -53,7 +54,10 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             )
             return
 
-        prediction_thread = await interaction.channel.create_thread(
+        thread_target_channel = interaction.guild.get_channel(
+            PREDICTION_THREAD_TARGET_CHANNEL
+        )
+        prediction_thread = await thread_target_channel.create_thread(
             name=self.description.value, type=ChannelType.public_thread
         )
         prediction_message = await prediction_thread.send(self.description.value)

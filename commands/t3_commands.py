@@ -31,6 +31,10 @@ class VoiceAI(enum.Enum):
     Doran = "KUQLVcPb4XIWEYZ3k5KH"
     Rare = "mkCayQGnpQ76siqz2ADL"
     Bread = "IFuhhf9MMNJdHeGo5gmc"
+    Dune = "Cy75Wpk4KAnCucPsDmQK"
+    Ulius = "iaQJDqRU1tDyF3NIhqsE"
+    noodabooda = "zZnQVN1B20Q4qqE0fg8e"
+    Woohoojin = "7ZWN6n7MF2qj1tgTiosb"
 
 
 T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]

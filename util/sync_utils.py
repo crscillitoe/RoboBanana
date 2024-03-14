@@ -5,6 +5,7 @@ from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.overlay_commands import OverlayCommands
 from commands.point_history_commands import PointHistoryCommands
+from commands.prediction_commands import PredictionCommands
 from commands.reaction_commands import ReactionCommands
 from commands.temprole_commands import TemproleCommands
 from commands.viewer_commands import ViewerCommands
@@ -22,6 +23,7 @@ class SyncUtils:
     ):
         tree.add_command(MemeCommands(tree, client), override=override)
         tree.add_command(ModCommands(tree, client), override=override)
+        tree.add_command(PredictionCommands(tree, client), override=override)
         tree.add_command(ViewerCommands(tree, client), override=override)
         tree.add_command(ManagerCommands(tree, client), override=override)
         tree.add_command(ReactionCommands(tree, client), override=override)

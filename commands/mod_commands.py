@@ -10,22 +10,14 @@ from discord import (
     TextChannel,
 )
 from discord.app_commands.errors import AppCommandError, CheckFailure
+from commands import t3_commands
 from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
 )
 from controllers.point_history_controller import PointHistoryController
-from controllers.predictions.close_prediction_controller import (
-    ClosePredictionController,
-)
-from controllers.predictions.payout_prediction_controller import (
-    PayoutPredictionController,
-)
 from db import DB, RaffleType
-from db.models import PredictionChoice, PredictionOutcome
 from models.transaction import Transaction
-from util.discord_utils import DiscordUtils
-from views.predictions.create_predictions_modal import CreatePredictionModal
 from views.raffle.new_raffle_modal import NewRaffleModal
 from views.rewards.add_reward_modal import AddRewardModal
 from controllers.raffle_controller import RaffleController
@@ -505,6 +497,40 @@ class ModCommands(app_commands.Group, name="mod"):
             return
 
         await interaction.response.send_message("Winner removed!")
+
+    @app_commands.command(name="disable_tts_redemptions")
+    @app_commands.checks.has_role(MOD_ROLE)
+    async def disable_tts_redemptions(self, interaction: Interaction) -> None:
+        """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
+        t3_commands.T3_TTS_ENABLED = False
+
+        await interaction.response.send_message(
+            "T3 TTS redemption disabled!", ephemeral=True
+        )
+
+    @app_commands.command(name="enable_tts_redemptions")
+    @app_commands.checks.has_role(MOD_ROLE)
+    async def enable_tts_redemptions(self, interaction: Interaction) -> None:
+        """Enables the T3 TTS redemption"""
+        t3_commands.T3_TTS_ENABLED = True
+
+        await interaction.response.send_message(
+            "T3 TTS redemption enabled!", ephemeral=True
+        )
+
+    @app_commands.command(name="set_tts_cost")
+    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.describe(
+        cost="The cost to use T3 TTS redemption. Set to 10k by default."
+    )
+    async def enable_tts_redemptions(self, interaction: Interaction, cost: int) -> None:
+        """Temporarily sets the cost of the T3 TTS redemption. Cost resets to 10k on bot restarts."""
+        t3_commands.T3_TTS_REQUIRED_POINTS = cost
+
+        await interaction.response.send_message(
+            f"T3 TTS cost set to {cost} points! Will reset to 10k points on bot restart.",
+            ephemeral=True,
+        )
 
 
 def publish_poll(title, option_one, option_two, option_three, option_four):

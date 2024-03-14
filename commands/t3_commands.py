@@ -36,6 +36,7 @@ T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
 T3_TTS_ENABLED = True
+T3_TTS_REQUIRED_POINTS = 10000
 
 
 @app_commands.guild_only()
@@ -67,14 +68,13 @@ class T3Commands(app_commands.Group, name="tier3"):
 
         user_points = DB().get_point_balance(interaction.user.id)
 
-        required_points = 10000
-        if user_points < required_points:
+        if user_points < T3_TTS_REQUIRED_POINTS:
             return await interaction.response.send_message(
-                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                f"You need {T3_TTS_REQUIRED_POINTS} points to redeem a TTS message. You currently have: {user_points}",
                 ephemeral=True,
             )
 
         modal = RedeemTTSView(
-            user_points, voice.value, voice.name, required_points, self.client
+            user_points, voice.value, voice.name, T3_TTS_REQUIRED_POINTS, self.client
         )
         await interaction.response.send_modal(modal)

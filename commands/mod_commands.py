@@ -518,6 +518,20 @@ class ModCommands(app_commands.Group, name="mod"):
             "T3 TTS redemption enabled!", ephemeral=True
         )
 
+    @app_commands.command(name="set_tts_cost")
+    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.describe(
+        cost="The cost to use T3 TTS redemption. Set to 10k by default."
+    )
+    async def enable_tts_redemptions(self, interaction: Interaction, cost: int) -> None:
+        """Temporarily sets the cost of the T3 TTS redemption. Cost resets to 10k on bot restarts."""
+        t3_commands.T3_TTS_REQUIRED_POINTS = cost
+
+        await interaction.response.send_message(
+            f"T3 TTS cost set to {cost} points! Will reset to 10k points on bot restart.",
+            ephemeral=True,
+        )
+
 
 def publish_poll(title, option_one, option_two, option_three, option_four):
     payload = {

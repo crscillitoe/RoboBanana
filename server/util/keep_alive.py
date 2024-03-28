@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from server.util.constants import EVENTS_CHANNEL
+from server.util.constants import EVENTS_CHANNEL, INHOUSE_TRACKER_CHANNEL
 from quart import Quart
 from server.blueprints.sse import sse
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -11,6 +11,7 @@ logging.getLogger("apscheduler.executors.default").setLevel(logging.ERROR)
 async def keep_alive(app: Quart):
     async with app.app_context():
         await sse.publish("\n\n", type="keepalive", channel=EVENTS_CHANNEL)
+        await sse.publish("\n\n", type="keepalive", channel=INHOUSE_TRACKER_CHANNEL)
 
 
 def start_keepalive(app: Quart):

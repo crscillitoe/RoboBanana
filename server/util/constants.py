@@ -4,6 +4,8 @@ SUBS_TYPE = "subs"
 SUBS_COUNT_TYPE = "subs-count"
 CHESS_TYPE = "chess"
 CONNECT_FOUR_TYPE = "connect-four"
+INHOUSE_DATA_TYPE = "inhouse-tracker-data"
+INHOUSE_TRACKER_CHANNEL = "inhouse-tracker-channel"
 
 # User responses to current active poll
 POLL_ANSWERS_TYPE = "poll-answers"

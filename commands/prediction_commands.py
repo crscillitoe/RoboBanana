@@ -24,6 +24,7 @@ PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel
 TIER3_ROLE_12MO = Config.CONFIG["Discord"]["Subscribers"]["12MonthTier3Role"]
 TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
+TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
@@ -36,7 +37,7 @@ class PredictionCommands(app_commands.Group, name="prediction"):
 
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE
+        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
     )
     @app_commands.describe(
         set_nickname="Whether to prepend users names with their choice"
@@ -61,7 +62,7 @@ class PredictionCommands(app_commands.Group, name="prediction"):
 
     @app_commands.command(name="close_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE
+        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
     )
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""

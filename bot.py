@@ -168,6 +168,7 @@ class RaffleBot(Client):
             return
 
         if reaction.count == CROWD_MUTE_THRESHOLD:
+            is_timed_out = reaction.message.author.is_timed_out()
             mute_reason = (
                 "been crowd muted for 10 minutes, likely due to asking:"
                 " "
@@ -177,9 +178,11 @@ class RaffleBot(Client):
                 " "
                 " 3. A question answered directly within our <#1035739990413545492>."
             )
-            await reaction.message.author.timeout(
-                timedelta(minutes=CROWD_MUTE_DURATION), reason=f"You have {mute_reason}"
-            )
+            if is_timed_out != True:
+                await reaction.message.author.timeout(
+                    timedelta(minutes=CROWD_MUTE_DURATION),
+                    reason=f"You have {mute_reason}",
+                )
             await reaction.message.reply(f"This user has {mute_reason}")
 
 

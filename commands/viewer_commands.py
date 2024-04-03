@@ -104,6 +104,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         self, interaction: Interaction, choice: PredictionChoice, points: int
     ):
         """Place bet on currently ongoing prediction"""
+        await interaction.response.defer(thinking=True, ephemeral=True)
         success = await PredictionEntryController.create_prediction_entry(
             points, choice, interaction, self.client
         )

@@ -532,6 +532,7 @@ class ModCommands(app_commands.Group, name="mod"):
             ephemeral=True,
         )
 
+
 def publish_poll(title, option_one, option_two, option_three, option_four):
     payload = {
         "title": title,

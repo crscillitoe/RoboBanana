@@ -44,11 +44,6 @@ class PredictionView(View):
         entry = DB().get_user_prediction_entry(
             interaction.guild_id, interaction.user.id
         )
-        if entry is not None:
-            await interaction.response.send_message(
-                "You have already entered the prediction!", ephemeral=True
-            )
-            return False
 
         if not DB().accepting_prediction_entries(interaction.guild_id):
             await interaction.response.send_message(

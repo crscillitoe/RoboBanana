@@ -111,10 +111,6 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         if not success:
             return
 
-        await interaction.response.send_message(
-            f"Vote cast with {points} points!", ephemeral=True
-        )
-
     @app_commands.command(name="good_morning")
     async def good_morning(self, interaction: Interaction):
         """Say good morning! Check #good-morning-faq for details"""

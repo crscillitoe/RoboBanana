@@ -27,24 +27,24 @@ class PredictionEntryController:
         client: Client,
     ) -> bool:
         if not DB().accepting_prediction_entries(interaction.guild_id):
-            return await interaction.followup.send(
+            return await interaction.response.send_message(
                 "Predictions are currently closed!", ephemeral=True
             )
 
         if channel_points <= 0:
-            return await interaction.followup.send(
+            return await interaction.response.send_message(
                 "You must wager a positive number of points!", ephemeral=True
             )
 
         point_balance = DB().get_point_balance(interaction.user.id)
         if channel_points > point_balance:
-            return await interaction.followup.send(
+            return await interaction.response.send_message(
                 f"You can only wager up to {point_balance} points", ephemeral=True
             )
 
         result, new_balance = DB().withdraw_points(interaction.user.id, channel_points)
         if not result:
-            return await interaction.followup.send(
+            return await interaction.response.send_message(
                 "Unable to cast vote - please try again!", ephemeral=True
             )
 
@@ -62,7 +62,7 @@ class PredictionEntryController:
             interaction.guild_id, interaction.user.id, channel_points, guess.value
         )
         if not success:
-            await interaction.followup.send("Unable to cast vote", ephemeral=True)
+            await interaction.response.send_message("Unable to cast vote", ephemeral=True)
             return False
 
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
@@ -112,7 +112,7 @@ class PredictionEntryController:
             f" {chosen_option}"
         )
 
-        await interaction.followup.send(
+        await interaction.response.send_message(
             f"Vote cast with {channel_points} points!{append}", ephemeral=True
         )
 

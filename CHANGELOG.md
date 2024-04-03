@@ -1,5 +1,6 @@
 # RoboBanana Changelog
 ## 2024.03.04
+This update requires `/sync sync` to be run once
 ### Additions and Fixes:
 - Added command to temporarily disable T3 TTS command (stays disabled until bot restart or enable command) (#129)
 - Added command to temporarily set the price of the T3 TTS command (resets to 10k on bot restart) (#130)

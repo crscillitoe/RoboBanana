@@ -133,7 +133,7 @@ class PayoutPredictionController:
             losing = prediction_summary.option_one_points
 
         winning_odds = calculate_multiplier(winning, losing)
-        payout_message = f"Payout complete! {total_points} points distributed to {paid_option}. (Odds of {winning_odds}x)"
+        payout_message = f"Payout complete! {total_points} points distributed to {paid_option}. (Multiplier of {winning_odds}x)"
         await reply_to_initial_message(prediction_id, client, payout_message)
 
         if prediction_summary.set_nickname == True:

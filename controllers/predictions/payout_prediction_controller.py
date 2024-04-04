@@ -1,4 +1,5 @@
 from asyncio import Lock
+import sys
 from typing import Generator, Tuple
 
 from discord import Client, Interaction
@@ -122,9 +123,17 @@ class PayoutPredictionController:
             else prediction_summary.option_two
         )
 
-        payout_message = (
-            f"Payout complete! {total_points} points distributed to {paid_option}."
-        )
+        winning = 0
+        losing = 0
+        if option == PredictionChoice.left:
+            winning = prediction_summary.option_one_points
+            losing = prediction_summary.option_two_points
+        else:
+            winning = prediction_summary.option_two_points
+            losing = prediction_summary.option_one_points
+
+        winning_odds = calculate_multiplier(winning, losing)
+        payout_message = f"Payout complete! {total_points} points distributed to {paid_option}. (Odds of {winning_odds}x)"
         await reply_to_initial_message(prediction_id, client, payout_message)
 
         if prediction_summary.set_nickname == True:
@@ -329,3 +338,10 @@ async def reply_to_initial_message(prediction_id: int, client: Client, message: 
         prediction_message_id
     )
     await prediction_message.reply(message)
+
+
+def calculate_multiplier(winning_points: int, losing_points: int):
+    if winning_points == 0:
+        return 1
+    multiplier = 1 + (losing_points / winning_points)
+    return round((multiplier + sys.float_info.epsilon) * 100) / 100

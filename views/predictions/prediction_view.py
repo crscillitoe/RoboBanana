@@ -41,10 +41,6 @@ class PredictionView(View):
         self.add_item(self.vote_two_button)
 
     async def user_eligible(self, interaction: Interaction) -> bool:
-        entry = DB().get_user_prediction_entry(
-            interaction.guild_id, interaction.user.id
-        )
-
         if not DB().accepting_prediction_entries(interaction.guild_id):
             await interaction.response.send_message(
                 "Prediction has been closed!", ephemeral=True

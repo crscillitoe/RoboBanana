@@ -1,27 +1,19 @@
-from discord import (
-    Colour,
-    Embed,
-    Role,
-    app_commands,
-    Interaction,
-    Client,
-    User,
-    utils
-)
+from discord import Colour, Embed, Role, app_commands, Interaction, Client, User, utils
 from config import YAMLConfig as Config
 
 from controllers.temprole_controller import TempRoleController
 from util.discord_utils import DiscordUtils
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
-#these are hardcoded until raze to radiant is over, or config file changes are allowed
-#for testing on own setup, these need to be changed to your appropriate IDs
-#CM_ROLE should be 1044433022537191515 when committing and refers to the Community Manager role
-#TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# CM_ROLE should be 1044433022537191515 when committing and refers to the Community Manager role
+# TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
 CM_ROLE = 1044433022537191515
 TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
 COLOR_FAIL = Colour.red()
 COLOR_SUCCESS = Colour.green()
+
 
 @app_commands.guild_only()
 class TemproleCommands(app_commands.Group, name="temprole"):
@@ -44,7 +36,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_failed_message = f"Tried to assign {role.name} to {user.mention} \n System returned message: \n"
 
         if not authorised:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -52,7 +46,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.set_role(user, role, duration)
 
         if not success:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -64,7 +60,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
-        await DiscordUtils.audit(interaction,message,audit_channel,COLOR_SUCCESS)
+        await DiscordUtils.audit(interaction, message, audit_channel, COLOR_SUCCESS)
 
     @app_commands.command(name="extend")
     @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
@@ -80,7 +76,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_failed_message = f"Tried to extend {role.name} on {user.mention} \n System returned message: \n"
 
         if not authorised:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -88,7 +86,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.extend_role(user, role, duration)
 
         if not success:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -100,7 +100,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
-        await DiscordUtils.audit(interaction,message,audit_channel,COLOR_SUCCESS)
+        await DiscordUtils.audit(interaction, message, audit_channel, COLOR_SUCCESS)
 
     @app_commands.command(name="remove")
     @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
@@ -113,7 +113,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_failed_message = f"Tried to remove {role.name} from {user.mention} \n System returned message: \n"
 
         if not authorised:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -121,7 +123,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.remove_role(user, role)
 
         if not success:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -131,10 +135,12 @@ class TemproleCommands(app_commands.Group, name="temprole"):
             description=message,
             color=COLOR_FAIL,
         )
-        #Removal of role will always be red on user end
+        # Removal of role will always be red on user end
         await DiscordUtils.reply(interaction, embed=embed)
 
-        await DiscordUtils.audit(interaction,message,audit_channel,COLOR_FAIL) #Removal of role will always be red on user facing side
+        await DiscordUtils.audit(
+            interaction, message, audit_channel, COLOR_FAIL
+        )  # Removal of role will always be red on user facing side
 
     @app_commands.command(name="status")
     @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
@@ -158,7 +164,9 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_failed_message = f"Tried to view duration of {role.name} on {user.mention} \n System returned message: \n"
 
         if not authorised:
-            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )

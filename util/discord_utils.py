@@ -3,6 +3,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+
 class DiscordUtils:
     @staticmethod
     async def reply(interaction: Interaction, *args, **kwargs):
@@ -24,6 +25,4 @@ class DiscordUtils:
             color=color,
         )
 
-        await channel.send (
-                embed=embed
-        )
+        await channel.send(embed=embed)

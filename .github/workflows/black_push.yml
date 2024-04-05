@@ -1,0 +1,19 @@
+name: Lint Push
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: psf/black@stable
+        with:
+          options: "--preview"
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Apply Black formatting changes

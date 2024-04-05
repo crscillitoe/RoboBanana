@@ -2,6 +2,7 @@ from __future__ import annotations
 import asyncio
 from datetime import timedelta
 import logging
+import time
 import requests
 import discord
 from discord import (
@@ -13,6 +14,7 @@ from discord import (
     Message,
     Reaction,
 )
+from commands import sync_commands
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.overlay_commands import OverlayCommands
@@ -74,6 +76,7 @@ class RaffleBot(Client):
 
     async def on_ready(self):
         logging.info(f"Logged in as {self.user} (ID: {self.user.id})")
+        sync_commands.UPTIME_START_TIME = time.time()
         # guild = discord.Object(id=GUILD_ID)
         # tree.clear_commands(guild=guild)
         # tree.copy_global_to(guild=guild)

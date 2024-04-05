@@ -1,3 +1,6 @@
+import datetime
+import subprocess
+import time
 from discord import Interaction, app_commands, Client
 from config import YAMLConfig as Config
 from util.sync_utils import SyncUtils
@@ -5,7 +8,11 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+UPTIME_START_TIME = 0.0
+
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
+TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 
 
 @app_commands.guild_only()
@@ -25,3 +32,28 @@ class SyncCommands(app_commands.Group, name="sync"):
         self.tree.copy_global_to(guild=guild)
         await self.tree.sync(guild=guild)
         await interaction.response.send_message("Commands synced", ephemeral=True)
+
+    @app_commands.command(name="info")
+    @app_commands.checks.has_any_role(MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY)
+    async def info(self, interaction: Interaction) -> None:
+        """Display info on current bot uptime and commit hash"""
+        uptime = str(
+            datetime.timedelta(seconds=int(round(time.time() - UPTIME_START_TIME)))
+        )
+
+        hash = "Unavailable"
+        try:
+            hash = get_git_revision_short_hash()
+        except Exception as e:
+            LOG.error(f"Unable to get commit hash: {e}")
+
+        message = f"Current bot uptime: {uptime} | Current bot commit hash: {hash}"
+        await interaction.response.send_message(message, ephemeral=True)
+
+
+def get_git_revision_short_hash() -> str:
+    return (
+        subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+        .decode("ascii")
+        .strip()
+    )

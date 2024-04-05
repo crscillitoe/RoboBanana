@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.04.05
+### Additions and Fixes:
+- Added error handling to all slash domains (previously only t3, mod and manager had it) ([#139](https://github.com/crscillitoe/RoboBanana/pull/139))
+  
 ## 2024.04.04
 ### Additions and Fixes:
 - Added display of odds to prediction payout message ([a151b75](https://github.com/crscillitoe/RoboBanana/commit/a151b753cac61c3c4a152c24105e4bfc2cdab2bb))

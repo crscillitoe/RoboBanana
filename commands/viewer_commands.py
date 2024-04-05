@@ -11,6 +11,7 @@ from threading import Thread
 import requests
 import logging
 from config import YAMLConfig as Config
+from discord.app_commands.errors import AppCommandError, CheckFailure
 from util.server_utils import get_base_url
 
 from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
@@ -26,6 +27,14 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="redeem")
     async def redeem_reward(self, interaction: Interaction):

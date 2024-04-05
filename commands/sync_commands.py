@@ -5,6 +5,7 @@ from discord import Interaction, app_commands, Client
 from config import YAMLConfig as Config
 from util.sync_utils import SyncUtils
 import logging
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 LOG = logging.getLogger(__name__)
 
@@ -21,6 +22,14 @@ class SyncCommands(app_commands.Group, name="sync"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="sync")
     @app_commands.checks.has_role(MOD_ROLE)

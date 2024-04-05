@@ -1,7 +1,9 @@
+import logging
 from discord import app_commands, Interaction, Client, User
 from discord.ext.commands import Cog
 from config import YAMLConfig as Config
 from db import DB
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
@@ -13,6 +15,14 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="toggle_emoji")
     @app_commands.checks.has_role(MOD_ROLE)

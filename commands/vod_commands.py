@@ -5,6 +5,7 @@ from config import YAMLConfig as Config
 from util.server_utils import get_base_url
 import requests
 import logging
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 PUBLISH_URL = f"{get_base_url()}/publish-vod"
 LOG = logging.getLogger(__name__)
@@ -18,6 +19,14 @@ class VodCommands(app_commands.Group, name="vod"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="start")
     @app_commands.checks.has_role(MOD_ROLE)

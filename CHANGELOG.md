@@ -4,6 +4,7 @@
 - Added error handling to all slash domains (previously only t3, mod and manager had it) ([#139](https://github.com/crscillitoe/RoboBanana/pull/139))
   
 ## 2024.04.04
+This update requires `/sync sync` to be run once
 ### Additions and Fixes:
 - Added display of odds to prediction payout message ([a151b75](https://github.com/crscillitoe/RoboBanana/commit/a151b753cac61c3c4a152c24105e4bfc2cdab2bb))
 - Added funcitonality for CMs to assign temproles, with a limit on which roles are allowed to be set with temproles in general ([#137](https://github.com/crscillitoe/RoboBanana/pull/137)) (By [lorinvzyl](https://github.com/lorinvzyl))

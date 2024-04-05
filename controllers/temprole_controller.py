@@ -227,6 +227,8 @@ class TempRoleController:
         guild = role.guild
 
         top_role_accepted = guild.get_role(TOP_ROLE_ACCEPTED)
+        if top_role_accepted is None:
+            return False, f"Top accepted role could not be initialised"
 
         if top_role_accepted > role:
             return True, f"{role} can be used"

@@ -1,4 +1,4 @@
-from discord import ChannelType, Client
+from discord import AllowedMentions, ChannelType, Client
 from controllers.predictions.create_prediction_controller import (
     CreatePredictionController,
 )
@@ -16,6 +16,7 @@ from server.models.quick_prediction import QuickPrediction
 
 GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
 PREDICTION_CHANNEL_ID = Config.CONFIG["Discord"]["Predictions"]["Channel"]
+PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
 
 LOG = logging.getLogger(__name__)
 
@@ -47,10 +48,21 @@ class PredictionController:
             False,
             client,
         )
+
+        audit_channel = client.get_channel(PREDICTION_AUDIT_CHANNEL)
+        await audit_channel.send(
+            f"*Streamdeck* started prediction `{prediction_details.description}` here: {prediction_thread.mention} (In {prediction_thread.parent.mention}).",
+            allowed_mentions=AllowedMentions.none(),
+        )
         return True
 
-    async def close_prediction():
+    async def close_prediction(client: Client):
         LOG.info("Closing ongoing prediction")
+        audit_channel = client.get_channel(PREDICTION_AUDIT_CHANNEL)
+        await audit_channel.send(
+            f"*Streamdeck* closed the current prediction.",
+            allowed_mentions=AllowedMentions.none(),
+        )
         await ClosePredictionController.close_prediction(GUILD_ID)
 
     async def payout_prediction(option: PredictionChoice, client: Client):

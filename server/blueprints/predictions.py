@@ -62,7 +62,7 @@ async def quick_prediction():
 @prediction_blueprint.route("/close-prediction", methods=["GET"])
 @token_required
 async def close_prediction():
-    await PredictionController.close_prediction()
+    await PredictionController.close_prediction(DISCORD_CLIENT)
     return ("OK", 200)
 
 

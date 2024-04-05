@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Interaction, Role, User
+from discord import Client, Interaction, Role, User, utils
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
@@ -14,6 +14,9 @@ from views.pagination.pagination_embed_view import PaginationEmbed, PaginationVi
 EXPIRATION_CHECK_CADENCE = Config.CONFIG["Discord"]["TempRoles"][
     "ExpirationCheckCadenceMinutes"
 ]
+#this is hardcoded until raze to radiant is over, or config file changes are allowed
+#TOP_ROLE_ACCEPTED should be 1077265826886979634 when committing and refers to the ▬▬▬▬▬Subscriptions▬▬▬▬▬ role
+TOP_ROLE_ACCEPTED = 1077265826886979634
 
 LOG = logging.getLogger(__name__)
 
@@ -35,7 +38,7 @@ class TempRoleController:
         except:
             return (
                 False,
-                "Unable to assing role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)",
+                "Unable to assign role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)",
             )
         guild = role.guild
 
@@ -213,6 +216,24 @@ class TempRoleController:
                 description += f"{member.mention} expires <t:{unixtime:.0f}:f>\n"
 
         return title, description, num_pages
+
+    @staticmethod
+    async def authorise_role_usage(
+        role: Role
+    ):
+        """
+        Checks whether role is allowed to be used based on top role accepted (does not include top role)
+        """
+        guild = role.guild
+
+        top_role_accepted = guild.get_role(TOP_ROLE_ACCEPTED)
+        if top_role_accepted is None:
+            return False, f"Top accepted role could not be initialised"
+
+        if top_role_accepted > role:
+            return True, f"{role} can be used"
+        else:
+            return False, f"{role} is higher than the top role accepted"
 
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):

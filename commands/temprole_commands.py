@@ -6,14 +6,21 @@ from discord import (
     Interaction,
     Client,
     User,
+    utils
 )
 from config import YAMLConfig as Config
 
 from controllers.temprole_controller import TempRoleController
 from util.discord_utils import DiscordUtils
 
-MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+#these are hardcoded until raze to radiant is over, or config file changes are allowed
+#for testing on own setup, these need to be changed to your appropriate IDs
+#CM_ROLE should be 1044433022537191515 when committing and refers to the Community Manager role
+#TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
+CM_ROLE = 1044433022537191515
+TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
 
 @app_commands.guild_only()
 class TemproleCommands(app_commands.Group, name="temprole"):
@@ -23,7 +30,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self.client = client
 
     @app_commands.command(name="set")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
     @app_commands.describe(user="Discord User to assign role to")
     @app_commands.describe(role="Discord Role to assign role to")
     @app_commands.describe(duration="Duration of temprole")
@@ -31,6 +38,14 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        authorised, message = await TempRoleController.authorise_role_usage(role)
+        color = Colour.green()
+
+        if not authorised:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
         success, message = await TempRoleController.set_role(user, role, duration)
 
         if not success:
@@ -41,12 +56,15 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         embed = Embed(
             title="Assigned Temprole",
             description=message,
-            color=Colour.green(),
+            color=color,
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
+        await DiscordUtils.audit(interaction,message,audit_channel,color)
+
     @app_commands.command(name="extend")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
     @app_commands.describe(user="Discord User to extend role for")
     @app_commands.describe(role="Discord Role to extend duration for")
     @app_commands.describe(duration="Duration to add to temprole")
@@ -54,6 +72,14 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        authorised, message = await TempRoleController.authorise_role_usage(role)
+        color = Colour.green()
+
+        if not authorised:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
         success, message = await TempRoleController.extend_role(user, role, duration)
 
         if not success:
@@ -64,16 +90,27 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         embed = Embed(
             title="Assigned Temprole",
             description=message,
-            color=Colour.green(),
+            color=color,
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
+        await DiscordUtils.audit(interaction,message,audit_channel,color)
+
     @app_commands.command(name="remove")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
     @app_commands.describe(user="Discord User to remove role from")
     @app_commands.describe(role="Discord Role to remove")
     async def remove_role(self, interaction: Interaction, user: User, role: Role):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        authorised, message = await TempRoleController.authorise_role_usage(role)
+        color = Colour.red()
+
+        if not authorised:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
         success, message = await TempRoleController.remove_role(user, role)
 
         if not success:
@@ -84,12 +121,15 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         embed = Embed(
             title="Removed Temprole",
             description=message,
-            color=Colour.red(),
+            color=color,
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
+        await DiscordUtils.audit(interaction,message,audit_channel,color)
+
     @app_commands.command(name="status")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
     @app_commands.describe(user="Discord User to check roles for")
     async def status(self, interaction: Interaction, user: User):
         """See expirations for all temproles currently assigned to given user"""
@@ -101,8 +141,15 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         await TempRoleController.view_temproles(interaction.user, interaction)
 
     @app_commands.command(name="view")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)
     @app_commands.describe(role="Discord Role to check users for")
     async def view(self, interaction: Interaction, role: Role):
         """See expirations for all users that currently have a given role"""
+        authorised, message = await TempRoleController.authorise_role_usage(role)
+
+        if not authorised:
+            return await DiscordUtils.reply(
+                interaction, content=message, ephemeral=True
+            )
+
         await TempRoleController.view_users(role, interaction)

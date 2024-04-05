@@ -8,6 +8,7 @@ from discord import (
 )
 import logging
 from enum import Enum
+from discord.app_commands.errors import AppCommandError, CheckFailure
 from config import YAMLConfig as Config
 
 from controllers.overlay_controller import OverlayController
@@ -74,6 +75,14 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="set_text")
     @app_commands.checks.has_role(MOD_ROLE)

@@ -5,6 +5,7 @@ from discord import Client, Interaction, User, app_commands
 import requests
 from config import YAMLConfig as Config
 from controllers.connect_four.connect_four_controller import ConnectFourController
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 from controllers.connect_four.game_orchestrator import GameOrchestrator
 from util.server_utils import get_base_url
@@ -25,6 +26,14 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         self.enabled = False
         self.orchestrator = GameOrchestrator()
         self.controller = ConnectFourController()
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command()
     @app_commands.checks.has_role(MOD_ROLE)

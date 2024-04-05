@@ -1,5 +1,7 @@
+import logging
 from discord import app_commands, Interaction, Client
 import random
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 from config import YAMLConfig as Config
 
@@ -38,6 +40,14 @@ class MemeCommands(app_commands.Group, name="meme"):
         self.tree = tree
         self.client = client
         self.chain = {}
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @staticmethod
     def check_hooj(interaction: Interaction) -> bool:

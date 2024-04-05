@@ -12,6 +12,7 @@ from controllers.predictions.payout_prediction_controller import (
     PayoutPredictionController,
 )
 from db import DB
+from discord.app_commands.errors import AppCommandError, CheckFailure
 from db.models import PredictionChoice, PredictionOutcome
 from views.predictions.create_predictions_modal import CreatePredictionModal
 from config import YAMLConfig as Config
@@ -34,6 +35,14 @@ class PredictionCommands(app_commands.Group, name="prediction"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_any_role(

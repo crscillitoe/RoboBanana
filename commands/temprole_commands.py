@@ -1,8 +1,10 @@
+import logging
 from discord import Colour, Embed, Role, app_commands, Interaction, Client, User, utils
 from config import YAMLConfig as Config
 
 from controllers.temprole_controller import TempRoleController
 from util.discord_utils import DiscordUtils
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 # these are hardcoded until raze to radiant is over, or config file changes are allowed
@@ -21,6 +23,14 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="set")
     @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE)

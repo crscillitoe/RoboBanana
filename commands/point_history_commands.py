@@ -1,3 +1,4 @@
+import logging
 import time
 from discord import (
     Embed,
@@ -7,6 +8,7 @@ from discord import (
     User,
 )
 from config import YAMLConfig as Config
+from discord.app_commands.errors import AppCommandError, CheckFailure
 
 from controllers.point_history_controller import PointHistoryController
 from db.models import PointsHistory
@@ -20,6 +22,14 @@ class PointHistoryCommands(app_commands.Group, name="points_history"):
         super().__init__()
         self.tree = tree
         self.client = client
+
+    async def on_error(self, interaction: Interaction, error: AppCommandError):
+        if isinstance(error, CheckFailure):
+            return await interaction.response.send_message(
+                "Failed to perform command - please verify permissions.", ephemeral=True
+            )
+        logging.error(error)
+        return await super().on_error(interaction, error)
 
     @app_commands.command(name="mine")
     async def mine(self, interaction: Interaction):

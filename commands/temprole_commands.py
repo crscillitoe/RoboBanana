@@ -13,7 +13,6 @@ from config import YAMLConfig as Config
 from controllers.temprole_controller import TempRoleController
 from util.discord_utils import DiscordUtils
 
-
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 #these are hardcoded until raze to radiant is over, or config file changes are allowed
 #for testing on own setup, these need to be changed to your appropriate IDs

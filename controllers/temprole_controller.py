@@ -38,7 +38,7 @@ class TempRoleController:
         except:
             return (
                 False,
-                "Unable to assing role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)",
+                "Unable to assign role - please provide a time indicator for duration (e.g. s for seconds, m for minutes)",
             )
         guild = role.guild
 

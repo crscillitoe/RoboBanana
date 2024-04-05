@@ -20,6 +20,7 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 #TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
 CM_ROLE = 1044433022537191515
 TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
+COLOR_FAIL = Colour.red()
 
 @app_commands.guild_only()
 class TemproleCommands(app_commands.Group, name="temprole"):
@@ -37,10 +38,13 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         color = Colour.green()
+        audit_failed_message = f"Tried to assign {role.name} to {user.mention} \n System returned message: \n"
 
         if not authorised:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -48,6 +52,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.set_role(user, role, duration)
 
         if not success:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -59,7 +64,6 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
-        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         await DiscordUtils.audit(interaction,message,audit_channel,color)
 
     @app_commands.command(name="extend")
@@ -71,10 +75,13 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         self, interaction: Interaction, user: User, role: Role, duration: str
     ):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         color = Colour.green()
+        audit_failed_message = f"Tried to extend {role.name} on {user.mention} \n System returned message: \n"
 
         if not authorised:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -82,6 +89,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.extend_role(user, role, duration)
 
         if not success:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -93,7 +101,6 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
-        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         await DiscordUtils.audit(interaction,message,audit_channel,color)
 
     @app_commands.command(name="remove")
@@ -102,10 +109,13 @@ class TemproleCommands(app_commands.Group, name="temprole"):
     @app_commands.describe(role="Discord Role to remove")
     async def remove_role(self, interaction: Interaction, user: User, role: Role):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         color = Colour.red()
+        audit_failed_message = f"Tried to remove {role.name} from {user.mention} \n System returned message: \n"
 
         if not authorised:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -113,6 +123,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         success, message = await TempRoleController.remove_role(user, role)
 
         if not success:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )
@@ -124,7 +135,6 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         )
         await DiscordUtils.reply(interaction, embed=embed)
 
-        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         await DiscordUtils.audit(interaction,message,audit_channel,color)
 
     @app_commands.command(name="status")
@@ -144,9 +154,12 @@ class TemproleCommands(app_commands.Group, name="temprole"):
     @app_commands.describe(role="Discord Role to check users for")
     async def view(self, interaction: Interaction, role: Role):
         """See expirations for all users that currently have a given role"""
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
+        audit_failed_message = f"Tried to view duration of {role.name} on {user.mention} \n System returned message: \n"
 
         if not authorised:
+            await DiscordUtils.audit(interaction, audit_failed_message + message, audit_channel, COLOR_FAIL)
             return await DiscordUtils.reply(
                 interaction, content=message, ephemeral=True
             )

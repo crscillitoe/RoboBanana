@@ -13,6 +13,8 @@ from util.command_utils import CommandUtils
 LOG = logging.getLogger(__name__)
 
 MARKER_CHANNEL = 1099680985467064360  # Change to config option once RtR is done - 1099680985467064360 on live
+MARKER_LOCKOUT_SECONDS = 180
+MARKER_SUBTRACT_SECONDS = 60
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
@@ -63,9 +65,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 f"Stream is not live", ephemeral=True
             )
             return
-        if (time.time() - 30) < self.LAST_MARKER_TIME:
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within 30 seconds", ephemeral=True
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
             )
             return
         self.LAST_MARKER_TIME = time.time()
@@ -99,9 +102,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 f"Stream is not live", ephemeral=True
             )
             return
-        if (time.time() - 30) < self.LAST_MARKER_TIME:
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within 30 seconds", ephemeral=True
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
             )
             return
         self.LAST_MARKER_TIME = time.time()
@@ -135,9 +139,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 f"Stream is not live", ephemeral=True
             )
             return
-        if (time.time() - 30) < self.LAST_MARKER_TIME:
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within 30 seconds", ephemeral=True
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
             )
             return
         self.LAST_MARKER_TIME = time.time()
@@ -171,9 +176,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 f"Stream is not live", ephemeral=True
             )
             return
-        if (time.time() - 30) < self.LAST_MARKER_TIME:
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within 30 seconds", ephemeral=True
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
             )
             return
         self.LAST_MARKER_TIME = time.time()
@@ -207,9 +213,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 f"Stream is not live", ephemeral=True
             )
             return
-        if (time.time() - 30) < self.LAST_MARKER_TIME:
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within 30 seconds", ephemeral=True
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
             )
             return
         self.LAST_MARKER_TIME = time.time()
@@ -257,7 +264,10 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     def get_timestamp(self) -> str:
         elapsed = datetime.now() - self.STREAM_START_TIME
-        nice = str(timedelta(seconds=int(elapsed.seconds)))
+        nice = str(
+            timedelta(seconds=int(elapsed.seconds))
+            - timedelta(seconds=MARKER_SUBTRACT_SECONDS)
+        )
         return nice
 
     async def post_to_markers(self, guild: Guild, text: str):

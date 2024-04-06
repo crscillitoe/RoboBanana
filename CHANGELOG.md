@@ -1,5 +1,6 @@
 # RoboBanana Changelog
 ## 2024.04.05
+This update requires `/sync sync` to be run once
 ### Additions and Fixes:
 - Added error handling to all slash domains (previously only t3, mod and manager had it) ([#139](https://github.com/crscillitoe/RoboBanana/pull/139))
 - Added auditing of streamdeck prediction endpoints ([#140](https://github.com/crscillitoe/RoboBanana/pull/140))

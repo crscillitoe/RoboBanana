@@ -12,7 +12,6 @@ from util.command_utils import CommandUtils
 
 LOG = logging.getLogger(__name__)
 
-STREAM_START_TIME = 0.0
 MARKER_CHANNEL = 1099680985467064360  # Change to config option once RtR is done - 1099680985467064360 on live
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
@@ -24,9 +23,11 @@ TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 
 @app_commands.guild_only()
 class MarkerCommands(app_commands.Group, name="marker"):
+    STREAM_START_TIME = 0
     CURRENT_THREAD = 0
     THREAD_MESSAGE = 0
     THREAD_TEXT = "0:00 Start"
+    LAST_MARKER_TIME = time.time()
 
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:
         super().__init__()
@@ -57,6 +58,18 @@ class MarkerCommands(app_commands.Group, name="marker"):
         rank: CommandUtils.Ranks,
     ) -> None:
         """Sets a VOD Review marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live", ephemeral=True
+            )
+            return
+        if (time.time() - 30) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within 30 seconds", ephemeral=True
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
         formatted_time = self.get_timestamp()
         formatted_full = (
             f"{formatted_time} VOD Review - {agent.value} {map.value} {rank.value}"
@@ -81,6 +94,18 @@ class MarkerCommands(app_commands.Group, name="marker"):
         rank: CommandUtils.Ranks,
     ) -> None:
         """Sets a Woohoojin LIVE marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live", ephemeral=True
+            )
+            return
+        if (time.time() - 30) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within 30 seconds", ephemeral=True
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
         formatted_time = self.get_timestamp()
         formatted_full = (
             f"{formatted_time} Woohoojin LIVE - {agent.value} {map.value} {rank.value}"
@@ -105,6 +130,18 @@ class MarkerCommands(app_commands.Group, name="marker"):
         rank: CommandUtils.Ranks,
     ) -> None:
         """Sets a Live Viewer Ranked marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live", ephemeral=True
+            )
+            return
+        if (time.time() - 30) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within 30 seconds", ephemeral=True
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
         formatted_time = self.get_timestamp()
         formatted_full = f"{formatted_time} Live Viewer Ranked - {agent.value} {map.value} {rank.value}"
         await self.post_to_markers(interaction.guild, formatted_full)
@@ -129,6 +166,18 @@ class MarkerCommands(app_commands.Group, name="marker"):
         game_nr: int,
     ) -> None:
         """Sets a Team VS Team marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live", ephemeral=True
+            )
+            return
+        if (time.time() - 30) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within 30 seconds", ephemeral=True
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
         formatted_time = self.get_timestamp()
         formatted_full = (
             f"{formatted_time} {team_left} vs {team_right} {map.value} Game {game_nr}"
@@ -153,6 +202,18 @@ class MarkerCommands(app_commands.Group, name="marker"):
         map: CommandUtils.Maps,
     ) -> None:
         """Sets a Inhouse Block marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live", ephemeral=True
+            )
+            return
+        if (time.time() - 30) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within 30 seconds", ephemeral=True
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
         formatted_time = self.get_timestamp()
         formatted_full = f"{formatted_time} {type} Block - {agent.value} {map.value}"
         await self.post_to_markers(interaction.guild, formatted_full)

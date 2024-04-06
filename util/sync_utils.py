@@ -1,6 +1,7 @@
 from discord import app_commands, Client
 from commands.connect_four import ConnectFourCommands
 from commands.manager_commands import ManagerCommands
+from commands.marker_commands import MarkerCommands
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.overlay_commands import OverlayCommands
@@ -32,6 +33,7 @@ class SyncUtils:
         tree.add_command(PointHistoryCommands(tree, client), override=override)
         tree.add_command(ConnectFourCommands(tree, client), override=override)
         tree.add_command(T3Commands(tree, client), override=override)
+        tree.add_command(MarkerCommands(tree, client), override=override)
         overlay_commands = OverlayCommands(tree, client)
         # LOG.info("---------------------------------------------")
         # for command in overlay_commands.walk_commands():

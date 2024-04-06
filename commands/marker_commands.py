@@ -19,6 +19,10 @@ CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 TIER3_ROLE_12MO = Config.CONFIG["Discord"]["Subscribers"]["12MonthTier3Role"]
 TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 @app_commands.guild_only()
@@ -45,7 +49,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="vod_review")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -81,7 +85,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="woohoojin_live")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -117,7 +121,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="live_viewer_ranked")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -151,7 +155,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="team_vs_team")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
     )
     @app_commands.describe(team_left="Left Team")
     @app_commands.describe(team_right="Right Team")
@@ -189,7 +193,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="inhouse_block")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
     )
     @app_commands.describe(type="Viewer Rank")
     @app_commands.describe(agent="Agent")

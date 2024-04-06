@@ -17,6 +17,10 @@ from views.overlay.configure_modal import OverlayConfigurationModal
 LOG = logging.getLogger(__name__)
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 class TextFields(Enum):
@@ -85,7 +89,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="set_text")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(field="Overlay field to set")
     @app_commands.describe(text="Text to set field to")
     @app_commands.describe(color="Color of text")
@@ -101,7 +105,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         )
 
     @app_commands.command(name="set_media")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(field="Overlay field to set")
     @app_commands.describe(media_url="URL of image to send to frontend")
     @app_commands.describe(media="Attachment image to send to frontend")
@@ -124,7 +128,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         )
 
     @app_commands.command(name="set_list")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(field="Overlay field to set")
     @app_commands.describe(csv="Comma separated string of values")
     async def set_list(self, interaction: Interaction, field: ListFields, csv: str):
@@ -136,7 +140,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         )
 
     @app_commands.command(name="clear_field")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(field="Overlay field to set")
     async def clear_field(self, interaction: Interaction, field: AllFields):
         """Clear value of field off overlay"""
@@ -146,7 +150,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         )
 
     @app_commands.command(name="timer")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(duration="Duration in seconds of timer")
     @app_commands.describe(color="Color of text")
     async def timer(self, interaction: Interaction, duration: int, color: str = None):
@@ -157,7 +161,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         await interaction.response.send_message("Overlay update sent!", ephemeral=True)
 
     @app_commands.command(name="toggle")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(switch="On/Off")
     async def toggle_overlay(self, interaction: Interaction, switch: Switch):
         """Toggle overlay to be on or off"""
@@ -171,7 +175,7 @@ class OverlayCommands(app_commands.Group, name="overlay"):
         )
 
     @app_commands.command(name="configure")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def configure(self, interaction: Interaction):
         """Paste JSON configuration for overlay directly into modal"""
         await interaction.response.send_modal(OverlayConfigurationModal())

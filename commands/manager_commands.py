@@ -28,6 +28,10 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 CM_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 VOD_TEAM_ROLE = Config.CONFIG["Discord"]["VODReview"]["ReviewerRole"]
 USER_ID_PATTERN = re.compile(r"(<@([0-9]+)>)")
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 LOG = logging.getLogger(__name__)
 
@@ -60,7 +64,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="flag_vod")
-    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
     @app_commands.describe(vod_type="VOD Type (Approved/Rejected)")
     @app_commands.describe(duration="Duration to add to temprole")
     async def flag_vod(
@@ -78,7 +82,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
             )
 
     @app_commands.command(name="add_balance")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Community Manager to add VOD Review credit for")
     @app_commands.describe(duration="Amount of time to add to user's balance")
     async def add_balance(self, interaction: Interaction, user: User, duration: str):
@@ -86,20 +90,20 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await VODReviewBankController.add_balance(user, duration, interaction)
 
     @app_commands.command(name="balance")
-    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
     async def balance(self, interaction: Interaction) -> None:
         """Check Gifted T3 credit"""
         await VODReviewBankController.get_balance(interaction.user, interaction)
 
     @app_commands.command(name="balance_for")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Community Manager to check VOD Review credit for")
     async def balance_for(self, interaction: Interaction, user: User) -> None:
         """Check Gifted T3 credit for specified user"""
         await VODReviewBankController.get_balance(user, interaction)
 
     @app_commands.command(name="redeem")
-    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
     @app_commands.describe(user="Community Manager to check VOD Review credit for")
     @app_commands.describe(
         duration="Duration to redeem T3 for (if balance is sufficient)"
@@ -194,7 +198,7 @@ class ManagerCommands(app_commands.Group, name="manager"):
         await VODReviewBankController.increment_balance(interaction.user, interaction)
 
     @app_commands.command(name="get_review_rounds")
-    @app_commands.checks.has_any_role(MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, CM_ROLE, VOD_TEAM_ROLE)
     @app_commands.describe(total_rounds="total number of rounds in VOD")
     async def get_review_rounds(
         self, interaction: Interaction, total_rounds: int

@@ -14,6 +14,10 @@ from controllers.point_history_controller import PointHistoryController
 from db.models import PointsHistory
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 @app_commands.guild_only()
@@ -41,7 +45,7 @@ class PointHistoryCommands(app_commands.Group, name="points_history"):
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command(name="user")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="User to check point transaction history for")
     async def user(self, interaction: Interaction, user: User):
         """View point transaction history for specified user"""

@@ -7,6 +7,10 @@ from config import YAMLConfig as Config
 
 HOOJ_DISCORD_ID = 82969926125490176
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 def get_processed_string(string):
@@ -54,7 +58,7 @@ class MemeCommands(app_commands.Group, name="meme"):
         return interaction.user.id == HOOJ_DISCORD_ID
 
     @app_commands.command(name="generate_chain")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def generate_chain(self, interaction: Interaction) -> None:
         if not self.check_hooj(interaction):
             return
@@ -87,7 +91,7 @@ class MemeCommands(app_commands.Group, name="meme"):
         await interaction.response.send_message("Chain generated!", ephemeral=True)
 
     @app_commands.command(name="hooj_message")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(length="length of message")
     async def hooj_message(self, interaction: Interaction, length: int) -> None:
         if not self.check_hooj(interaction):

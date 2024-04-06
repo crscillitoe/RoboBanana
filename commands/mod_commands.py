@@ -40,6 +40,10 @@ BOT_ROLE = Config.CONFIG["Discord"]["Roles"]["Bot"]
 GIFTED_TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]
 GIFTED_TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
@@ -86,7 +90,7 @@ class ModCommands(app_commands.Group, name="mod"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="reset_vod_submission")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Discord User to reset vod submission for")
     async def reset_vod_submission(self, interaction: Interaction, user: User) -> None:
         """Allows the given userID to submit a VOD."""
@@ -94,7 +98,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Success!", ephemeral=True)
 
     @app_commands.command(name="chess")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(open_value="1 for yes 0 for no")
     @app_commands.describe(na_score="-1 for no change")
     @app_commands.describe(eu_score="-1 for no change")
@@ -114,7 +118,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Chess event sent!", ephemeral=True)
 
     @app_commands.command(name="timer")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(time="Time in seconds")
     async def timer(
         self,
@@ -134,7 +138,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Timer created!", ephemeral=True)
 
     @app_commands.command(name="poll")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(title="title")
     @app_commands.describe(option_one="option_one")
     @app_commands.describe(option_two="option_two")
@@ -164,7 +168,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Poll created!", ephemeral=True)
 
     @app_commands.command(name="gift")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(num_winners="num_winners")
     @app_commands.describe(oprah="Oprah")
     async def gift(self, interaction: Interaction, oprah: str, num_winners: int):
@@ -181,6 +185,7 @@ class ModCommands(app_commands.Group, name="mod"):
                     GIFTED_TIER1_ROLE,
                     GIFTED_TIER2_ROLE,
                     MOD_ROLE,
+                    HIDDEN_MOD_ROLE,
                 ]:
                     can_win = False
 
@@ -194,7 +199,7 @@ class ModCommands(app_commands.Group, name="mod"):
             )
 
     @app_commands.command(name="start")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(raffle_type="Raffle Type (default: normal)")
     async def start(
         self, interaction: Interaction, raffle_type: RaffleType = RaffleType.normal
@@ -211,7 +216,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="end")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def end(
         self,
         interaction: Interaction,
@@ -238,14 +243,14 @@ class ModCommands(app_commands.Group, name="mod"):
         DB().close_raffle(interaction.guild.id, end_time=datetime.now())
 
     @app_commands.command(name="add_reward")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def add_reward(self, interaction: Interaction):
         """Creates new channel reward for redemption"""
         modal = AddRewardModal()
         await interaction.response.send_modal(modal)
 
     @app_commands.command(name="remove_reward")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(name="Name of reward to remove")
     async def remove_reward(self, interaction: Interaction, name: str):
         """Removes channel reward for redemption"""
@@ -255,7 +260,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="allow_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def allow_redemptions(self, interaction: Interaction):
         """Allow rewards to be redeemed"""
         DB().allow_redemptions()
@@ -264,7 +269,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="pause_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def pause_redemptions(self, interaction: Interaction):
         """Pause rewards from being redeemed"""
         DB().pause_redemptions()
@@ -273,7 +278,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="check_redemption_status")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def check_redemption_status(self, interaction: Interaction):
         """Check whether or not rewards are eligible to be redeemed"""
         status = DB().check_redemption_status()
@@ -283,7 +288,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="set_chat_mode")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(mode="Chat Mode")
     @app_commands.describe(channel="Channel")
     async def set_chat_mode(
@@ -424,7 +429,7 @@ class ModCommands(app_commands.Group, name="mod"):
             PERMISSION_LOCK.release()
 
     @app_commands.command(name="give_points")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="User ID to award points")
     @app_commands.describe(points="Number of points to award")
     @app_commands.describe(reason="Reason for awarding points")
@@ -457,7 +462,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="good_morning_count")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def good_morning_count(self, interaction: Interaction):
         """Check how many users have said good morning today!"""
         count = DB().get_today_morning_count()
@@ -466,26 +471,26 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="good_morning_reward")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def good_morning_reward(self, interaction: Interaction):
         """Reward users who have met the 'Good Morning' threshold"""
         await GoodMorningController.reward_users(interaction)
 
     @app_commands.command(name="good_morning_reset")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def good_morning_reset(self, interaction: Interaction):
         """Reset all weekly good morning points to 0"""
         await GoodMorningController.reset_all_morning_points(interaction)
 
     @app_commands.command(name="good_morning_increment")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(points="Number of points to award")
     async def good_morning_increment(self, interaction: Interaction, points: int):
         """Give all users a fixed number of good morning points"""
         await GoodMorningController.good_morning_increment(points, interaction)
 
     @app_commands.command(name="remove_raffle_winner")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="User ID to remove win from")
     async def remove_raffle_winner(self, interaction: Interaction, user: User):
         one_week_ago = datetime.now().date() - timedelta(days=6)
@@ -499,7 +504,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Winner removed!")
 
     @app_commands.command(name="disable_tts_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def disable_tts_redemptions(self, interaction: Interaction) -> None:
         """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
         t3_commands.T3_TTS_ENABLED = False
@@ -509,7 +514,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="enable_tts_redemptions")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def enable_tts_redemptions(self, interaction: Interaction) -> None:
         """Enables the T3 TTS redemption"""
         t3_commands.T3_TTS_ENABLED = True
@@ -519,7 +524,7 @@ class ModCommands(app_commands.Group, name="mod"):
         )
 
     @app_commands.command(name="set_tts_cost")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(
         cost="The cost to use T3 TTS redemption. Set to 10k by default."
     )

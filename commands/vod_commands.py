@@ -11,6 +11,10 @@ PUBLISH_URL = f"{get_base_url()}/publish-vod"
 LOG = logging.getLogger(__name__)
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 @app_commands.guild_only()
@@ -29,7 +33,7 @@ class VodCommands(app_commands.Group, name="vod"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="start")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Discord User")
     @app_commands.describe(riotid="riotid")
     @app_commands.describe(rank="rank")
@@ -57,7 +61,7 @@ class VodCommands(app_commands.Group, name="vod"):
         await interaction.response.send_message("VOD start event sent!", ephemeral=True)
 
     @app_commands.command(name="end")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def complete(self, interaction: Interaction) -> None:
         """Start a VOD review for the given username"""
         Thread(

@@ -14,6 +14,10 @@ UPTIME_START_TIME = 0.0
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 @app_commands.guild_only()
@@ -32,7 +36,7 @@ class SyncCommands(app_commands.Group, name="sync"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="sync")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def sync(self, interaction: Interaction) -> None:
         """Manually sync slash commands to guild"""
         guild = interaction.guild
@@ -43,7 +47,9 @@ class SyncCommands(app_commands.Group, name="sync"):
         await interaction.response.send_message("Commands synced", ephemeral=True)
 
     @app_commands.command(name="info")
-    @app_commands.checks.has_any_role(MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY)
+    @app_commands.checks.has_any_role(
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+    )
     async def info(self, interaction: Interaction) -> None:
         """Display info on current bot uptime and commit hash"""
         uptime = str(

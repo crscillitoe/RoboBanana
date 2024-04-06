@@ -13,6 +13,10 @@ from util.server_utils import get_base_url
 PUBLISH_CONNECT_FOUR_URL = f"{get_base_url()}/publish-connect-four"
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +40,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         return await super().on_error(interaction, error)
 
     @app_commands.command()
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def enable(self, interaction: Interaction):
         """Allow users to challenge each other to Connect Four"""
         self.enabled = True
@@ -47,7 +51,7 @@ class ConnectFourCommands(app_commands.Group, name="connect_four"):
         await interaction.response.send_message("Connect Four Enabled!", ephemeral=True)
 
     @app_commands.command()
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def disable(self, interaction: Interaction):
         """Prevent users from challenging each other to Connect Four"""
         self.enabled = False

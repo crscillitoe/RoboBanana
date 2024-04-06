@@ -27,6 +27,10 @@ TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
 TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+HIDDEN_MOD_ROLE = 1040337265790042172
 
 
 @app_commands.guild_only()
@@ -46,7 +50,12 @@ class PredictionCommands(app_commands.Group, name="prediction"):
 
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
     )
     @app_commands.describe(
         set_nickname="Whether to prepend users names with their choice"
@@ -64,14 +73,19 @@ class PredictionCommands(app_commands.Group, name="prediction"):
         )
 
     @app_commands.command(name="refund_prediction")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def refund_prediction(self, interaction: Interaction):
         """Refund ongoing prediction, giving users back the points they wagered"""
         await PayoutPredictionController.refund_prediction(interaction, self.client)
 
     @app_commands.command(name="close_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
     )
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
@@ -93,7 +107,7 @@ class PredictionCommands(app_commands.Group, name="prediction"):
         await interaction.response.send_message("Prediction closed!", ephemeral=True)
 
     @app_commands.command(name="payout_prediction")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(option="Option to payout")
     async def payout_prediction(
         self, interaction: Interaction, option: PredictionChoice
@@ -104,7 +118,7 @@ class PredictionCommands(app_commands.Group, name="prediction"):
         )
 
     @app_commands.command(name="redo_payout")
-    @app_commands.checks.has_role(MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(option="Option to payout")
     async def redo_payout(self, interaction: Interaction, option: PredictionOutcome):
         """Redo the last prediction's payout"""

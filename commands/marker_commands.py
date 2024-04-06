@@ -49,7 +49,12 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="vod_review")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -85,7 +90,12 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="woohoojin_live")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -121,7 +131,12 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="live_viewer_ranked")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
     )
     @app_commands.describe(agent="Agent")
     @app_commands.describe(map="Map")
@@ -155,7 +170,12 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="team_vs_team")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
     )
     @app_commands.describe(team_left="Left Team")
     @app_commands.describe(team_right="Right Team")
@@ -193,7 +213,12 @@ class MarkerCommands(app_commands.Group, name="marker"):
 
     @app_commands.command(name="inhouse_block")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
     )
     @app_commands.describe(type="Viewer Rank")
     @app_commands.describe(agent="Agent")

@@ -47,7 +47,9 @@ class SyncCommands(app_commands.Group, name="sync"):
         await interaction.response.send_message("Commands synced", ephemeral=True)
 
     @app_commands.command(name="info")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY)
+    @app_commands.checks.has_any_role(
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+    )
     async def info(self, interaction: Interaction) -> None:
         """Display info on current bot uptime and commit hash"""
         uptime = str(

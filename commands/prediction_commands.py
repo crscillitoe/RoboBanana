@@ -50,7 +50,12 @@ class PredictionCommands(app_commands.Group, name="prediction"):
 
     @app_commands.command(name="start_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
     )
     @app_commands.describe(
         set_nickname="Whether to prepend users names with their choice"
@@ -75,7 +80,12 @@ class PredictionCommands(app_commands.Group, name="prediction"):
 
     @app_commands.command(name="close_prediction")
     @app_commands.checks.has_any_role(
-        TIER3_ROLE_12MO, TIER3_ROLE_18MO, MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
     )
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""

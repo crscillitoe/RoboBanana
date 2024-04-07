@@ -30,8 +30,8 @@ HIDDEN_MOD_ROLE = 1040337265790042172
 @app_commands.guild_only()
 class MarkerCommands(app_commands.Group, name="marker"):
     STREAM_START_TIME = 0
-    CURRENT_THREAD = 0
-    THREAD_MESSAGE = 0
+    CURRENT_THREAD_ID = 0
+    THREAD_MESSAGE_ID = 0
     THREAD_TEXT = "0:00 Start"
     LAST_MARKER_TIME = time.time()
 
@@ -324,7 +324,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
             self.check_online.start()
             self.check_offline.stop()
             self.STREAM_START_TIME = 0.0
-            self.CURRENT_THREAD = 0
+            self.CURRENT_THREAD_ID = 0
 
     def get_timestamp(self) -> str:
         elapsed = datetime.now() - self.STREAM_START_TIME
@@ -335,13 +335,19 @@ class MarkerCommands(app_commands.Group, name="marker"):
         return nice
 
     async def post_to_markers(self, guild: Guild, text: str):
-        if self.CURRENT_THREAD == 0:
+        if self.CURRENT_THREAD_ID == 0:
             start = self.STREAM_START_TIME.strftime("Stream %m/%d/%Y, %H:%M:%S")
-            self.CURRENT_THREAD = await guild.get_channel(MARKER_CHANNEL).create_thread(
-                name=start, type=ChannelType.public_thread
-            )
-            msg = await self.CURRENT_THREAD.send("0:00 Start")
-            self.THREAD_MESSAGE = msg
+            self.CURRENT_THREAD_ID = (
+                await guild.get_channel(MARKER_CHANNEL).create_thread(
+                    name=start, type=ChannelType.public_thread
+                )
+            ).id
+            msg = await guild.get_thread(self.CURRENT_THREAD_ID).send("0:00 Start")
+            self.THREAD_MESSAGE_ID = msg.id
 
         self.THREAD_TEXT = self.THREAD_TEXT + "\n" + text
-        await self.THREAD_MESSAGE.edit(content=self.THREAD_TEXT)
+        await (
+            await guild.get_thread(self.CURRENT_THREAD_ID).fetch_message(
+                self.THREAD_MESSAGE_ID
+            )
+        ).edit(content=self.THREAD_TEXT)

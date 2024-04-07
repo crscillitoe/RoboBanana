@@ -89,6 +89,11 @@ class PredictionCommands(app_commands.Group, name="prediction"):
     )
     async def close_prediction(self, interaction: Interaction):
         """CLOSE PREDICTION"""
+        if not DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "There is no ongoing prediction!", ephemeral=True
+            )
+
         await ClosePredictionController.close_prediction(interaction.guild_id)
         prediction_id = DB().get_ongoing_prediction_id(interaction.guild_id)
         prediction_message_id = DB().get_prediction_message_id(prediction_id)

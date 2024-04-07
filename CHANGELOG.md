@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.04.07
+### Additions and Fixes:
+- Added more guards to stop double prediction opening ([bbe1815](https://github.com/crscillitoe/RoboBanana/commit/bbe1815bf1599a0c662658cdcbc417732055028b))
+- Now re-fetching Marker Thread and Message because of object timeouts, making Markers not re-create threads for single streams without bot restarts ([e8a2454](https://github.com/crscillitoe/RoboBanana/commit/e8a24545c1fd7b75ae693eee78d07348a6f61105))
 ## 2024.04.06
 ### Additions and Fixes:
 - Added "Mod Role (Hidden)" to allowed roles for mod commands ([#142](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))

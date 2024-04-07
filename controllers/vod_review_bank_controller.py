@@ -57,10 +57,16 @@ class VODReviewBankController:
 
         role = interaction.guild.get_role(GIFTED_T3_ROLE_ID)
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
-        audit_failed_message = f"Tried to extend {role.name} for {user.mention} \n\n**System message:** "
+        audit_failed_message = (
+            f"Tried to extend {role.name} for {user.mention} \n\n**System message:** "
+        )
         if role is None:
             await DiscordUtils.audit(
-                interaction, user, audit_failed_message + message, audit_channel, COLOR_FAIL
+                interaction,
+                user,
+                audit_failed_message + message,
+                audit_channel,
+                COLOR_FAIL,
             )
             return await interaction.response.send_message(
                 f"Cannot find Gifted T3 role - check bot config!", ephemeral=True
@@ -73,7 +79,11 @@ class VODReviewBankController:
                 color=Color.red(),
             )
             await DiscordUtils.audit(
-                interaction, user, audit_failed_message + message, audit_channel, COLOR_FAIL
+                interaction,
+                user,
+                audit_failed_message + message,
+                audit_channel,
+                COLOR_FAIL,
             )
             return await DiscordUtils.reply(interaction, embed=embed)
         embed = Embed(
@@ -82,7 +92,7 @@ class VODReviewBankController:
             color=Color.green(),
         )
         await DiscordUtils.audit(
-                interaction, user, message, audit_channel, COLOR_SUCCESS
+            interaction, user, message, audit_channel, COLOR_SUCCESS
         )
         await DiscordUtils.reply(interaction, embed=embed)
 

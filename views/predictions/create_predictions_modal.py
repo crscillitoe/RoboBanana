@@ -6,6 +6,7 @@ from config import YAMLConfig as Config
 from controllers.predictions.create_prediction_controller import (
     CreatePredictionController,
 )
+from db import DB
 
 LOG = logging.getLogger(__name__)
 PREDICTION_AUDIT_CHANNEL = Config.CONFIG["Discord"]["Predictions"]["AuditChannel"]
@@ -53,6 +54,10 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
                 "Invalid prediction duration.", ephemeral=True
             )
             return
+        if DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "There is already an ongoing prediction!", ephemeral=True
+            )
 
         thread_target_channel = interaction.guild.get_channel(
             PREDICTION_THREAD_TARGET_CHANNEL

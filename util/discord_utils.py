@@ -1,4 +1,4 @@
-from discord import Interaction, TextChannel, Embed
+from discord import Interaction, TextChannel, Embed, User
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -13,15 +13,24 @@ class DiscordUtils:
         return await interaction.response.send_message(*args, **kwargs)
 
     @staticmethod
-    async def audit(interaction: Interaction, message, channel: TextChannel, color):
+    async def audit(
+        interaction: Interaction, user: User, message, channel: TextChannel, color
+    ):
         """Audit interaction in specified audit channel"""
         if channel is None:
             return LOG.error("Audit channel is not initialised")
+
         user = interaction.user.name
         userID = interaction.user.id
+        command = f"**Command:** /{interaction.command.parent.name} {interaction.command.name}"
+
+        message = message.replace(f"{user.mention}", f"{user.name} (ID {user.id})")
+        if "System message" not in message:
+            message = message + "\n"
+
         embed = Embed(
             title=f"{user} (ID {userID})",
-            description=message,
+            description=f"{message}\n{command}",
             color=color,
         )
 

@@ -35,6 +35,7 @@ services:
       MYSQL_USER: woohoojinuser
       MYSQL_PASSWORD: testpassword
       MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: devRootPassword
     expose:
       - '3306'
     volumes:

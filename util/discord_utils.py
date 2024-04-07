@@ -1,4 +1,4 @@
-from discord import Interaction, TextChannel, Embed
+from discord import Interaction, TextChannel, Embed, User
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -19,10 +19,12 @@ class DiscordUtils:
             return LOG.error("Audit channel is not initialised")
         user = interaction.user.name
         userID = interaction.user.id
+        command = {interaction.command.parent.name} {interaction.command.name}
         embed = Embed(
             title=f"{user} (ID {userID})",
-            description=message,
+            description=f"**Used** {command}",
             color=color,
         )
+        embed.add_field(name="Description", value=message, inline=False)
 
         await channel.send(embed=embed)

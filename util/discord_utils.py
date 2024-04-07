@@ -20,7 +20,7 @@ class DiscordUtils:
         message = message.replace(f"{user.mention}",f"{user.name} (ID {user.id})")
         user = interaction.user.name
         userID = interaction.user.id
-        command = {interaction.command.parent.name} {interaction.command.name}
+        command = f"/{interaction.command.parent.name} {interaction.command.name}"
         embed = Embed(
             title=f"{user} (ID {userID})",
             description=f"**Used** {command}",

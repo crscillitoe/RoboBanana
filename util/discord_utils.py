@@ -17,13 +17,18 @@ class DiscordUtils:
         """Audit interaction in specified audit channel"""
         if channel is None:
             return LOG.error("Audit channel is not initialised")
-        message = message.replace(f"{user.mention}",f"{user.name} (ID {user.id})")
+
         user = interaction.user.name
         userID = interaction.user.id
         command = f"**Command:** /{interaction.command.parent.name} {interaction.command.name}"
+
+        message = message.replace(f"{user.mention}",f"{user.name} (ID {user.id})")
+        if "System message" not in message:
+            message = message + "\n"
+
         embed = Embed(
             title=f"{user} (ID {userID})",
-            description=f"{message}\n\n{command}",
+            description=f"{message}\n{command}",
             color=color,
         )
 

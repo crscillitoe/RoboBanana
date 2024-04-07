@@ -45,7 +45,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
-        audit_failed_message = f"Tried to assign {role.name} to {user.mention} \n System message: \n"
+        audit_failed_message = f"Tried to assign {role.name} to {user.mention} \n\n**System message:** "
 
         if not authorised:
             await DiscordUtils.audit(
@@ -85,7 +85,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
-        audit_failed_message = f"Tried to extend {role.name} on {user.mention} \n System message: \n"
+        audit_failed_message = f"Tried to extend {role.name} on {user.mention} \n\n**System message:** "
 
         if not authorised:
             await DiscordUtils.audit(
@@ -122,7 +122,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         """Assign temprole to a user for a specified time (10m, 30d, 3w, etc)"""
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
-        audit_failed_message = f"Tried to remove {role.name} from {user.mention} \n System message: \n"
+        audit_failed_message = f"Tried to remove {role.name} from {user.mention} \n\n**System message:** "
 
         if not authorised:
             await DiscordUtils.audit(
@@ -173,7 +173,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         """See expirations for all users that currently have a given role"""
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
-        audit_failed_message = f"Tried to view duration of {role.name} on {user.mention} \n System message: \n"
+        audit_failed_message = f"Tried to view duration of {role.name} on {user.mention} \n\n**System message:** "
 
         if not authorised:
             await DiscordUtils.audit(

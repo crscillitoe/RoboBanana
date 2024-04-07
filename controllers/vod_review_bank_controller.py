@@ -57,7 +57,7 @@ class VODReviewBankController:
 
         role = interaction.guild.get_role(GIFTED_T3_ROLE_ID)
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
-        audit_failed_message = f"Tried to extend {role.name} for {user.mention} \n System message: \n"
+        audit_failed_message = f"Tried to extend {role.name} for {user.mention} \n\n**System message:** "
         if role is None:
             await DiscordUtils.audit(
                 interaction, user, audit_failed_message + message, audit_channel, COLOR_FAIL

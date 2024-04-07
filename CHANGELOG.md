@@ -2,6 +2,7 @@
 ## 2024.04.06
 ### Additions and Fixes:
 - Added "Mod Role (Hidden)" to allowed roles for mod commands ([#142](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))
+- Add Wildcard marker type, increase lockout to 180 seconds, create markers with a minute offset so they are in the past (4058e0, )
 ## 2024.04.05
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

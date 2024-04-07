@@ -71,7 +71,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
         """Sets a VOD Review marker"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
-                f"Stream is not live", ephemeral=True
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
             )
             return
         if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
@@ -113,7 +114,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
         """Sets a Woohoojin LIVE marker"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
-                f"Stream is not live", ephemeral=True
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
             )
             return
         if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
@@ -155,7 +157,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
         """Sets a Live Viewer Ranked marker"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
-                f"Stream is not live", ephemeral=True
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
             )
             return
         if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
@@ -197,7 +200,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
         """Sets a Team VS Team marker"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
-                f"Stream is not live", ephemeral=True
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
             )
             return
         if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
@@ -239,7 +243,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
         """Sets a Inhouse Block marker"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
-                f"Stream is not live", ephemeral=True
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
             )
             return
         if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
@@ -256,6 +261,36 @@ class MarkerCommands(app_commands.Group, name="marker"):
         await interaction.response.send_message(
             f"Inhouse Block marker set!", ephemeral=True
         )
+
+    @app_commands.command(name="wildcard")
+    @app_commands.checks.has_any_role(
+        MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO
+    )
+    @app_commands.describe(text="Wildcard text")
+    async def wildcard_segment(
+        self,
+        interaction: Interaction,
+        text: str,
+    ) -> None:
+        """Sets a Inhouse Block marker"""
+        if self.STREAM_START_TIME == 0:
+            await interaction.response.send_message(
+                f"Stream is not live - please allow up to 3 minutes for the stream to be detected",
+                ephemeral=True,
+            )
+            return
+        if (time.time() - MARKER_LOCKOUT_SECONDS) < self.LAST_MARKER_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within {MARKER_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
+            )
+            return
+        self.LAST_MARKER_TIME = time.time()
+
+        formatted_time = self.get_timestamp()
+        formatted_full = f"{formatted_time} {text}"
+        await self.post_to_markers(interaction.guild, formatted_full)
+        await interaction.response.send_message(f"Wildcard marker set!", ephemeral=True)
 
     @tasks.loop(seconds=15)
     async def check_online(self):

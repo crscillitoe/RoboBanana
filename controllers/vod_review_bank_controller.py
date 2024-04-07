@@ -13,6 +13,12 @@ LOG = logging.getLogger(__name__)
 HOURS_PER_REVIEW = Config.CONFIG["Discord"]["VODReview"]["RewardHoursPerReview"]
 GIFTED_T3_ROLE_ID = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 SECONDS_IN_HOUR = 3600
+# these are hardcoded until raze to radiant is over, or config file changes are allowed
+# for testing on own setup, these need to be changed to your appropriate IDs
+# TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
+TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
+COLOR_FAIL = Colour.red()
+COLOR_SUCCESS = Colour.green()
 
 
 class VODReviewBankController:
@@ -50,7 +56,12 @@ class VODReviewBankController:
             )
 
         role = interaction.guild.get_role(GIFTED_T3_ROLE_ID)
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
+        audit_failed_message = f"Tried to extend {role.name} for {user.mention} \n System returned message: \n"
         if role is None:
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await interaction.response.send_message(
                 f"Cannot find Gifted T3 role - check bot config!", ephemeral=True
             )
@@ -61,11 +72,17 @@ class VODReviewBankController:
                 description=message,
                 color=Color.red(),
             )
+            await DiscordUtils.audit(
+                interaction, audit_failed_message + message, audit_channel, COLOR_FAIL
+            )
             return await DiscordUtils.reply(interaction, embed=embed)
         embed = Embed(
             title="Successfully extended Gifted T3",
             description=message,
             color=Color.green(),
+        )
+        await DiscordUtils.audit(
+                interaction, message, audit_channel, COLOR_SUCCESS
         )
         await DiscordUtils.reply(interaction, embed=embed)
 

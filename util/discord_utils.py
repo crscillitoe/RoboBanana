@@ -1,4 +1,4 @@
-from discord import Interaction, TextChannel, Embed, User
+from discord import Interaction, TextChannel, Embed
 import logging
 
 LOG = logging.getLogger(__name__)

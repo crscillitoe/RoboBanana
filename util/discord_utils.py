@@ -20,12 +20,11 @@ class DiscordUtils:
         message = message.replace(f"{user.mention}",f"{user.name} (ID {user.id})")
         user = interaction.user.name
         userID = interaction.user.id
-        command = f"/{interaction.command.parent.name} {interaction.command.name}"
+        command = f"**Command:** /{interaction.command.parent.name} {interaction.command.name}"
         embed = Embed(
             title=f"{user} (ID {userID})",
-            description=f"**Used** {command}",
+            description=f"{message}\n\n{command}",
             color=color,
         )
-        embed.add_field(name="Description", value=message, inline=False)
 
         await channel.send(embed=embed)

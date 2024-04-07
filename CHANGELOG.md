@@ -3,13 +3,17 @@
 ### Additions and Fixes:
 - Added "Mod Role (Hidden)" to allowed roles for mod commands ([#142](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))
 - Add Wildcard marker type, increase lockout to 180 seconds, create markers with a minute offset so they are in the past ([4058e0](https://github.com/crscillitoe/RoboBanana/commit/4058e035f771f9b8dd3d43ed42bef24dd0a10a48), [6f3ac3c](https://github.com/crscillitoe/RoboBanana/commit/6f3ac3c5e43d13e20a74054076ba9780a3f1c333))
+- Add auditing for /manager redeem command ([#143](https://github.com/crscillitoe/RoboBanana/pull/143)) (By [Leshy](https://github.com/lorinvzyl))
+- Add what command was used in audit logs ([#143](https://github.com/crscillitoe/RoboBanana/pull/143)) (By [Leshy](https://github.com/lorinvzyl))
+- Change audit log user mentions to name + ID of user affected by command ([#143](https://github.com/crscillitoe/RoboBanana/pull/143)) (By [Leshy](https://github.com/lorinvzyl))
+- Change structure of audit logs to look better ([#143](https://github.com/crscillitoe/RoboBanana/pull/143)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.04.05
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:
 - Added error handling to all slash domains (previously only t3, mod and manager had it) ([#139](https://github.com/crscillitoe/RoboBanana/pull/139))
 - Added auditing of streamdeck prediction endpoints ([#140](https://github.com/crscillitoe/RoboBanana/pull/140))
 - Added marker commands to easily allow multiple people to create stream markers for editors and VOD channel ([#141](https://github.com/crscillitoe/RoboBanana/pull/141))
-  
+
 ## 2024.04.04
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

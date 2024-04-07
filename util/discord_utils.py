@@ -13,7 +13,9 @@ class DiscordUtils:
         return await interaction.response.send_message(*args, **kwargs)
 
     @staticmethod
-    async def audit(interaction: Interaction, user: User, message, channel: TextChannel, color):
+    async def audit(
+        interaction: Interaction, user: User, message, channel: TextChannel, color
+    ):
         """Audit interaction in specified audit channel"""
         if channel is None:
             return LOG.error("Audit channel is not initialised")
@@ -22,7 +24,7 @@ class DiscordUtils:
         userID = interaction.user.id
         command = f"**Command:** /{interaction.command.parent.name} {interaction.command.name}"
 
-        message = message.replace(f"{user.mention}",f"{user.name} (ID {user.id})")
+        message = message.replace(f"{user.mention}", f"{user.name} (ID {user.id})")
         if "System message" not in message:
             message = message + "\n"
 

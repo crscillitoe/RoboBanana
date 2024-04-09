@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.04.09
+### Additions and Fixes:
+- Allowed Staff Developers to payout etc. predictions, as per Zendikar (https://github.com/crscillitoe/RoboBanana/pull/144)
 ## 2024.04.07
 ### Additions and Fixes:
 - Added more guards to stop double prediction opening ([bbe1815](https://github.com/crscillitoe/RoboBanana/commit/bbe1815bf1599a0c662658cdcbc417732055028b))

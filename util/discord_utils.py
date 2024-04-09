@@ -14,7 +14,7 @@ class DiscordUtils:
 
     @staticmethod
     async def audit(
-            interaction: Interaction, user: User, message, channel: TextChannel, color
+        interaction: Interaction, user: User, message, channel: TextChannel, color
     ):
         """Audit interaction in specified audit channel"""
         if channel is None:

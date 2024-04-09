@@ -91,7 +91,7 @@ class PredictionCommands(app_commands.Group, name="prediction"):
         """CLOSE PREDICTION"""
         if not DB().has_ongoing_prediction(interaction.guild_id):
             return await interaction.response.send_message(
-                "There is no ongoing prediction!", ephemeral=True
+                "There is no open prediction!", ephemeral=True
             )
 
         await ClosePredictionController.close_prediction(interaction.guild_id)

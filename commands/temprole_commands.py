@@ -14,7 +14,7 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 # TEMPROLE_AUDIT_CHANNEL should be 1225769539267199026 when committing and refers to the temprole-logs channel
 HIDDEN_MOD_ROLE = 1040337265790042172
 CM_ROLE = 1044433022537191515
-TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
+TEMPROLE_AUDIT_CHANNEL = 1225751771780091994
 COLOR_FAIL = Colour.red()
 COLOR_SUCCESS = Colour.green()
 
@@ -46,7 +46,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         audit_failed_message = (
-            f"Tried to assign {role.name} to {user.mention} \n\n**System message:** "
+            f"Tried to assign {role.name} to {user.name} (ID {user.id}) \n\n**System message:** "
         )
 
         if not authorised:
@@ -98,7 +98,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         audit_failed_message = (
-            f"Tried to extend {role.name} on {user.mention} \n\n**System message:** "
+            f"Tried to extend {role.name} on {user.name} (ID {user.id}) \n\n**System message:** "
         )
 
         if not authorised:
@@ -147,7 +147,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
         audit_failed_message = (
-            f"Tried to remove {role.name} from {user.mention} \n\n**System message:** "
+            f"Tried to remove {role.name} from {user.name} (ID {user.id}) \n\n**System message:** "
         )
 
         if not authorised:
@@ -207,7 +207,7 @@ class TemproleCommands(app_commands.Group, name="temprole"):
         """See expirations for all users that currently have a given role"""
         audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
         authorised, message = await TempRoleController.authorise_role_usage(role)
-        audit_failed_message = f"Tried to view duration of {role.name} on {user.mention} \n\n**System message:** "
+        audit_failed_message = f"Tried to view durations of {role.name} \n\n**System message:** "
 
         if not authorised:
             await DiscordUtils.audit(

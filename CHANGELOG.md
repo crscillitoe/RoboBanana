@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.04.10
+### Additions and Fixes:
+- Fix variable names for audit function ([#145](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))
+- Remove user.mention from audit_failed_message variable to use name + ID instead ([#145](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.04.09
 ### Additions and Fixes:
 - Allowed Staff Developers to payout etc. predictions, as per Zendikar (https://github.com/crscillitoe/RoboBanana/pull/144)

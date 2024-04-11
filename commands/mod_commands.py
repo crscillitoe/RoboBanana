@@ -470,18 +470,6 @@ class ModCommands(app_commands.Group, name="mod"):
             f"{count} users have said good morning today! {GOOD_MORNING_EXPLANATION}"
         )
 
-    @app_commands.command(name="good_morning_reward")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def good_morning_reward(self, interaction: Interaction):
-        """Reward users who have met the 'Good Morning' threshold"""
-        await GoodMorningController.reward_users(interaction)
-
-    @app_commands.command(name="good_morning_reset")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def good_morning_reset(self, interaction: Interaction):
-        """Reset all weekly good morning points to 0"""
-        await GoodMorningController.reset_all_morning_points(interaction)
-
     @app_commands.command(name="good_morning_increment")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(points="Number of points to award")
@@ -503,16 +491,6 @@ class ModCommands(app_commands.Group, name="mod"):
 
         await interaction.response.send_message("Winner removed!")
 
-    @app_commands.command(name="disable_tts_redemptions")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def disable_tts_redemptions(self, interaction: Interaction) -> None:
-        """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
-        t3_commands.T3_TTS_ENABLED = False
-
-        await interaction.response.send_message(
-            "T3 TTS redemption disabled!", ephemeral=True
-        )
-
     @app_commands.command(name="enable_tts_redemptions")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     async def enable_tts_redemptions(self, interaction: Interaction) -> None:
@@ -523,12 +501,22 @@ class ModCommands(app_commands.Group, name="mod"):
             "T3 TTS redemption enabled!", ephemeral=True
         )
 
+    @app_commands.command(name="disable_tts_redemptions")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    async def disable_tts_redemptions(self, interaction: Interaction) -> None:
+        """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
+        t3_commands.T3_TTS_ENABLED = False
+
+        await interaction.response.send_message(
+            "T3 TTS redemption disabled!", ephemeral=True
+        )
+
     @app_commands.command(name="set_tts_cost")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(
         cost="The cost to use T3 TTS redemption. Set to 10k by default."
     )
-    async def enable_tts_redemptions(self, interaction: Interaction, cost: int) -> None:
+    async def set_tts_cost(self, interaction: Interaction, cost: int) -> None:
         """Temporarily sets the cost of the T3 TTS redemption. Cost resets to 10k on bot restarts."""
         t3_commands.T3_TTS_REQUIRED_POINTS = cost
 

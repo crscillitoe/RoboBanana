@@ -17,7 +17,9 @@ TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 # these are hardcoded until raze to radiant is over, or config file changes are allowed
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+# STAFF_DEVELOPER_ROLE should be 1226317841272279131 when committing and refers to the Staff Developer role
 HIDDEN_MOD_ROLE = 1040337265790042172
+STAFF_DEVELOPER_ROLE = 1226317841272279131
 
 
 @app_commands.guild_only()
@@ -36,7 +38,7 @@ class SyncCommands(app_commands.Group, name="sync"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="sync")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE)
     async def sync(self, interaction: Interaction) -> None:
         """Manually sync slash commands to guild"""
         guild = interaction.guild
@@ -48,7 +50,7 @@ class SyncCommands(app_commands.Group, name="sync"):
 
     @app_commands.command(name="info")
     @app_commands.checks.has_any_role(
-        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY
+        MOD_ROLE, HIDDEN_MOD_ROLE, CHAT_MOD_ROLE, STAFF_DEVELOPER_ROLE
     )
     async def info(self, interaction: Interaction) -> None:
         """Display info on current bot uptime and commit hash"""

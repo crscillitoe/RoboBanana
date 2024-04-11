@@ -4,6 +4,7 @@ This update requires `/sync sync` to be run once
 ### Additions and Fixes:
 - Fix enable_tts_redemption not showing in slash commands ([#146](https://github.com/crscillitoe/RoboBanana/pull/146))
 - Removed good morning payout and reset as that is successfully automatic for some time now ([#146](https://github.com/crscillitoe/RoboBanana/pull/146))
+- Allow Staff Developers to sync and info ([63e3f35](https://github.com/crscillitoe/RoboBanana/commit/63e3f35e84e8e43b6285bccd428c3216491fefab))
 ## 2024.04.10
 ### Additions and Fixes:
 - Fix variable names for audit function ([#145](https://github.com/crscillitoe/RoboBanana/pull/142)) (By [Leshy](https://github.com/lorinvzyl))

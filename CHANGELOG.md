@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.04.12
+### Additions and Fixes:
+- Limit prediction titles to 24 characters as more break the overlay for now ([97171c5](https://github.com/crscillitoe/RoboBanana/commit/97171c5fc8d054c28431bebbfc6a969b05cc4d58))
 ## 2024.04.11
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

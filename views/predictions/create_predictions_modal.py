@@ -21,6 +21,8 @@ class CreatePredictionModal(Modal, title="Start new prediction"):
             label="Description",
             placeholder="What are viewers trying to predict?",
             required=True,
+            min_length=1,
+            max_length=24,
         )
         self.option_one = TextInput(
             label="Option 1",

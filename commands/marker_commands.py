@@ -272,7 +272,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
         interaction: Interaction,
         text: str,
     ) -> None:
-        """Sets a Inhouse Block marker"""
+        """Sets a Wildcard marker (any text)"""
         if self.STREAM_START_TIME == 0:
             await interaction.response.send_message(
                 f"Stream is not live - please allow up to 3 minutes for the stream to be detected",

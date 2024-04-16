@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.04.17
+### Additions and Fixes:
+- Allow new Dealer role to fully manage predictions ([e587abf](https://github.com/crscillitoe/RoboBanana/commit/e587abfd233e9ba11837ab92f1013fdf47439eeb))
 ## 2024.04.12
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

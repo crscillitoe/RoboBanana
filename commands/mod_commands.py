@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from discord import (
     AllowedMentions,
+    Role,
     app_commands,
     Interaction,
     Client,
@@ -10,12 +11,14 @@ from discord import (
     TextChannel,
 )
 from discord.app_commands.errors import AppCommandError, CheckFailure
+from discord.ext import tasks
 from commands import t3_commands
 from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
 )
 from controllers.point_history_controller import PointHistoryController
+from controllers.temprole_controller import TempRoleController
 from db import DB, RaffleType
 from models.transaction import Transaction
 from views.raffle.new_raffle_modal import NewRaffleModal
@@ -38,7 +41,7 @@ TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 BOT_ROLE = Config.CONFIG["Discord"]["Roles"]["Bot"]
 GIFTED_TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]
-GIFTED_TIER2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 # these are hardcoded until raze to radiant is over, or config file changes are allowed
 # for testing on own setup, these need to be changed to your appropriate IDs
@@ -49,6 +52,10 @@ AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
 PUBLISH_TIMER_URL = f"{get_base_url()}/publish-timer"
 PUBLISH_CHESS_URL = f"{get_base_url()}/publish-chess"
+
+ACTIVE_DURATION = 5 * 60
+ACTIVE_CHATTERS = {}
+ACTIVE_T3_CHATTERS = {}
 
 PERMISSION_LOCK = Lock()
 
@@ -117,25 +124,74 @@ class ModCommands(app_commands.Group, name="mod"):
 
         await interaction.response.send_message("Chess event sent!", ephemeral=True)
 
-    @app_commands.command(name="timer")
+    @app_commands.command(name="get_active_chatters")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    @app_commands.describe(time="Time in seconds")
-    async def timer(
+    @app_commands.describe(amount="Amount of active chatters to get")
+    @app_commands.describe(
+        t3_only="Whether or not to only select T3 subs (default: False)"
+    )
+    @app_commands.describe(
+        grant_role="The role to temporarily grant all selected chatters"
+    )
+    @app_commands.describe(
+        grant_duration="How long to grant the role for (default: 1h)"
+    )
+    async def get_active_chatters(
         self,
         interaction: Interaction,
-        time: int,
-        direction: TimerDirection = TimerDirection.decrement,
+        amount: int,
+        t3_only: Optional[bool] = False,
+        grant_role: Optional[Role] = None,
+        grant_duration: Optional[str] = "1h",
     ) -> None:
-        """Display a timer on stream of the given length"""
-        Thread(
-            target=publish_timer,
-            args=(
-                time,
-                direction,
-            ),
-        ).start()
+        """Returns a given amount of active chatters, can be restricted to an amount and automatically grant a role"""
 
-        await interaction.response.send_message("Timer created!", ephemeral=True)
+        try:
+            if t3_only:
+                active_chatters = list(ACTIVE_T3_CHATTERS.keys())
+            else:
+                active_chatters = list(ACTIVE_CHATTERS.keys())
+            random_chatters = random.sample(active_chatters, amount)
+        except Exception as e:
+            return await interaction.response.send_message(
+                f"An error occurred: {str(e)}", ephemeral=True
+            )
+
+        selected = ""
+        for user_id in random_chatters:
+            member = interaction.guild.get_member(user_id)
+            selected += f" {member.mention}"
+
+            if grant_role is not None:
+                try:
+                    success, message = await TempRoleController(self).set_role(
+                        member.id, grant_role, grant_duration
+                    )
+                except Exception as e:
+                    return await interaction.response.send_message(
+                        f"An error occurred: {str(e)}", ephemeral=True
+                    )
+                if not success:
+                    return await interaction.response.send_message(
+                        f"Failed to grant role: {message}", ephemeral=True
+                    )
+
+        send_message = (
+            f"The following {amount} active chatters were selected:{selected}."
+        )
+        if t3_only:
+            send_message = (
+                f"The following {amount} active T3 chatters were selected:{selected}."
+            )
+
+        if grant_role is not None:
+            send_message += f" They were granted the role {grant_role.mention} for {grant_duration}."
+
+        await interaction.response.send_message(
+            send_message,
+            ephemeral=True,
+            allowed_mentions=AllowedMentions.none(),
+        )
 
     @app_commands.command(name="poll")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
@@ -183,7 +239,7 @@ class ModCommands(app_commands.Group, name="mod"):
                     TIER3_ROLE,
                     BOT_ROLE,
                     GIFTED_TIER1_ROLE,
-                    GIFTED_TIER2_ROLE,
+                    GIFTED_TIER3_ROLE,
                     MOD_ROLE,
                     HIDDEN_MOD_ROLE,
                 ]:
@@ -461,15 +517,6 @@ class ModCommands(app_commands.Group, name="mod"):
             "Successfully awarded points!", ephemeral=True
         )
 
-    @app_commands.command(name="good_morning_count")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def good_morning_count(self, interaction: Interaction):
-        """Check how many users have said good morning today!"""
-        count = DB().get_today_morning_count()
-        await interaction.response.send_message(
-            f"{count} users have said good morning today! {GOOD_MORNING_EXPLANATION}"
-        )
-
     @app_commands.command(name="good_morning_increment")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(points="Number of points to award")
@@ -591,3 +638,14 @@ def publish_timer(time, direction: TimerDirection):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish timer: {response.text}")
+
+
+@tasks.loop(seconds=30)
+async def remove_inactive_chatters():
+    for user_id, time in list(ACTIVE_CHATTERS.items()):
+        if time < (datetime.now() - timedelta(seconds=ACTIVE_DURATION)).timestamp():
+            del ACTIVE_CHATTERS[user_id]
+            try:
+                del ACTIVE_T3_CHATTERS[user_id]
+            except Exception:
+                pass

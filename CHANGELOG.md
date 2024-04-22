@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.04.23
+This update requires `/sync sync` to be run once
+### Additions and Fixes:
+- Added get_active_chatters command to get a random selection of active chatters and optionally assign them a role ([#147](https://github.com/crscillitoe/RoboBanana/pull/147))
 ## 2024.04.17
 ### Additions and Fixes:
 - Allow new Dealer role to fully manage predictions ([e587abf](https://github.com/crscillitoe/RoboBanana/commit/e587abfd233e9ba11837ab92f1013fdf47439eeb))

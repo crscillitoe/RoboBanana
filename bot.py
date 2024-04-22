@@ -15,6 +15,7 @@ from discord import (
     Reaction,
 )
 from commands import sync_commands
+from commands import mod_commands
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.overlay_commands import OverlayCommands
@@ -53,6 +54,8 @@ GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
 CROWD_MUTE_EMOJI_ID = Config.CONFIG["Discord"]["CrowdMute"]["Emoji"]
 CROWD_MUTE_THRESHOLD = Config.CONFIG["Discord"]["CrowdMute"]["Threshold"]
 CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
+TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
@@ -87,6 +90,7 @@ class RaffleBot(Client):
         # SubController(self).sync_channel_perms.start()
         TempRoleController(self).expire_roles.start()
         GoodMorningController(self).auto_reward_users.start()
+        mod_commands.remove_inactive_chatters.start()
 
     async def on_message_edit(self, before: Message, message: Message):
         # Don't respond to ourselves
@@ -144,6 +148,11 @@ class RaffleBot(Client):
         ):
             await SubController.subscribe(message, self)
 
+        mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
+        if any(
+            role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE] for role in message.author.roles
+        ):
+            mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             await self.check_message_length(message)

@@ -39,6 +39,11 @@ class VoiceAI(enum.Enum):
 T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
+
+HIDDEN_MOD_ROLE = 1040337265790042172
+STAFF_DEVELOPER_ROLE = 1226317841272279131
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+
 T3_TTS_ENABLED = True
 T3_TTS_REQUIRED_POINTS = 10000
 
@@ -59,7 +64,14 @@ class T3Commands(app_commands.Group, name="tier3"):
         return await super().on_error(interaction, error)
 
     @app_commands.command(name="tts")
-    @app_commands.checks.has_any_role(T3_ROLE, GIFTED_T3_ROLE, TWITCH_T3_ROLE)
+    @app_commands.checks.has_any_role(
+        T3_ROLE,
+        GIFTED_T3_ROLE,
+        TWITCH_T3_ROLE,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        STAFF_DEVELOPER_ROLE,
+    )
     @app_commands.describe(voice="Voice")
     async def flag_vod(self, interaction: Interaction, voice: VoiceAI) -> None:
         """Submit a phrase to be read out on stream by TTS system"""
@@ -70,15 +82,22 @@ class T3Commands(app_commands.Group, name="tier3"):
                 ephemeral=True,
             )
 
-        user_points = DB().get_point_balance(interaction.user.id)
+        required_points = T3_TTS_REQUIRED_POINTS
+        if any(
+            role.id in [MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE]
+            for role in interaction.user.roles
+        ):
+            required_points = 0
+        else:
+            user_points = DB().get_point_balance(interaction.user.id)
 
-        if user_points < T3_TTS_REQUIRED_POINTS:
-            return await interaction.response.send_message(
-                f"You need {T3_TTS_REQUIRED_POINTS} points to redeem a TTS message. You currently have: {user_points}",
-                ephemeral=True,
-            )
+            if user_points < required_points:
+                return await interaction.response.send_message(
+                    f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                    ephemeral=True,
+                )
 
         modal = RedeemTTSView(
-            user_points, voice.value, voice.name, T3_TTS_REQUIRED_POINTS, self.client
+            user_points, voice.value, voice.name, required_points, self.client
         )
         await interaction.response.send_modal(modal)

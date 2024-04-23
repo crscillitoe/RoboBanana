@@ -12,7 +12,7 @@ from discord import (
 )
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from discord.ext import tasks
-from commands import t3_commands
+from commands import t3_commands, viewer_commands
 from controllers.good_morning_controller import (
     GoodMorningController,
     GOOD_MORNING_EXPLANATION,
@@ -187,10 +187,31 @@ class ModCommands(app_commands.Group, name="mod"):
         if grant_role is not None:
             send_message += f" They were granted the role {grant_role.mention} for {grant_duration}."
 
+        if viewer_commands.ACTIVE_CHATTER_KEYWORD is not None:
+            send_message += f" Active chatter keyword is set to `{viewer_commands.ACTIVE_CHATTER_KEYWORD}`."
+
         await interaction.response.send_message(
             send_message,
             ephemeral=True,
             allowed_mentions=AllowedMentions.none(),
+        )
+
+    @app_commands.command(name="set_active_chatter_keyword")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(keyword="keyword")
+    async def set_active_chatter_keyword(
+        self,
+        interaction: Interaction,
+        keyword: str,
+    ) -> None:
+        """Sets the keyword to be used for active chatter tracking"""
+        viewer_commands.ACTIVE_CHATTER_KEYWORD = keyword
+        ACTIVE_CHATTERS.clear()
+        ACTIVE_T3_CHATTERS.clear()
+
+        await interaction.response.send_message(
+            f"Keyword set to `{viewer_commands.ACTIVE_CHATTER_KEYWORD}`!",
+            ephemeral=True,
         )
 
     @app_commands.command(name="poll")

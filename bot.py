@@ -16,6 +16,7 @@ from discord import (
 )
 from commands import sync_commands
 from commands import mod_commands
+from commands import viewer_commands
 from commands.meme_commands import MemeCommands
 from commands.mod_commands import ModCommands
 from commands.overlay_commands import OverlayCommands
@@ -148,11 +149,22 @@ class RaffleBot(Client):
         ):
             await SubController.subscribe(message, self)
 
-        mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
-        if any(
-            role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE] for role in message.author.roles
-        ):
-            mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
+        if viewer_commands.ACTIVE_CHATTER_KEYWORD is not None:
+            if viewer_commands.ACTIVE_CHATTER_KEYWORD in message.content:
+                mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
+                if any(
+                    role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
+                    for role in message.author.roles
+                ):
+                    mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
+        else:
+            mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
+            if any(
+                role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
+                for role in message.author.roles
+            ):
+                mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
+
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             await self.check_message_length(message)

@@ -20,6 +20,9 @@ LOG = logging.getLogger(__name__)
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll-answer"
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
+# It's stupid that it's here but I don't know how else to make it work
+ACTIVE_CHATTER_KEYWORD = None
+
 
 @app_commands.guild_only()
 class ViewerCommands(app_commands.Group, name="hooj"):

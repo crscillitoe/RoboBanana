@@ -60,7 +60,7 @@ GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
 MAX_CHARACTER_LENGTH = 200
-CUSTOM_EMOJI_PATTERN = re.compile("<a?:\w+:(\d{17,19}>)?")
+CUSTOM_EMOJI_PATTERN = re.compile("(<a?:(\w+):\d{17,19}>?)")
 MAX_EMOJI_COUNT = 5
 
 LOG = logging.getLogger(__name__)
@@ -107,15 +107,21 @@ class RaffleBot(Client):
         if message.author.id == 204343692960464896:
             return
 
-        length = len(message.clean_content)
-
         # The content we get might contain custom emoji, which will be displayed like this: <:hoojKEKW:1059961649412460575>
         # Since an emoji isn't actually that long (the ID and brackets are 20+ chars), we run a regex to count emoji and remove 20*x chars from the length for leniency
-        custom_emoji_count = len(
-            re.findall(CUSTOM_EMOJI_PATTERN, message.clean_content)
+        custom_emoji_matches = dict(
+            (full_match, name)
+            for full_match, name in re.findall(
+                CUSTOM_EMOJI_PATTERN, message.clean_content
+            )
         )
-        length = length - (20 * custom_emoji_count)
+        for match in custom_emoji_matches:
+            message.clean_content = message.clean_content.replace(
+                match, custom_emoji_matches[match]
+            )
 
+        custom_emoji_count = len(custom_emoji_matches)
+        length = len(message.clean_content)
         if length > MAX_CHARACTER_LENGTH:
             content = message.content
             await message.delete()

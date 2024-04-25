@@ -10,6 +10,7 @@ from controllers.predictions.payout_prediction_controller import (
 )
 from config import YAMLConfig as Config
 import logging
+from db import DB
 from db.models import PredictionChoice
 
 from server.models.quick_prediction import QuickPrediction
@@ -57,12 +58,26 @@ class PredictionController:
         return True
 
     async def close_prediction(client: Client):
+        if not DB().has_ongoing_prediction(GUILD_ID):
+            return False
         LOG.info("Closing ongoing prediction")
         audit_channel = client.get_channel(PREDICTION_AUDIT_CHANNEL)
         await audit_channel.send(
             f"*Streamdeck* closed the current prediction.",
             allowed_mentions=AllowedMentions.none(),
         )
+
+        try:
+            prediction_id = DB().get_ongoing_prediction_id(GUILD_ID)
+            prediction_message_id = DB().get_prediction_message_id(prediction_id)
+            prediction_channel_id = DB().get_prediction_channel_id(prediction_id)
+            prediction_message = await client.get_channel(
+                prediction_channel_id
+            ).fetch_message(prediction_message_id)
+            await prediction_message.reply("Prediction closed!")
+        except Exception:
+            pass
+
         await ClosePredictionController.close_prediction(GUILD_ID)
 
     async def payout_prediction(option: PredictionChoice, client: Client):

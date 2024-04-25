@@ -72,8 +72,8 @@ class T3Commands(app_commands.Group, name="tier3"):
         HIDDEN_MOD_ROLE,
         STAFF_DEVELOPER_ROLE,
     )
-    @app_commands.describe(voice="Voice")
-    async def flag_vod(self, interaction: Interaction, voice: VoiceAI) -> None:
+    @app_commands.describe(voice="The voice to use for the TTS message.")
+    async def tts(self, interaction: Interaction, voice: VoiceAI) -> None:
         """Submit a phrase to be read out on stream by TTS system"""
 
         if T3_TTS_ENABLED == False:
@@ -83,19 +83,20 @@ class T3Commands(app_commands.Group, name="tier3"):
             )
 
         required_points = T3_TTS_REQUIRED_POINTS
+
         if any(
             role.id in [MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE]
             for role in interaction.user.roles
         ):
             required_points = 0
-        else:
-            user_points = DB().get_point_balance(interaction.user.id)
 
-            if user_points < required_points:
-                return await interaction.response.send_message(
-                    f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
-                    ephemeral=True,
-                )
+        user_points = DB().get_point_balance(interaction.user.id)
+
+        if user_points < required_points:
+            return await interaction.response.send_message(
+                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                ephemeral=True,
+            )
 
         modal = RedeemTTSView(
             user_points, voice.value, voice.name, required_points, self.client

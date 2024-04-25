@@ -80,7 +80,8 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
         ).start()
 
         await interaction.response.send_message(
-            f"TTS Redeemed! You have {balance} points remaining.", ephemeral=True
+            f"TTS Redeemed! You have {balance} points remaining after spending {self.cost}.",
+            ephemeral=True,
         )
 
 

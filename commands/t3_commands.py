@@ -91,6 +91,10 @@ class T3Commands(app_commands.Group, name="tier3"):
             required_points = 0
 
         user_points = DB().get_point_balance(interaction.user.id)
+        if not user_points:
+            return await interaction.response.send_message(
+                "Failed to retrieve point balance - please try again.", ephemeral=True
+            )
 
         if user_points < required_points:
             return await interaction.response.send_message(

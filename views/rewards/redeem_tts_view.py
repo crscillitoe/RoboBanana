@@ -53,21 +53,24 @@ class RedeemTTSView(Modal, title="Redeem a TTS Message"):
         self.add_item(self.text)
 
     async def on_submit(self, interaction: Interaction):
-        success, balance = DB().withdraw_points(interaction.user.id, self.cost)
-        if not success:
-            return await interaction.response.send_message(
-                "Failed to redeem reward - please try again.", ephemeral=True
-            )
+        if self.cost > 0:
+            success, balance = DB().withdraw_points(interaction.user.id, self.cost)
+            if not success:
+                return await interaction.response.send_message(
+                    "Failed to redeem reward - please try again.", ephemeral=True
+                )
 
-        PointHistoryController.record_transaction(
-            Transaction(
-                interaction.user.id,
-                -self.cost,
-                self.user_points,
-                balance,
-                "TTS Redemption",
+            PointHistoryController.record_transaction(
+                Transaction(
+                    interaction.user.id,
+                    -self.cost,
+                    self.user_points,
+                    balance,
+                    "TTS Redemption",
+                )
             )
-        )
+        else:
+            balance = DB().get_point_balance(interaction.user.id)
 
         Thread(
             target=publish_tts,

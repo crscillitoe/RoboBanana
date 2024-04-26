@@ -1,4 +1,15 @@
 # RoboBanana Changelog
+## 2024.04.26
+### Additions and Fixes:
+- Add pokemon commands to stop stream chat spam and allow for more intricate handling ([#148](https://github.com/crscillitoe/RoboBanana/pull/148)) (By [Street/RyanO-K](https://github.com/RyanO-K))
+- Improve pokemon commands to properly pass messages to the overlay ([7726730...8bb20ca](https://github.com/crscillitoe/RoboBananaFrontend/compare/8b5c781...8bb20ca))
+## 2024.04.25
+### Additions and Fixes:
+- Fix absence of prediction close message when prediction is closed via API ([8b5c781](github.com/crscillitoe/RoboBanana/commit/8b5c781827d5927793346c6b0ef5e1fb0f454bc1))
+## 2024.04.24
+### Additions and Fixes:
+- Allow Mods and Staff Devs to use T3 TTS for free ([3e9b479](github.com/crscillitoe/RoboBanana/commit/3e9b47925356dc8c0c260fcc2f2555cf1ef0ff1f))
+- Improve handling of custom emoji message length check ([717d372](github.com/crscillitoe/RoboBanana/commit/717d372d8afd8ad372537f4a697297d8e98c0fd4))
 ## 2024.04.23
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

@@ -1,4 +1,4 @@
-from discord import app_commands, Interaction, Client
+from discord import app_commands, Interaction, Client, AllowedMentions
 from discord.app_commands import Choice
 from controllers.good_morning_controller import GoodMorningController
 from controllers.predictions.prediction_entry_controller import (
@@ -18,6 +18,7 @@ from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
 
 LOG = logging.getLogger(__name__)
 
+POKEMON_THREAD_ID = 1233467109485314150
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll-answer"
 POKEMON_PUBLISH_URL = f"{get_base_url()}/publish-streamdeck"
 
@@ -152,6 +153,11 @@ class ViewerCommands(app_commands.Group, name="hooj"):
                 1 #TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
             ),
         ).start()
+
+        await interaction.guild.get_thread(POKEMON_THREAD_ID).send(
+            f"{interaction.user.mention} played: {move} {1} times!",
+            allowed_mentions=AllowedMentions.none(),
+        )
 
         await interaction.response.send_message(
             f"Successfully sent move: {move}", ephemeral=True

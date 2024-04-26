@@ -149,7 +149,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             args=(
                 interaction.user.display_name,
                 move,
-                1 #TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
+                1,  # TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
             ),
         ).start()
 
@@ -190,12 +190,13 @@ def publish_poll_answer(user_id, choice, roles):
     if response.status_code != 200:
         LOG.error(f"Failed to publish poll answer: {response.text}")
 
+
 def publish_pokemon_move(user_name, move, number):
     payload = {
         "type": "pokemon-move",
         "move": move,
         "userName": user_name,
-        "number": number
+        "number": number,
     }
 
     response = requests.post(

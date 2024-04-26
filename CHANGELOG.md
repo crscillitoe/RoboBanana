@@ -2,7 +2,7 @@
 ## 2024.04.26
 ### Additions and Fixes:
 - Add pokemon commands to stop stream chat spam and allow for more intricate handling ([#148](https://github.com/crscillitoe/RoboBanana/pull/148)) (By [Street/RyanO-K](https://github.com/RyanO-K))
-- Improve pokemon commands to properly pass messages to the overlay ([7726730...8bb20ca](https://github.com/crscillitoe/RoboBananaFrontend/compare/8b5c781...8bb20ca))
+- Improve pokemon commands to properly pass messages to the overlay ([7726730...8bb20ca](https://github.com/crscillitoe/RoboBanana/compare/8b5c781...8bb20ca))
 ## 2024.04.25
 ### Additions and Fixes:
 - Fix absence of prediction close message when prediction is closed via API ([8b5c781](github.com/crscillitoe/RoboBanana/commit/8b5c781827d5927793346c6b0ef5e1fb0f454bc1))

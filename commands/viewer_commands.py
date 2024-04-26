@@ -141,21 +141,32 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             Choice(name="Down", value="Down"),
             Choice(name="R", value="R"),
             Choice(name="L", value="L"),
+        ],
+        amount=[
+            Choice(name="1", value=1),
+            Choice(name="2", value=2),
+            Choice(name="3", value=3),
+            Choice(name="4", value=4),
+            Choice(name="5", value=5),
+            Choice(name="6", value=6),
+            Choice(name="7", value=7),
+            Choice(name="8", value=8),
+            Choice(name="9", value=9)
         ]
     )
-    async def pokemon_move(self, interaction: Interaction, move: str):
+    async def pokemon_move(self, interaction: Interaction, move: str, amount: int):
         """Send a move to the Pokemon game"""
         Thread(
             target=publish_pokemon_move,
             args=(
                 interaction.user.display_name,
                 move,
-                1,  # TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
+                amount
             ),
         ).start()
 
         await interaction.guild.get_thread(POKEMON_THREAD_ID).send(
-            f"{interaction.user.mention} played: {move} {1} times!",
+            f"{interaction.user.mention} played: {move} {amount} times!",
             allowed_mentions=AllowedMentions.none(),
         )
 

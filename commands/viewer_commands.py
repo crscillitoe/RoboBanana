@@ -19,6 +19,8 @@ from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
 LOG = logging.getLogger(__name__)
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll-answer"
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
+HOST = Config.CONFIG["Server"]["Host"]
+POKE_PORT = Config.CONFIG["Server"]["PokePort"]
 
 # It's stupid that it's here but I don't know how else to make it work
 ACTIVE_CHATTER_KEYWORD = None
@@ -123,6 +125,44 @@ class ViewerCommands(app_commands.Group, name="hooj"):
 
         if not success:
             return
+
+    @app_commands.command(name="pokemon")
+    @app_commands.choices(
+        move=[
+            Choice(name="A", value="A"),
+            Choice(name="B", value="B"),
+            Choice(name="Start", value="Start"),
+            Choice(name="Select", value="Select"),
+            Choice(name="Right", value="Right"),
+            Choice(name="Left", value="Left"),
+            Choice(name="Up", value="Up"),
+            Choice(name="Down", value="Down"),
+            Choice(name="R", value="R"),
+            Choice(name="L", value="L"),
+        ]
+    )
+    async def pokemon_move(self, interaction: Interaction, move: str):
+        """Send a move to the Pokemon game"""
+
+        try:
+            response = requests.post(
+                url=f"http://{HOST}:{POKE_PORT}/mgba-http/button/tap?key={move}",
+                json={},
+                headers={"x-access-token": AUTH_TOKEN},
+            )
+        except Exception as e:
+            logging.error(f"Failed to send move: {e}")
+            await interaction.response.send_message(
+                f"Failed to send move: {move}", ephemeral=True
+            )
+        if not response.ok:
+            await interaction.response.send_message(
+                f"Failed to send move: {move}", ephemeral=True
+            )
+
+        await interaction.response.send_message(
+            f"Successfully sent move: {move}", ephemeral=True
+        )
 
     @app_commands.command(name="good_morning")
     async def good_morning(self, interaction: Interaction):

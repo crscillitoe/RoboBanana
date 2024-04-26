@@ -17,10 +17,11 @@ from util.server_utils import get_base_url
 from views.vod_submission.vod_submission_modal import NewVodSubmissionModal
 
 LOG = logging.getLogger(__name__)
+
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll-answer"
+POKEMON_PUBLISH_URL = f"{get_base_url()}/publish-streamdeck"
+
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
-HOST = Config.CONFIG["Server"]["Host"]
-POKE_PORT = Config.CONFIG["Server"]["PokePort"]
 
 # It's stupid that it's here but I don't know how else to make it work
 ACTIVE_CHATTER_KEYWORD = None
@@ -143,22 +144,14 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     )
     async def pokemon_move(self, interaction: Interaction, move: str):
         """Send a move to the Pokemon game"""
-
-        try:
-            response = requests.post(
-                url=f"http://{HOST}:{POKE_PORT}/mgba-http/button/tap?key={move}",
-                json={},
-                headers={"x-access-token": AUTH_TOKEN},
-            )
-        except Exception as e:
-            logging.error(f"Failed to send move: {e}")
-            await interaction.response.send_message(
-                f"Failed to send move: {move}", ephemeral=True
-            )
-        if not response.ok:
-            await interaction.response.send_message(
-                f"Failed to send move: {move}", ephemeral=True
-            )
+        Thread(
+            target=publish_pokemon_move,
+            args=(
+                interaction.user.display_name,
+                move,
+                1 #TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
+            ),
+        ).start()
 
         await interaction.response.send_message(
             f"Successfully sent move: {move}", ephemeral=True
@@ -196,3 +189,18 @@ def publish_poll_answer(user_id, choice, roles):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish poll answer: {response.text}")
+
+def publish_pokemon_move(user_name, move, number):
+    payload = {
+        "type": "pokemon-move",
+        "move": move,
+        "userName": user_name,
+        "number": number
+    }
+
+    response = requests.post(
+        url=POKEMON_PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish pokemon move: {response.text}")

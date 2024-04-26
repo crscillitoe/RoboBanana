@@ -129,35 +129,40 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     @app_commands.command(name="pokemon")
     @app_commands.choices(
         move=[
-            Choice(name="A",value="A"),
-            Choice(name="B",value="B"),
-            Choice(name="Start",value="Start"),
-            Choice(name="Select",value="Select"),
-            Choice(name="Right",value="Right"),
-            Choice(name="Left",value="Left"),
-            Choice(name="Up",value="Up"), 
-            Choice(name="Down",value="Down"),
-            Choice(name="R",value="R"),
-            Choice(name="L",value="L"),
+            Choice(name="A", value="A"),
+            Choice(name="B", value="B"),
+            Choice(name="Start", value="Start"),
+            Choice(name="Select", value="Select"),
+            Choice(name="Right", value="Right"),
+            Choice(name="Left", value="Left"),
+            Choice(name="Up", value="Up"),
+            Choice(name="Down", value="Down"),
+            Choice(name="R", value="R"),
+            Choice(name="L", value="L"),
         ]
     )
     async def pokemon_move(self, interaction: Interaction, move: str):
         """Send a move to the Pokemon game"""
-          
+
         try:
             response = requests.post(
-                url=f"http://{HOST}:{POKE_PORT}/mgba-http/button/tap?key={move}", 
-                json={}, 
-                headers={"x-access-token": AUTH_TOKEN}
+                url=f"http://{HOST}:{POKE_PORT}/mgba-http/button/tap?key={move}",
+                json={},
+                headers={"x-access-token": AUTH_TOKEN},
             )
         except Exception as e:
             logging.error(f"Failed to send move: {e}")
-            await interaction.response.send_message(f"Failed to send move: {move}", ephemeral=True)
+            await interaction.response.send_message(
+                f"Failed to send move: {move}", ephemeral=True
+            )
         if not response.ok:
-            await interaction.response.send_message(f"Failed to send move: {move}", ephemeral=True)
-    
-        await interaction.response.send_message(f"Successfully sent move: {move}", ephemeral=True)
-        
+            await interaction.response.send_message(
+                f"Failed to send move: {move}", ephemeral=True
+            )
+
+        await interaction.response.send_message(
+            f"Successfully sent move: {move}", ephemeral=True
+        )
 
     @app_commands.command(name="good_morning")
     async def good_morning(self, interaction: Interaction):

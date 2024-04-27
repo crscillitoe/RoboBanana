@@ -155,7 +155,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         ]
     )
     async def pokemon_move(self, interaction: Interaction, move: str, amount: int):
-        """Send a move to the Pokemon game"""
+        """Send Pokemon move data to frontend"""
         Thread(
             target=publish_pokemon_move,
             args=(
@@ -171,7 +171,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         )
 
         await interaction.response.send_message(
-            f"Successfully sent move: {move}", ephemeral=True
+            f"Successfully sent move: {move}, amount: {amount}", ephemeral=True
         )
 
     @app_commands.command(name="good_morning")

@@ -1,5 +1,6 @@
 from discord import app_commands, Interaction, Client, AllowedMentions
-from discord.app_commands import Choice
+from discord.app_commands import Choice, Range
+from typing import Optional
 from controllers.good_morning_controller import GoodMorningController
 from controllers.predictions.prediction_entry_controller import (
     PredictionEntryController,
@@ -129,6 +130,9 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             return
 
     @app_commands.command(name="pokemon")
+    @app_commands.describe(move="Button to press",
+                           amount="Times to press (only affects movement keys)"
+                           )
     @app_commands.choices(
         move=[
             Choice(name="A", value="A"),
@@ -141,21 +145,10 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             Choice(name="Down", value="Down"),
             Choice(name="R", value="R"),
             Choice(name="L", value="L"),
-        ],
-        amount=[
-            Choice(name="1", value=1),
-            Choice(name="2", value=2),
-            Choice(name="3", value=3),
-            Choice(name="4", value=4),
-            Choice(name="5", value=5),
-            Choice(name="6", value=6),
-            Choice(name="7", value=7),
-            Choice(name="8", value=8),
-            Choice(name="9", value=9)
         ]
     )
-    async def pokemon_move(self, interaction: Interaction, move: str, amount: int):
-        """Send Pokemon move data to frontend"""
+    async def pokemon_move(self, interaction: Interaction, move: str, amount: Optional[Range[int, 1, 9]]):
+        """Send a move to the Pokemon game"""
         Thread(
             target=publish_pokemon_move,
             args=(
@@ -171,7 +164,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         )
 
         await interaction.response.send_message(
-            f"Successfully sent move: {move}, amount: {amount}", ephemeral=True
+            f"Successfully sent move: {move} {amount} times!", ephemeral=True
         )
 
     @app_commands.command(name="good_morning")

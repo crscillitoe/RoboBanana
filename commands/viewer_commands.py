@@ -1,5 +1,6 @@
 from discord import app_commands, Interaction, Client, AllowedMentions
-from discord.app_commands import Choice
+from discord.app_commands import Choice, Range
+from typing import Optional
 from controllers.good_morning_controller import GoodMorningController
 from controllers.predictions.prediction_entry_controller import (
     PredictionEntryController,
@@ -129,6 +130,8 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             return
 
     @app_commands.command(name="pokemon")
+    @app_commands.describe(move="Button to press")
+    @app_commands.describe(amount="Times to press (only affects movement keys)")
     @app_commands.choices(
         move=[
             Choice(name="A", value="A"),
@@ -143,24 +146,24 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             Choice(name="L", value="L"),
         ]
     )
-    async def pokemon_move(self, interaction: Interaction, move: str):
+    async def pokemon_move(self, interaction: Interaction, move: str, amount: Optional[Range[int, 1, 9]]):
         """Send a move to the Pokemon game"""
         Thread(
             target=publish_pokemon_move,
             args=(
                 interaction.user.display_name,
                 move,
-                1,  # TODO: Allow users to optionally select a number 1-9 inclusive to repeat the given move
+                amount
             ),
         ).start()
 
         await interaction.guild.get_thread(POKEMON_THREAD_ID).send(
-            f"{interaction.user.mention} played: {move} {1} times!",
+            f"{interaction.user.mention} played: {move} {amount} times!",
             allowed_mentions=AllowedMentions.none(),
         )
 
         await interaction.response.send_message(
-            f"Successfully sent move: {move}", ephemeral=True
+            f"Successfully sent move: {move} {amount} times!", ephemeral=True
         )
 
     @app_commands.command(name="good_morning")

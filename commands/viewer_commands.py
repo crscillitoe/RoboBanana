@@ -146,15 +146,13 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             Choice(name="L", value="L"),
         ]
     )
-    async def pokemon_move(self, interaction: Interaction, move: str, amount: Optional[Range[int, 1, 9]]):
+    async def pokemon_move(
+        self, interaction: Interaction, move: str, amount: Optional[Range[int, 1, 9]]
+    ):
         """Send a move to the Pokemon game"""
         Thread(
             target=publish_pokemon_move,
-            args=(
-                interaction.user.display_name,
-                move,
-                amount
-            ),
+            args=(interaction.user.display_name, move, amount),
         ).start()
 
         await interaction.guild.get_thread(POKEMON_THREAD_ID).send(

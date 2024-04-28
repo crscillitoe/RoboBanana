@@ -351,3 +351,35 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 self.THREAD_MESSAGE_ID
             )
         ).edit(content=self.THREAD_TEXT)
+
+
+    @app_commands.command(name="event_ping")
+    @app_commands.checks.has_any_role(MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO)
+    async def event_ping(ctx, ping: str):
+        choices_with_roles = [
+            ("VOD Review", "1186765238608089189"),
+            ("Lunch Time Sub Game", "1186766144158302279"),
+            ("Ranked Games", "1186765380472029204"),
+            ("Pro Analysis", "1186765320640286881"),
+            ("Funday Friday", "1186766668710555799"),
+            ("Variety Sunday", "1186768759290085498"),
+            ("Content Creation Office Hours", "1186765443512401981"),
+            ("Low ELO Coaching", "1186765658873155656"),
+            ("Setup Review", "1186766606756487289"),
+        ]
+
+        choices = [create_choice(name=name, value=value) for name, value in choices_with_roles]
+
+        @cog_ext.cog_slash(
+            name="event_ping",
+            description="Pings an event role",
+            options=choices
+        )
+        async def event_ping_slash(ctx: SlashContext, ping: str):
+            roles = dict(choices_with_roles)
+            role_id = roles.get(ping)
+            if role_id:
+                role_mention = f"<@&{role_id}>"
+                await ctx.send(role_mention)
+            else:
+                await ctx.send("Invalid option.")

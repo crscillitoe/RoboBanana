@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.04.28
+This update requires `/sync sync` to be run once
+### Additions and Fixes:
+- Allow pokemon service to accept move amount to move character multiple times in one direction ([#150](https://github.com/crscillitoe/RoboBanana/pull/150)) (By [ValpsZ](https://github.com/ValpsZ))
 ## 2024.04.26
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

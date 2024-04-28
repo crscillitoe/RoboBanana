@@ -130,9 +130,8 @@ class ViewerCommands(app_commands.Group, name="hooj"):
             return
 
     @app_commands.command(name="pokemon")
-    @app_commands.describe(move="Button to press",
-                           amount="Times to press (only affects movement keys)"
-                           )
+    @app_commands.describe(move="Button to press")
+    @app_commands.describe(amount="Times to press (only affects movement keys)")
     @app_commands.choices(
         move=[
             Choice(name="A", value="A"),

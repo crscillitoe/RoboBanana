@@ -147,9 +147,15 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         ]
     )
     async def pokemon_move(
-        self, interaction: Interaction, move: str, amount: Optional[Range[int, 1, 9]]
+        self,
+        interaction: Interaction,
+        move: str,
+        amount: Optional[Range[int, 1, 9]] = 1,
     ):
         """Send a move to the Pokemon game"""
+        if move not in ["Right", "Left", "Up", "Down"]:
+            amount = 1
+
         Thread(
             target=publish_pokemon_move,
             args=(interaction.user.display_name, move, amount),

@@ -7,14 +7,27 @@ import requests
 from config import YAMLConfig as Config
 import logging
 from discord.app_commands.errors import AppCommandError, CheckFailure
+import enum
 
 from util.command_utils import CommandUtils
+
+class Pings(enum.Enum):
+    VOD_Review = "1186765238608089189"
+    Lunch_Time_Sub_Game = "1186766144158302279"
+    Ranked_Games = "1186765380472029204"
+    Pro_Analysis = "1186765320640286881"
+    Funday_Friday = "1186766668710555799"
+    Variety_Sunday = "1186768759290085498"
+    Content_Creation Office Hours = "1186765443512401981"
+    Low_ELO_Coaching = "1186765443512401981"
+    Setup_Review = "1186766606756487289"
 
 LOG = logging.getLogger(__name__)
 
 MARKER_CHANNEL = 1099680985467064360  # Change to config option once RtR is done - 1099680985467064360 on live
 MARKER_LOCKOUT_SECONDS = 180
 MARKER_SUBTRACT_SECONDS = 60
+PING_LOCKOUT_SECONDS = 180
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
@@ -34,6 +47,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
     THREAD_MESSAGE_ID = 0
     THREAD_TEXT = "0:00 Start"
     LAST_MARKER_TIME = time.time()
+    LAST_PING_TIME = time.time()
 
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:
         super().__init__()
@@ -353,33 +367,26 @@ class MarkerCommands(app_commands.Group, name="marker"):
         ).edit(content=self.THREAD_TEXT)
 
 
-    @app_commands.command(name="event_ping")
-    @app_commands.checks.has_any_role(MOD_ROLE, CHAT_MOD_ROLE, TRUSTWORTHY, TIER3_ROLE_12MO, TIER3_ROLE_18MO)
-    async def event_ping(ctx, ping: str):
-        choices_with_roles = [
-            ("VOD Review", "1186765238608089189"),
-            ("Lunch Time Sub Game", "1186766144158302279"),
-            ("Ranked Games", "1186765380472029204"),
-            ("Pro Analysis", "1186765320640286881"),
-            ("Funday Friday", "1186766668710555799"),
-            ("Variety Sunday", "1186768759290085498"),
-            ("Content Creation Office Hours", "1186765443512401981"),
-            ("Low ELO Coaching", "1186765658873155656"),
-            ("Setup Review", "1186766606756487289"),
-        ]
 
-        choices = [create_choice(name=name, value=value) for name, value in choices_with_roles]
+    @app_commands.command(name="Event_Ping")
+    @app_commands.checks.has_any_role(
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        CHAT_MOD_ROLE,
+        TRUSTWORTHY,
+        TIER3_ROLE_12MO,
+        TIER3_ROLE_18MO,
+    )
+    @app_commands.describe(voice="Ping a role")
+    async def Event_Ping(self, interaction: Interaction, ping: Pings) -> None:    
+        
+        if (time.time() - PING_LOCKOUT_SECONDS) < self.LAST_PING_TIME:
+            await interaction.response.send_message(
+                f"Last marker was set within {MARKER_PING_SECONDS} seconds, aborting",
+                ephemeral=True,
+            )
+            return
+        self.LAST_PING_TIME = time.time()
 
-        @cog_ext.cog_slash(
-            name="event_ping",
-            description="Pings an event role",
-            options=choices
-        )
-        async def event_ping_slash(ctx: SlashContext, ping: str):
-            roles = dict(choices_with_roles)
-            role_id = roles.get(ping)
-            if role_id:
-                role_mention = f"<@&{role_id}>"
-                await ctx.send(role_mention)
-            else:
-                await ctx.send("Invalid option.")
+        role_mention = f"<@&{ping.value}>"
+        return await interaction.response.send_message(role_mention)

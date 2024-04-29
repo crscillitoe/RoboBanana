@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta
 import time
 import re
-from discord import ChannelType, Guild, Interaction, app_commands, Client
+from discord import ChannelType, Guild, Interaction, app_commands, Client, AllowedMentions
 from discord.ext import tasks
 import requests
 from config import YAMLConfig as Config
@@ -19,8 +19,11 @@ class Pings(enum.Enum):
     Funday_Friday = "1186766668710555799"
     Variety_Sunday = "1186768759290085498"
     Content_Creation Office Hours = "1186765443512401981"
-    Low_ELO_Coaching = "1186765443512401981"
+    Low_ELO_Coaching = "1186765658873155656"
     Setup_Review = "1186766606756487289"
+
+
+allowed_roles = [1186765238608089189, 1186766144158302279, 1186765380472029204, 1186765320640286881, 1186766668710555799, 1186768759290085498, 1186765443512401981, 1186765658873155656, 1186766606756487289]
 
 LOG = logging.getLogger(__name__)
 
@@ -382,11 +385,16 @@ class MarkerCommands(app_commands.Group, name="marker"):
         
         if (time.time() - PING_LOCKOUT_SECONDS) < self.LAST_PING_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within {MARKER_PING_SECONDS} seconds, aborting",
+                f"Last marker was set within {PING_LOCKOUT_SECONDS} seconds, aborting",
                 ephemeral=True,
             )
             return
         self.LAST_PING_TIME = time.time()
 
         role_mention = f"<@&{ping.value}>"
-        return await interaction.response.send_message(role_mention)
+        await interaction.response.send_message(
+            role_mention
+            allowed_mentions = discord.AllowedMentions(
+                roles=allowed_roles
+            )
+        )

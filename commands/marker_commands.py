@@ -41,7 +41,8 @@ TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
 HIDDEN_MOD_ROLE = 1040337265790042172
-
+STAFF_DEVELOPER_ROLE = 1226317841272279131
+PREDICTION_DEALER_ROLE = 1229896209515282472
 
 @app_commands.guild_only()
 class MarkerCommands(app_commands.Group, name="marker"):
@@ -375,10 +376,8 @@ class MarkerCommands(app_commands.Group, name="marker"):
     @app_commands.checks.has_any_role(
         MOD_ROLE,
         HIDDEN_MOD_ROLE,
-        CHAT_MOD_ROLE,
-        TRUSTWORTHY,
-        TIER3_ROLE_12MO,
-        TIER3_ROLE_18MO,
+        STAFF_DEVELOPER_ROLE
+        PREDICTION_DEALER_ROLE
     )
     @app_commands.describe(voice="Ping a role")
     async def Event_Ping(self, interaction: Interaction, ping: Pings) -> None:    

@@ -15,6 +15,7 @@ CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
 
 CROWD_MUTE_ENABLED = True
 
+
 class ReactionController:
     """
     Applies configured reactions to messages sent by

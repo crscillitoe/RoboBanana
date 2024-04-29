@@ -189,6 +189,7 @@ class RaffleBot(Client):
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
         await ReactionController.apply_crowd_mute(reaction)
 
+
 client = RaffleBot()
 tree = app_commands.CommandTree(client)
 

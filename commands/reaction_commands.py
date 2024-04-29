@@ -57,12 +57,12 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         """Sets required amount of reactions for crowd mute"""
         if count <= 0:
             return await interaction.response.send_message(
-                    "Count must be more than 0", ephemeral=True
+                "Count must be more than 0", ephemeral=True
             )
         reaction_controller.CROWD_MUTE_THRESHOLD = count
         await DiscordUtils.reply(
             interaction, content=f"Crowd mute threshold set to {count}", ephemeral=True
-            )
+        )
 
     @app_commands.command(name="disable_crowd_mute")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
@@ -81,4 +81,3 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         await DiscordUtils.reply(
             interaction, content="Crowd mute feature enabled", ephemeral=True
         )
-

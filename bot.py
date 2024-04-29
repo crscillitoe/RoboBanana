@@ -52,9 +52,6 @@ PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
     "PendingRewardChannel"
 ]
 GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
-CROWD_MUTE_EMOJI_ID = Config.CONFIG["Discord"]["CrowdMute"]["Emoji"]
-CROWD_MUTE_THRESHOLD = Config.CONFIG["Discord"]["CrowdMute"]["Threshold"]
-CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 FOSSA_BOT_ID = 488164251249279037
@@ -190,30 +187,7 @@ class RaffleBot(Client):
                 ).start()
 
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
-        if isinstance(reaction.emoji, str):
-            return
-        if reaction.emoji.id != CROWD_MUTE_EMOJI_ID:
-            return
-        if reaction.count < CROWD_MUTE_THRESHOLD:
-            return
-
-        if reaction.count == CROWD_MUTE_THRESHOLD:
-            is_timed_out = reaction.message.author.is_timed_out()
-            mute_reason = (
-                "been crowd muted for 10 minutes, likely due to asking:"
-                " "
-                " 1. An easily Googleable question"
-                " "
-                " 2. A question about aim (see <#1056639643443007659>)"
-                " "
-                " 3. A question answered directly within our <#1035739990413545492>."
-            )
-            if is_timed_out != True:
-                await reaction.message.author.timeout(
-                    timedelta(minutes=CROWD_MUTE_DURATION),
-                    reason=f"You have {mute_reason}",
-                )
-            await reaction.message.reply(f"This user has {mute_reason}")
+        await ReactionController.apply_crowd_mute(reaction)
 
 
 client = RaffleBot()

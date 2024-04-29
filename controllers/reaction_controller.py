@@ -1,13 +1,19 @@
-from discord import Message
+from discord import Message, Reaction
 from db import DB
 from datetime import datetime, timedelta
 import logging
+from config import YAMLConfig as Config
 
 LOG = logging.getLogger(__name__)
 
 DEFAULT_EMOJI_REACTION_DELAY = (
     15  # Default delay for Robomoji reactions if not set manually
 )
+CROWD_MUTE_EMOJI_ID = Config.CONFIG["Discord"]["CrowdMute"]["Emoji"]
+CROWD_MUTE_THRESHOLD = Config.CONFIG["Discord"]["CrowdMute"]["Threshold"]
+CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
+
+CROWD_MUTE_ENABLED = True
 
 
 class ReactionController:
@@ -47,3 +53,32 @@ class ReactionController:
             for emoji in emojis:
                 await message.add_reaction(emoji)
             DB().set_emoji_reaction_last_used(message.author.id, datetime.now())
+
+    @staticmethod
+    async def apply_crowd_mute(reaction: Reaction):
+        if not CROWD_MUTE_ENABLED:
+            return
+        if isinstance(reaction.emoji, str):
+            return
+        if reaction.emoji.id != CROWD_MUTE_EMOJI_ID:
+            return
+        if reaction.count < CROWD_MUTE_THRESHOLD:
+            return
+
+        if reaction.count == CROWD_MUTE_THRESHOLD:
+            is_timed_out = reaction.message.author.is_timed_out()
+            mute_reason = (
+                f"been crowd muted for {CROWD_MUTE_DURATION} minutes, likely due to asking:"
+                " "
+                " 1. An easily Googleable question"
+                " "
+                " 2. A question about aim (see <#1056639643443007659>)"
+                " "
+                " 3. A question answered directly within our <#1035739990413545492>."
+            )
+            if is_timed_out != True:
+                await reaction.message.author.timeout(
+                    timedelta(minutes=CROWD_MUTE_DURATION),
+                    reason=f"You have {mute_reason}",
+                )
+            await reaction.message.reply(f"This user has {mute_reason}")

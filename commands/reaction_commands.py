@@ -4,7 +4,10 @@ from discord.ext.commands import Cog
 from config import YAMLConfig as Config
 from db import DB
 from discord.app_commands.errors import AppCommandError, CheckFailure
+from controllers import reaction_controller
+from util.discord_utils import DiscordUtils
 
+LOG = logging.getLogger(__name__)
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 # these are hardcoded until raze to radiant is over, or config file changes are allowed
@@ -46,3 +49,36 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         await interaction.response.send_message(
             f"Robomoji delay time set to {result} seconds!"
         )
+
+    @app_commands.command(name="set_crowd_mute_limit")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(count="Number of reactions required for crowd mute")
+    async def set_crowd_mute_limit(self, interaction: Interaction, count: int):
+        """Sets required amount of reactions for crowd mute"""
+        if count <= 0:
+            return await interaction.response.send_message(
+                    "Count must be more than 0", ephemeral=True
+            )
+        reaction_controller.CROWD_MUTE_THRESHOLD = count
+        await DiscordUtils.reply(
+            interaction, content=f"Crowd mute threshold set to {count}", ephemeral=True
+            )
+
+    @app_commands.command(name="disable_crowd_mute")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    async def disable_crowd_mute(self, interaction: Interaction):
+        """Disables crowd mute feature"""
+        reaction_controller.CROWD_MUTE_ENABLED = False
+        await DiscordUtils.reply(
+            interaction, content="Crowd mute feature disabled", ephemeral=True
+        )
+
+    @app_commands.command(name="enable_crowd_mute")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    async def enable_crowd_mute(self, interaction: Interaction):
+        """Enables crowd mute feature"""
+        reaction_controller.CROWD_MUTE_ENABLED = True
+        await DiscordUtils.reply(
+            interaction, content="Crowd mute feature enabled", ephemeral=True
+        )
+

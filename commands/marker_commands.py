@@ -384,7 +384,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
         
         if (time.time() - PING_LOCKOUT_SECONDS) < self.LAST_PING_TIME:
             await interaction.response.send_message(
-                f"Last marker was set within {PING_LOCKOUT_SECONDS} seconds, aborting",
+                f"Last ping was set within {PING_LOCKOUT_SECONDS} seconds, aborting",
                 ephemeral=True,
             )
             return

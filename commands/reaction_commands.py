@@ -85,11 +85,7 @@ class ReactionCommands(app_commands.Group, name="reactions"):
     ):
         """Enables or disables crowd mute feature"""
         reaction_controller.CROWD_MUTE_ENABLED = enable
-
-        message = "Crowd mute feature "
-        if enable:
-            message = message + "enabled"
-        else:
-            message = message + "disabled"
+        status_message = "enabled!" if enable else "disabled!"
+        message = f"Crowd mute feature {status_message}"
 
         await DiscordUtils.reply(interaction, content=message, ephemeral=True)

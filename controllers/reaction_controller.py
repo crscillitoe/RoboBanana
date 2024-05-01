@@ -1,4 +1,4 @@
-from discord import Message, Reaction
+from discord import HTTPException, Message, Reaction
 from db import DB
 from datetime import datetime, timedelta
 import logging
@@ -51,7 +51,12 @@ class ReactionController:
             or robomoji_allowed_datetime <= datetime.now()
         ):
             for emoji in emojis:
-                await message.add_reaction(emoji)
+                try:
+                    await message.add_reaction(emoji)
+                except HTTPException as e:
+                    if e.code == 10014:
+                        LOG.error(f"Emoji {emoji} does not exist, removing from DB.")
+                        DB().toggle_emoji_reaction(message.author.id, emoji)
             DB().set_emoji_reaction_last_used(message.author.id, datetime.now())
 
     @staticmethod

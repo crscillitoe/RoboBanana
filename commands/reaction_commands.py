@@ -58,11 +58,11 @@ class ReactionCommands(app_commands.Group, name="reactions"):
     @app_commands.describe(count="Number of reactions required for crowd mute")
     @app_commands.describe(duration="Duration of crowd mute")
     async def configure_crowd_mute(
-            self,
-            interaction: Interaction,
-            count: Optional[int] = CROWD_MUTE_THRESHOLD,
-            duration: Optional[int] = CROWD_MUTE_DURATION
-        ):
+        self,
+        interaction: Interaction,
+        count: Optional[int] = CROWD_MUTE_THRESHOLD,
+        duration: Optional[int] = CROWD_MUTE_DURATION,
+    ):
         """Configures parameters for crowd mute"""
         if count <= 0 or duration <= 0:
             return await interaction.response.send_message(
@@ -72,13 +72,17 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         reaction_controller.CROWD_MUTE_THRESHOLD = count
 
         await DiscordUtils.reply(
-                interaction, content=f"""Crowd mute configured\nThreshold: {count}\nDuration: {duration}""", ephemeral=True
+            interaction,
+            content=f"""Crowd mute configured\nThreshold: {count}\nDuration: {duration}""",
+            ephemeral=True,
         )
 
     @app_commands.command(name="enable_crowd_mute")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(enable="True/False that manages availability of crowd mute")
-    async def enable_crowd_mute(self, interaction: Interaction, enable: Optional[bool] = True):
+    async def enable_crowd_mute(
+        self, interaction: Interaction, enable: Optional[bool] = True
+    ):
         """Enables or disables crowd mute feature"""
         reaction_controller.CROWD_MUTE_ENABLED = enable
 
@@ -88,6 +92,4 @@ class ReactionCommands(app_commands.Group, name="reactions"):
         else:
             message = message + "disabled"
 
-        await DiscordUtils.reply(
-            interaction, content=message, ephemeral=True
-        )
+        await DiscordUtils.reply(interaction, content=message, ephemeral=True)

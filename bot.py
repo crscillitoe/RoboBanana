@@ -152,22 +152,6 @@ class RaffleBot(Client):
         ):
             await SubController.subscribe(message, self)
 
-        if viewer_commands.ACTIVE_CHATTER_KEYWORD is not None:
-            if viewer_commands.ACTIVE_CHATTER_KEYWORD in message.content:
-                mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
-                if any(
-                    role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
-                    for role in message.author.roles
-                ):
-                    mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
-        else:
-            mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
-            if any(
-                role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
-                for role in message.author.roles
-            ):
-                mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
-
         # Only look in the active stream channel
         if message.channel.id == STREAM_CHAT_ID:
             await self.check_message_length(message)
@@ -185,6 +169,22 @@ class RaffleBot(Client):
                     target=publish_cool,
                     args=(-1,),
                 ).start()
+
+            if viewer_commands.ACTIVE_CHATTER_KEYWORD is not None:
+                if viewer_commands.ACTIVE_CHATTER_KEYWORD in message.content:
+                    mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
+                    if any(
+                        role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
+                        for role in message.author.roles
+                    ):
+                        mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
+            else:
+                mod_commands.ACTIVE_CHATTERS[message.author.id] = time.time()
+                if any(
+                    role.id in [TIER3_ROLE, GIFTED_TIER3_ROLE]
+                    for role in message.author.roles
+                ):
+                    mod_commands.ACTIVE_T3_CHATTERS[message.author.id] = time.time()
 
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
         await ReactionController.apply_crowd_mute(reaction)

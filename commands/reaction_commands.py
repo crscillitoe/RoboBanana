@@ -73,7 +73,7 @@ class ReactionCommands(app_commands.Group, name="reactions"):
 
         await DiscordUtils.reply(
             interaction,
-            content=f"""Crowd mute configured\nThreshold: {count}\nDuration: {duration}""",
+            content=f"Crowd mute configured\nThreshold: {count}\nDuration: {duration}",
             ephemeral=True,
         )
 

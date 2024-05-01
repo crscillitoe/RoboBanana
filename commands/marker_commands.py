@@ -379,7 +379,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
         STAFF_DEVELOPER_ROLE
         PREDICTION_DEALER_ROLE
     )
-    @app_commands.describe(voice="Ping a role")
+    @app_commands.describe(ping="Ping a role")
     async def Event_Ping(self, interaction: Interaction, ping: Pings) -> None:    
         
         if (time.time() - PING_LOCKOUT_SECONDS) < self.LAST_PING_TIME:

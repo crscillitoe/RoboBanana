@@ -1,4 +1,9 @@
 # RoboBanana Changelog
+## 2024.05.01
+This update requires `/sync sync` to be run once
+### Additions and Fixes:
+- Merge enable/disable command of crowd mute functionality ([#153](https://github.com/crscillitoe/RoboBanana/pull/153)) (By [Leshy](https://github.com/lorinvzyl))
+- Rename "set_crowd_mute_limit" to "configure_crowd_mute", and added duration as an argument ([#153](https://github.com/crscillitoe/RoboBanana/pull/153)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.04.29
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

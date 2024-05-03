@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from discord import app_commands, Interaction, Client, User
 from discord.ext.commands import Cog
 from config import YAMLConfig as Config
@@ -10,6 +11,8 @@ from util.discord_utils import DiscordUtils
 LOG = logging.getLogger(__name__)
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+CROWD_MUTE_DURATION = Config.CONFIG["Discord"]["CrowdMute"]["Duration"]
+CROWD_MUTE_THRESHOLD = Config.CONFIG["Discord"]["CrowdMute"]["Threshold"]
 # these are hardcoded until raze to radiant is over, or config file changes are allowed
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
@@ -50,34 +53,39 @@ class ReactionCommands(app_commands.Group, name="reactions"):
             f"Robomoji delay time set to {result} seconds!"
         )
 
-    @app_commands.command(name="set_crowd_mute_limit")
+    @app_commands.command(name="configure_crowd_mute")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(count="Number of reactions required for crowd mute")
-    async def set_crowd_mute_limit(self, interaction: Interaction, count: int):
-        """Sets required amount of reactions for crowd mute"""
-        if count <= 0:
+    @app_commands.describe(duration="Duration of crowd mute")
+    async def configure_crowd_mute(
+        self,
+        interaction: Interaction,
+        count: Optional[int] = CROWD_MUTE_THRESHOLD,
+        duration: Optional[int] = CROWD_MUTE_DURATION,
+    ):
+        """Configures parameters for crowd mute"""
+        if count <= 0 or duration <= 0:
             return await interaction.response.send_message(
-                "Count must be more than 0", ephemeral=True
+                "An input of 0 or less is not valid", ephemeral=True
             )
+        reaction_controller.CROWD_MUTE_DURATION = duration
         reaction_controller.CROWD_MUTE_THRESHOLD = count
-        await DiscordUtils.reply(
-            interaction, content=f"Crowd mute threshold set to {count}", ephemeral=True
-        )
 
-    @app_commands.command(name="disable_crowd_mute")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def disable_crowd_mute(self, interaction: Interaction):
-        """Disables crowd mute feature"""
-        reaction_controller.CROWD_MUTE_ENABLED = False
         await DiscordUtils.reply(
-            interaction, content="Crowd mute feature disabled", ephemeral=True
+            interaction,
+            content=f"Crowd mute configured\nThreshold: {count}\nDuration: {duration}",
+            ephemeral=True,
         )
 
     @app_commands.command(name="enable_crowd_mute")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def enable_crowd_mute(self, interaction: Interaction):
-        """Enables crowd mute feature"""
-        reaction_controller.CROWD_MUTE_ENABLED = True
-        await DiscordUtils.reply(
-            interaction, content="Crowd mute feature enabled", ephemeral=True
-        )
+    @app_commands.describe(enable="True/False that manages availability of crowd mute")
+    async def enable_crowd_mute(
+        self, interaction: Interaction, enable: Optional[bool] = True
+    ):
+        """Enables or disables crowd mute feature"""
+        reaction_controller.CROWD_MUTE_ENABLED = enable
+        status_message = "enabled!" if enable else "disabled!"
+        message = f"Crowd mute feature {status_message}"
+
+        await DiscordUtils.reply(interaction, content=message, ephemeral=True)

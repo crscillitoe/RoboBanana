@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.05.03
+### Additions and Fixes:
+- Add defer function to discord_utils and updated reply function to support use of added function ([#154](https://github.com/crscillitoe/RoboBanana/pull/154)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.05.01
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

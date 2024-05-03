@@ -5,6 +5,7 @@ LOG = logging.getLogger(__name__)
 
 DEFERRED_INTERACTION_IDS = []
 
+
 class DiscordUtils:
     @staticmethod
     async def reply(interaction: Interaction, *args, **kwargs):

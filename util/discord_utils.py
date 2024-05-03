@@ -5,6 +5,7 @@ LOG = logging.getLogger(__name__)
 
 DEFERRED_INTERACTIONS_ID = []
 
+
 class DiscordUtils:
     @staticmethod
     @staticmethod

@@ -3,14 +3,25 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
+DEFERRED_INTERACTIONS_ID = []
 
 class DiscordUtils:
     @staticmethod
+    @staticmethod
     async def reply(interaction: Interaction, *args, **kwargs):
         """Reply to an interaction regardless of if its been previously responded to"""
+        if interaction.id in DEFERRED_INTERACTIONS_ID:
+            DEFERRED_INTERACTIONS_ID.remove(interaction.id)
+            return await interaction.followup.send(*args, **kwargs)
         if interaction.response.is_done():
             return await interaction.followup.send(*args, **kwargs)
         return await interaction.response.send_message(*args, **kwargs)
+
+    @staticmethod
+    async def defer(interaction: Interaction, *args, **kwargs):
+        """Defer interaction response and hold interaction ID"""
+        DEFERRED_INTERACTIONS_ID.append(interaction.id)
+        return await interaction.response.defer(*args, **kwargs)
 
     @staticmethod
     async def audit(

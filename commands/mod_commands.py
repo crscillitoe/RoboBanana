@@ -596,8 +596,8 @@ class ModCommands(app_commands.Group, name="mod"):
     ) -> None:
         """Temporarily sets availability and cost of the emote animation redemption. Resets to Enabled and 10k on bot restarts."""
 
-        t3_commands.T3_EMOJI_ANIMATION_ENABLED = enabled
-        t3_commands.T3_EMOJI_ANIMATION_REQUIRED_POINTS = cost
+        t3_commands.T3_EMOTE_ANIMATION_ENABLED = enabled
+        t3_commands.T3_EMOTE_ANIMATION_REQUIRED_POINTS = cost
         enabled_text = "enabled" if enabled else "disabled"
 
         await interaction.response.send_message(

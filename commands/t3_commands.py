@@ -42,7 +42,7 @@ class VoiceAI(enum.Enum):
     Woohoojin = "7ZWN6n7MF2qj1tgTiosb"
 
 
-class EmojiAnimation(enum.Enum):
+class EmoteAnimation(enum.Enum):
     Fountains = "fountains"
     Fireworks = "fireworks"
 
@@ -58,9 +58,9 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 T3_TTS_ENABLED = True
 T3_TTS_REQUIRED_POINTS = 10000
 
-T3_EMOJI_ANIMATION_ENABLED = True
-T3_EMOJI_ANIMATION_REQUIRED_POINTS = 10000
-CUSTOM_EMOJI_PATTERN = re.compile("(<a?:\w+:\d{17,19}>?)")
+T3_EMOTE_ANIMATION_ENABLED = True
+T3_EMOTE_ANIMATION_REQUIRED_POINTS = 10000
+CUSTOM_EMOTE_PATTERN = re.compile("(<a?:\w+:\d{17,19}>?)")
 
 
 @app_commands.guild_only()
@@ -133,25 +133,25 @@ class T3Commands(app_commands.Group, name="tier3"):
     )
     @app_commands.describe(animation="The emote animation to play.")
     @app_commands.describe(
-        emote="Must be at least one custom emoji. Not all animations support multiple emoji, defaulting to the first."
+        emote="Must be at least one custom emote. Not all animations support multiple emote, defaulting to the first."
     )
     async def emote_animation(
-        self, interaction: Interaction, animation: EmojiAnimation, emote: str
+        self, interaction: Interaction, animation: EmoteAnimation, emote: str
     ) -> None:
         """Pay to play an emote animation on stream"""
 
-        if T3_EMOJI_ANIMATION_ENABLED == False:
+        if T3_EMOTE_ANIMATION_ENABLED == False:
             return await interaction.response.send_message(
                 f"The emote animation redemption is currently disabled.",
                 ephemeral=True,
             )
 
-        required_points = T3_EMOJI_ANIMATION_REQUIRED_POINTS
+        required_points = T3_EMOTE_ANIMATION_REQUIRED_POINTS
 
-        custom_emotes = CUSTOM_EMOJI_PATTERN.findall(emote)
+        custom_emotes = CUSTOM_EMOTE_PATTERN.findall(emote)
         if len(custom_emotes) == 0:
             return await interaction.response.send_message(
-                f"Please provide at least one custom emoji for the emote animation.",
+                f"Please provide at least one custom emote for the emote animation.",
                 ephemeral=True,
             )
 
@@ -208,7 +208,7 @@ class T3Commands(app_commands.Group, name="tier3"):
         ).start()
 
         await interaction.response.send_message(
-            f"Emoji animation redeemed! You have {balance} points remaining after spending {required_points}.",
+            f"Emote animation redeemed! You have {balance} points remaining after spending {required_points}.",
             ephemeral=True,
         )
 

@@ -103,7 +103,10 @@ def deposit_points(
             select(ChannelPoints).where(ChannelPoints.user_id == user_id)
         ).first()
         if result is None:
-            return False, -1
+            sess.execute(
+                insert(ChannelPoints).values(user_id=user_id, points=point_amount)
+            )
+            return True, point_amount
 
         channel_points: ChannelPoints = result[0]
         new_balance = channel_points.points + point_amount

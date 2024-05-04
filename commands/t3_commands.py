@@ -1,22 +1,28 @@
-from copy import copy
-from typing import Optional
+import re
+from threading import Thread
 from discord import (
-    Color,
-    Embed,
-    Guild,
     app_commands,
     Interaction,
     Client,
-    User,
 )
 from discord.app_commands.errors import AppCommandError, CheckFailure
 import enum
 
+import requests
+
+from controllers.point_history_controller import PointHistoryController
 from db import DB
 from config import YAMLConfig as Config
 import logging
 
+from models.transaction import Transaction
+from util.server_utils import get_base_url
 from views.rewards.redeem_tts_view import RedeemTTSView
+
+LOG = logging.getLogger(__name__)
+
+PUBLISH_URL = f"{get_base_url()}/publish-streamdeck"
+AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 
 class VoiceAI(enum.Enum):
@@ -36,6 +42,11 @@ class VoiceAI(enum.Enum):
     Woohoojin = "7ZWN6n7MF2qj1tgTiosb"
 
 
+class EmoteAnimation(enum.Enum):
+    Fountains = "fountains"
+    Fireworks = "fireworks"
+
+
 T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
@@ -46,6 +57,10 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 T3_TTS_ENABLED = True
 T3_TTS_REQUIRED_POINTS = 10000
+
+T3_EMOTE_ANIMATION_ENABLED = True
+T3_EMOTE_ANIMATION_REQUIRED_POINTS = 10000
+CUSTOM_EMOTE_PATTERN = re.compile("(<a?:\w+:\d{17,19}>?)")
 
 
 @app_commands.guild_only()
@@ -106,3 +121,109 @@ class T3Commands(app_commands.Group, name="tier3"):
             user_points, voice.value, voice.name, required_points, self.client
         )
         await interaction.response.send_modal(modal)
+
+    @app_commands.command(name="emote_animation")
+    @app_commands.checks.has_any_role(
+        T3_ROLE,
+        GIFTED_T3_ROLE,
+        TWITCH_T3_ROLE,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        STAFF_DEVELOPER_ROLE,
+    )
+    @app_commands.describe(animation="The emote animation to play.")
+    @app_commands.describe(
+        emote="Must be at least one custom emote. Not all animations support multiple emote, defaulting to the first."
+    )
+    async def emote_animation(
+        self, interaction: Interaction, animation: EmoteAnimation, emote: str
+    ) -> None:
+        """Pay to play an emote animation on stream"""
+
+        if T3_EMOTE_ANIMATION_ENABLED == False:
+            return await interaction.response.send_message(
+                f"The emote animation redemption is currently disabled.",
+                ephemeral=True,
+            )
+
+        required_points = T3_EMOTE_ANIMATION_REQUIRED_POINTS
+
+        custom_emotes = CUSTOM_EMOTE_PATTERN.findall(emote)
+        if len(custom_emotes) == 0:
+            return await interaction.response.send_message(
+                f"Please provide at least one custom emote for the emote animation.",
+                ephemeral=True,
+            )
+
+        if any(
+            role.id in [MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE]
+            for role in interaction.user.roles
+        ):
+            required_points = 0
+
+        user_points = DB().get_point_balance(interaction.user.id)
+        if not user_points:
+            return await interaction.response.send_message(
+                "Failed to retrieve point balance - please try again.", ephemeral=True
+            )
+
+        if user_points < required_points:
+            return await interaction.response.send_message(
+                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                ephemeral=True,
+            )
+
+        if required_points > 0:
+            success, balance = DB().withdraw_points(
+                interaction.user.id, required_points
+            )
+            if not success:
+                return await interaction.response.send_message(
+                    "Failed to redeem reward - please try again.", ephemeral=True
+                )
+
+            PointHistoryController.record_transaction(
+                Transaction(
+                    interaction.user.id,
+                    -required_points,
+                    self.user_points,
+                    balance,
+                    "TTS Redemption",
+                )
+            )
+        else:
+            balance = DB().get_point_balance(interaction.user.id)
+
+        custom_emote_links = []
+        for emote in custom_emotes:
+            custom_emote_type = "gif" if emote.startswith("<a") else "png"
+            custom_emote_id = emote.split(":")[-1].replace(">", "")
+            custom_emote_links.append(
+                f"https://cdn.discordapp.com/emojis/{custom_emote_id}.{custom_emote_type}"
+            )
+
+        Thread(
+            target=publish_emote_animation,
+            args=(animation.value, custom_emote_links),
+        ).start()
+
+        await interaction.response.send_message(
+            f"Emote animation redeemed! You have {balance} points remaining after spending {required_points}.",
+            ephemeral=True,
+        )
+
+
+def publish_emote_animation(animation: str, emotes: list[str]):
+    payload = {
+        "type": "happy-emotes",
+        "location": "special",
+        "animation": animation,
+        "emotes": ",".join(emotes),
+    }
+
+    response = requests.post(
+        url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to publish emote animation: {response.text}")

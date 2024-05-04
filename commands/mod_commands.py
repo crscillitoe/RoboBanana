@@ -580,6 +580,31 @@ class ModCommands(app_commands.Group, name="mod"):
             ephemeral=True,
         )
 
+    @app_commands.command(name="set_emote_animation_values")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(
+        enabled="Whether or not emote animations should be enabeld. Set to Enabled by default."
+    )
+    @app_commands.describe(
+        cost="The cost to use emote animations redemption. Set to 10k by default."
+    )
+    async def set_emote_animation_values(
+        self,
+        interaction: Interaction,
+        enabled: Optional[bool] = True,
+        cost: Optional[int] = 10000,
+    ) -> None:
+        """Temporarily sets availability and cost of the emote animation redemption. Resets to Enabled and 10k on bot restarts."""
+
+        t3_commands.T3_EMOTE_ANIMATION_ENABLED = enabled
+        t3_commands.T3_EMOTE_ANIMATION_REQUIRED_POINTS = cost
+        enabled_text = "enabled" if enabled else "disabled"
+
+        await interaction.response.send_message(
+            f"Emote animation set to {enabled_text}, cost set to {cost} points! Will reset to enabled and 10k points on bot restart.",
+            ephemeral=True,
+        )
+
 
 def publish_poll(title, option_one, option_two, option_three, option_four):
     payload = {

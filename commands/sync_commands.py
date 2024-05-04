@@ -41,12 +41,16 @@ class SyncCommands(app_commands.Group, name="sync"):
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE)
     async def sync(self, interaction: Interaction) -> None:
         """Manually sync slash commands to guild"""
-        guild = interaction.guild
-        self.tree.clear_commands(guild=guild)
-        SyncUtils.add_commands_to_tree(self.tree, self.client, override=True)
-        self.tree.copy_global_to(guild=guild)
-        await self.tree.sync(guild=guild)
-        await interaction.response.send_message("Commands synced", ephemeral=True)
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        try:
+            guild = interaction.guild
+            self.tree.clear_commands(guild=guild)
+            SyncUtils.add_commands_to_tree(self.tree, self.client, override=True)
+            self.tree.copy_global_to(guild=guild)
+            await self.tree.sync(guild=guild)
+            await interaction.followup.send("Commands synced", ephemeral=True)
+        except Exception as e:
+            await interaction.followup.send(f"Command sync failed: {e}", ephemeral=True)
 
     @app_commands.command(name="info")
     @app_commands.checks.has_any_role(

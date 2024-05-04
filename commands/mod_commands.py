@@ -336,22 +336,18 @@ class ModCommands(app_commands.Group, name="mod"):
             f"Successfully removed {name}!", ephemeral=True
         )
 
-    @app_commands.command(name="allow_redemptions")
+    @app_commands.command(name="set_redemption_status")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def allow_redemptions(self, interaction: Interaction):
-        """Allow rewards to be redeemed"""
-        DB().allow_redemptions()
-        await interaction.response.send_message(
-            "Redemptions are now enabled", ephemeral=True
-        )
+    async def set_redemption_status(self, interaction: Interaction, enabled: bool):
+        """Set reward redemption status to allowed or paused"""
+        if enabled == True:
+            DB().allow_redemptions()
+        else:
+            DB().pause_redemptions()
 
-    @app_commands.command(name="pause_redemptions")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def pause_redemptions(self, interaction: Interaction):
-        """Pause rewards from being redeemed"""
-        DB().pause_redemptions()
+        text = "allowed" if enabled else "paused"
         await interaction.response.send_message(
-            "Redemptions are now paused", ephemeral=True
+            f"Redemptions are now {text}", ephemeral=True
         )
 
     @app_commands.command(name="check_redemption_status")

@@ -1,4 +1,3 @@
-from copy import copy
 import re
 from threading import Thread
 from discord import (
@@ -219,7 +218,7 @@ def publish_emote_animation(animation: str, emotes: list[str]):
         "type": "happy-emotes",
         "location": "special",
         "animation": animation,
-        "emotes": emotes,
+        "emotes": ",".join(emotes),
     }
 
     response = requests.post(

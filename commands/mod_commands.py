@@ -559,37 +559,28 @@ class ModCommands(app_commands.Group, name="mod"):
 
         await interaction.response.send_message("Winner removed!")
 
-    @app_commands.command(name="enable_tts_redemptions")
+    @app_commands.command(name="set_tts_values")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def enable_tts_redemptions(self, interaction: Interaction) -> None:
-        """Enables the T3 TTS redemption"""
-        t3_commands.T3_TTS_ENABLED = True
-
-        await interaction.response.send_message(
-            "T3 TTS redemption enabled!", ephemeral=True
-        )
-
-    @app_commands.command(name="disable_tts_redemptions")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    async def disable_tts_redemptions(self, interaction: Interaction) -> None:
-        """Disables the T3 TTS redemption until it is reenabled with the enable command or by a bot restart"""
-        t3_commands.T3_TTS_ENABLED = False
-
-        await interaction.response.send_message(
-            "T3 TTS redemption disabled!", ephemeral=True
-        )
-
-    @app_commands.command(name="set_tts_cost")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(
+        enabled="Whether or not T3 TTS should be enabeld. Set to Enabled by default."
+    )
     @app_commands.describe(
         cost="The cost to use T3 TTS redemption. Set to 10k by default."
     )
-    async def set_tts_cost(self, interaction: Interaction, cost: int) -> None:
-        """Temporarily sets the cost of the T3 TTS redemption. Cost resets to 10k on bot restarts."""
+    async def set_tts_values(
+        self,
+        interaction: Interaction,
+        enabled: Optional[bool] = True,
+        cost: Optional[int] = 10000,
+    ) -> None:
+        """Temporarily sets availability and cost of the T3 TTS redemption. Resets to Enabled and 10k on bot restarts."""
+
+        t3_commands.T3_TTS_ENABLED = enabled
         t3_commands.T3_TTS_REQUIRED_POINTS = cost
+        enabled_text = "enabled" if enabled else "disabled"
 
         await interaction.response.send_message(
-            f"T3 TTS cost set to {cost} points! Will reset to 10k points on bot restart.",
+            f"T3 TTS set to {enabled_text}, cost set to {cost} points! Will reset to enabled and 10k points on bot restart.",
             ephemeral=True,
         )
 

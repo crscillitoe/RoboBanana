@@ -8,6 +8,9 @@ from discord import (
 from controllers.predictions.close_prediction_controller import (
     ClosePredictionController,
 )
+from controllers.predictions.create_prediction_controller import (
+    CreatePredictionController,
+)
 from controllers.predictions.payout_prediction_controller import (
     PayoutPredictionController,
 )
@@ -142,3 +145,27 @@ class PredictionCommands(app_commands.Group, name="prediction"):
     async def redo_payout(self, interaction: Interaction, option: PredictionOutcome):
         """Redo the last prediction's payout"""
         await PayoutPredictionController.redo_payout(option, interaction, self.client)
+
+    @app_commands.command(name="rename_prediction")
+    @app_commands.checks.has_any_role(
+        MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE, PREDICTION_DEALER_ROLE
+    )
+    @app_commands.describe(name="New prediction name")
+    @app_commands.describe(left="New left option")
+    @app_commands.describe(right="New right option")
+    async def rename_prediction(
+        self,
+        interaction: Interaction,
+        name: str,
+        left: str,
+        right: str,
+    ):
+        """Rename the ongoing prediction"""
+        if not DB().has_ongoing_prediction(interaction.guild_id):
+            return await interaction.response.send_message(
+                "There is no open prediction!", ephemeral=True
+            )
+        await CreatePredictionController.rename_prediction(
+            interaction.guild_id, name, left, right, client=self.client
+        )
+        await interaction.response.send_message("Prediction renamed!", ephemeral=True)

@@ -60,6 +60,7 @@ from .predictions import (
     get_prediction_summary,
     get_user_prediction_entry,
     has_ongoing_prediction,
+    rename_prediction,
     set_prediction_outcome,
 )
 from .channel_rewards import (
@@ -555,6 +556,25 @@ class DB:
             end_time,
             set_nickname,
             self.session,
+        )
+
+    def rename_prediction(
+        self,
+        guild_id: int,
+        description: str,
+        option_one: str,
+        option_two: str,
+    ):
+        """Rename an ongoing prediction
+
+        Args:
+            guild_id (int): Discord Guild ID initiating prediction
+            description (str): Description of what viewers are trying to predict
+            option_one (str): First option that users can vote for
+            option_two (str): Second option that users can vote for
+        """
+        return rename_prediction(
+            guild_id, description, option_one, option_two, self.session
         )
 
     def has_ongoing_prediction(self, guild_id: int) -> bool:

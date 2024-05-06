@@ -34,6 +34,28 @@ def create_prediction(
         )
 
 
+def rename_prediction(
+    guild_id: int,
+    description: str,
+    option_one: str,
+    option_two: str,
+    session: sessionmaker,
+) -> None:
+    if not has_ongoing_prediction(guild_id, session):
+        raise Exception("There is no ongoing prediction!")
+
+    with session() as sess:
+        sess.execute(
+            update(Prediction)
+            .where(Prediction.guild_id == guild_id)
+            .values(
+                description=description,
+                option_one=option_one,
+                option_two=option_two,
+            )
+        )
+
+
 def has_ongoing_prediction(guild_id: int, session: sessionmaker) -> bool:
     with session() as sess:
         stmt = (

@@ -64,3 +64,32 @@ class CreatePredictionController:
         await client.get_channel(PENDING_REWARDS_CHAT_ID).send(
             content="", embed=close_prediction_embed, view=close_prediction_view
         )
+
+    @staticmethod
+    async def rename_prediction(
+        guild_id: int,
+        description: str,
+        option_one: str,
+        option_two: str,
+        client: Client,
+    ):
+        DB().rename_prediction(
+            guild_id,
+            description,
+            option_one,
+            option_two,
+        )
+        prediction_id = DB().get_ongoing_prediction_id(guild_id)
+        UpdatePredictionController.publish_prediction_summary(prediction_id)
+        prediction_summary = DB().get_prediction_summary(prediction_id)
+        prediction_embed = PredictionEmbed(
+            guild_id, description, prediction_summary.end_time
+        )
+        prediction_view = PredictionView(
+            prediction_embed, option_one, option_two, client
+        )
+        channel = client.get_channel(DB().get_prediction_channel_id(prediction_id))
+        message = channel.get_partial_message(
+            DB().get_prediction_message_id(prediction_id)
+        )
+        await message.edit(content="", embed=prediction_embed, view=prediction_view)

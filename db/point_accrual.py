@@ -15,6 +15,7 @@ POINTS_PER_ACCRUAL = 50
 ROLE_MULTIPLIERS: dict[str, int] = {
     Config.CONFIG["Discord"]["Subscribers"]["Tier1Role"]: 2,
     Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]: 2,
+    Config.CONFIG["Discord"]["GoodMorning"]["RewardRole"]: 2,  # T2 GM Role
     Config.CONFIG["Discord"]["Subscribers"]["Tier2Role"]: 3,
     Config.CONFIG["Discord"]["Subscribers"]["GiftedTier2Role"]: 3,
     Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]: 4,

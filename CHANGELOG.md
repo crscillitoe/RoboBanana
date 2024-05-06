@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.05.06
+This update requires `/sync sync` to be run once
+### Additions and Fixes:
+- Added rename_prediction command to fix typos/overflows without having to remake the prediction ([b3e0235](https://github.com/crscillitoe/RoboBanana/commit/b3e02359c59c4c00b649b9518ff9d756b688cc4f))
 ## 2024.05.04
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

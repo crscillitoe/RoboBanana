@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.05.11
+### Additions and Fixes:
+- Assign 12mo and 6mo role if exceeding 12mo sub reward ([#156](https://github.com/crscillitoe/RoboBanana/pull/156)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.05.06
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

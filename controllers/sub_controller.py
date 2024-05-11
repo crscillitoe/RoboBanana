@@ -98,7 +98,6 @@ class SubController:
         num_months_subscribed: int,
         mention_thankyou: str,
     ):
-        LOG.info("here3")
         role_ids = SubController._get_duration_reward_roles(
             num_months_subscribed, mention_thankyou
         )

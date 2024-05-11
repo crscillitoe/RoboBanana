@@ -72,10 +72,9 @@ class SubController:
     ) -> Optional[int]:
         if "THE ONES WHO" not in mention_thankyou:
             return None
-        rewards_array_filtered = list(filter(
-            lambda s: s[0] <= num_months_subscribed,
-            SUB_DURATION_REWARDS
-        ))
+        rewards_array_filtered = list(
+            filter(lambda s: s[0] <= num_months_subscribed, SUB_DURATION_REWARDS)
+        )
         rewards_array_filtered = [role_id[1] for role_id in rewards_array_filtered]
         rewards_array_length = len(rewards_array_filtered)
 

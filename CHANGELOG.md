@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.05.11
+### Additions and Fixes:
+- Re-enable vod submission ([#157](https://github.com/crscillitoe/RoboBanana/pull/157)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.05.06
 This update requires `/sync sync` to be run once
 ### Additions and Fixes:

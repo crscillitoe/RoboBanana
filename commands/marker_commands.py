@@ -1,20 +1,36 @@
 from datetime import date, datetime, timedelta
 import time
 import re
-from discord import ChannelType, Guild, Interaction, app_commands, Client
+from discord import ChannelType, Guild, Interaction, app_commands, Client, AllowedMentions
 from discord.ext import tasks
 import requests
 from config import YAMLConfig as Config
 import logging
 from discord.app_commands.errors import AppCommandError, CheckFailure
+import enum
 
 from util.command_utils import CommandUtils
+
+class Pings(enum.Enum):
+    VOD_Review = "1186765238608089189"
+    Lunch_Time_Sub_Game = "1186766144158302279"
+    Ranked_Games = "1186765380472029204"
+    Pro_Analysis = "1186765320640286881"
+    Funday_Friday = "1186766668710555799"
+    Variety_Sunday = "1186768759290085498"
+    Content_Creation Office Hours = "1186765443512401981"
+    Low_ELO_Coaching = "1186765658873155656"
+    Setup_Review = "1186766606756487289"
+
+
+allowed_roles = [1186765238608089189, 1186766144158302279, 1186765380472029204, 1186765320640286881, 1186766668710555799, 1186768759290085498, 1186765443512401981, 1186765658873155656, 1186766606756487289]
 
 LOG = logging.getLogger(__name__)
 
 MARKER_CHANNEL = 1099680985467064360  # Change to config option once RtR is done - 1099680985467064360 on live
 MARKER_LOCKOUT_SECONDS = 180
 MARKER_SUBTRACT_SECONDS = 60
+PING_LOCKOUT_SECONDS = 180
 
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 CHAT_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["CMChatModerator"]
@@ -25,7 +41,8 @@ TIER3_ROLE_18MO = Config.CONFIG["Discord"]["Subscribers"]["18MonthTier3Role"]
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
 HIDDEN_MOD_ROLE = 1040337265790042172
-
+STAFF_DEVELOPER_ROLE = 1226317841272279131
+PREDICTION_DEALER_ROLE = 1229896209515282472
 
 @app_commands.guild_only()
 class MarkerCommands(app_commands.Group, name="marker"):
@@ -34,6 +51,7 @@ class MarkerCommands(app_commands.Group, name="marker"):
     THREAD_MESSAGE_ID = 0
     THREAD_TEXT = "0:00 Start"
     LAST_MARKER_TIME = time.time()
+    LAST_PING_TIME = time.time()
 
     def __init__(self, tree: app_commands.CommandTree, client: Client) -> None:
         super().__init__()
@@ -351,3 +369,31 @@ class MarkerCommands(app_commands.Group, name="marker"):
                 self.THREAD_MESSAGE_ID
             )
         ).edit(content=self.THREAD_TEXT)
+
+
+
+    @app_commands.command(name="Event_Ping")
+    @app_commands.checks.has_any_role(
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        STAFF_DEVELOPER_ROLE
+        PREDICTION_DEALER_ROLE
+    )
+    @app_commands.describe(ping="Ping a role")
+    async def Event_Ping(self, interaction: Interaction, ping: Pings) -> None:    
+        
+        if (time.time() - PING_LOCKOUT_SECONDS) < self.LAST_PING_TIME:
+            await interaction.response.send_message(
+                f"Last ping was set within {PING_LOCKOUT_SECONDS} seconds, aborting",
+                ephemeral=True,
+            )
+            return
+        self.LAST_PING_TIME = time.time()
+
+        role_mention = f"<@&{ping.value}>"
+        await interaction.response.send_message(
+            role_mention
+            allowed_mentions = discord.AllowedMentions(
+                roles=allowed_roles
+            )
+        )

@@ -105,12 +105,6 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     async def start(self, interaction: Interaction):
         """Opens the VOD Submission Prompt"""
 
-        await interaction.response.send_message(
-            "VOD Submissions are currently closed until Hooj has hit Radiant!",
-            ephemeral=True,
-        )
-        return
-
         modal = NewVodSubmissionModal(self.client)
         await interaction.response.send_modal(modal)
 

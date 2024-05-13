@@ -67,64 +67,63 @@ class SubController:
         return role_sub_data.get("total_months_subscribed", 1)
 
     @staticmethod
-    def _get_duration_reward_role(
+    def _get_duration_reward_roles(
         num_months_subscribed: int, mention_thankyou: str
     ) -> Optional[int]:
         if "THE ONES WHO" not in mention_thankyou:
             return None
-        for duration, role_id in SUB_DURATION_REWARDS:
-            if num_months_subscribed >= duration:
-                return role_id
-        return None
+        rewards_array_filtered = list(
+            filter(lambda s: s[0] <= num_months_subscribed, SUB_DURATION_REWARDS)
+        )
+        rewards_array_filtered = [role_id[1] for role_id in rewards_array_filtered]
+        rewards_array_length = len(rewards_array_filtered)
+
+        if rewards_array_length <= 3:
+            return rewards_array_filtered
+
+        # currently 12mo and 6mo are important roles as perms are linked to it
+        # so they should always be added even if 24mo role exists
+        # 12mo and 6mo will always be the last 2 elements in the list
+        rewards_array = []
+        rewards_array.append(rewards_array_filtered[0])
+        rewards_array.extend(rewards_array_filtered[-2:])
+
+        return rewards_array
 
     @staticmethod
     async def _assign_duration_reward(
         client: Client,
-        message: Message,
+        user_message: Message,
         num_months_subscribed: int,
         mention_thankyou: str,
     ):
-        role_id = SubController._get_duration_reward_role(
+        role_ids = SubController._get_duration_reward_roles(
             num_months_subscribed, mention_thankyou
         )
-        if role_id is None:
+        if not role_ids:
             return
 
-        duration_reward_role = message.guild.get_role(role_id)
-        success, message = await TempRoleController.set_role(
-            message.author, duration_reward_role, "31 days"
-        )
-
-        if not success:
-            fail_embed = Embed(
-                title="Failed to assign duration reward role",
-                description=message,
-                color=Colour.red(),
+        for role_id in role_ids:
+            duration_reward_role = user_message.guild.get_role(role_id)
+            success, message = await TempRoleController.set_role(
+                user_message.author, duration_reward_role, "31 days"
             )
-            return await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
 
-        # Always assign the 6 month role, this is to ensure there is a shared
-        # Role across all longer term T3 subs that we can use for embed permissions and
-        # Other things, such as pinging all longer term subscribers easily.
-        six_month = message.guild.get_role(SIX_MONTH_TIER_3_ROLE_ID)
-        success, message = await TempRoleController.set_role(
-            message.author, six_month, "31 days"
-        )
+            if not success:
+                fail_embed = Embed(
+                    title="Failed to assign duration reward role",
+                    description=message,
+                    color=Colour.red(),
+                )
+                await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
 
-        if not success:
-            fail_embed = Embed(
-                title="Failed to assign duration reward role",
+            embed = Embed(
+                title="Assigned Temprole",
                 description=message,
-                color=Colour.red(),
+                color=Colour.green(),
             )
-            return await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=fail_embed)
-
-        embed = Embed(
-            title="Assigned Temprole",
-            description=message,
-            color=Colour.green(),
-        )
-        await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=embed)
+            await client.get_channel(BOT_AUDIT_CHANNEL).send(embed=embed)
+        return
 
     @staticmethod
     async def subscribe(message: Message, client: Client):

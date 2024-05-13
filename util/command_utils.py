@@ -2,6 +2,13 @@ import enum
 
 
 class CommandUtils:
+
+    class VODReviewTypes(enum.Enum):
+        Regular = "VOD Review"
+        Duo_Coaching = "Duo Coaching"
+        Low_Elo_Coaching = "Low Elo Coaching"
+        Solo_Coaching = "Solo Coaching"
+
     class Agents(enum.Enum):
         Brimstone = "Brimstone"
         Viper = "Viper"

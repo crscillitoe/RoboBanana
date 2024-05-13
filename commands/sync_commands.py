@@ -43,6 +43,9 @@ class SyncCommands(app_commands.Group, name="sync"):
         """Manually sync slash commands to guild"""
         await interaction.response.defer(ephemeral=True, thinking=True)
         try:
+            logging.info(
+                f"Command sync started by {interaction.user.name} ({interaction.user.id})"
+            )
             guild = interaction.guild
             self.tree.clear_commands(guild=guild)
             SyncUtils.add_commands_to_tree(self.tree, self.client, override=True)
@@ -51,6 +54,7 @@ class SyncCommands(app_commands.Group, name="sync"):
             await interaction.followup.send("Commands synced", ephemeral=True)
         except Exception as e:
             await interaction.followup.send(f"Command sync failed: {e}", ephemeral=True)
+            logging.info(f"Command sync failed: {e}")
 
     @app_commands.command(name="info")
     @app_commands.checks.has_any_role(

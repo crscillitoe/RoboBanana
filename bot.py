@@ -106,19 +106,16 @@ class RaffleBot(Client):
 
         # The content we get might contain custom emoji, which will be displayed like this: <:hoojKEKW:1059961649412460575>
         # Since an emoji isn't actually that long (the ID and brackets are 20+ chars), we run a regex to count emoji and remove 20*x chars from the length for leniency
+        clean_content = message.clean_content
         custom_emoji_matches = dict(
             (full_match, name)
-            for full_match, name in re.findall(
-                CUSTOM_EMOJI_PATTERN, message.clean_content
-            )
+            for full_match, name in re.findall(CUSTOM_EMOJI_PATTERN, clean_content)
         )
         for match in custom_emoji_matches:
-            message.clean_content = message.clean_content.replace(
-                match, custom_emoji_matches[match]
-            )
+            clean_content = clean_content.replace(match, custom_emoji_matches[match])
 
         custom_emoji_count = len(custom_emoji_matches)
-        length = len(message.clean_content)
+        length = len(clean_content)
         if length > MAX_CHARACTER_LENGTH:
             content = message.content
             await message.delete()

@@ -7,6 +7,7 @@ import requests
 import discord
 from discord import (
     Member,
+    Role,
     User,
     app_commands,
     Client,
@@ -54,11 +55,23 @@ PENDING_REWARDS_CHAT_ID = Config.CONFIG["Discord"]["ChannelPoints"][
 GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
+# STAFF_DEVELOPER_ROLE should be 1226317841272279131 when committing and refers to the Staff Developer role
+HIDDEN_MOD_ROLE = 1040337265790042172
+STAFF_DEVELOPER_ROLE = 1226317841272279131
 FOSSA_BOT_ID = 488164251249279037
 SERVER_SUBSCRIPTION_MESSAGE_TYPE = 25
-MAX_CHARACTER_LENGTH = 200
 CUSTOM_EMOJI_PATTERN = re.compile("(<a?:(\w+):\d{17,19}>?)")
 MAX_EMOJI_COUNT = 5
+
+MAX_CHARACTER_LENGTH = 200
+ROLE_AND_USER_OVERRIDE: dict[str, int] = {
+    STAFF_DEVELOPER_ROLE: 300,
+    Config.CONFIG["Discord"]["Roles"]["Mod"]: 400,
+    HIDDEN_MOD_ROLE: 400,
+    1237760496191537176: 400,  # Hooj's Accountant
+    204343692960464896: 9999,  # Ethan
+}
 
 LOG = logging.getLogger(__name__)
 
@@ -100,10 +113,6 @@ class RaffleBot(Client):
             await self.check_message_length(message)
 
     async def check_message_length(self, message: Message):
-        # Ethan check
-        if message.author.id == 204343692960464896:
-            return
-
         # The content we get might contain custom emoji, which will be displayed like this: <:hoojKEKW:1059961649412460575>
         # Since an emoji isn't actually that long (the ID and brackets are 20+ chars), we run a regex to count emoji and remove 20*x chars from the length for leniency
         clean_content = message.clean_content
@@ -116,12 +125,14 @@ class RaffleBot(Client):
 
         custom_emoji_count = len(custom_emoji_matches)
         length = len(clean_content)
-        if length > MAX_CHARACTER_LENGTH:
+
+        user_max_length = get_length_for_user(message.author.roles, message.author.id)
+        if length > user_max_length:
             content = message.content
             await message.delete()
             await message.author.send(
                 "Hey! Keep your messages in the stream chat under"
-                f" {MAX_CHARACTER_LENGTH} characters please! Your message was"
+                f" {user_max_length} characters please! Your message was"
                 f" {length} characters long! Thanks! Here's your message: {content}."
             )
         if custom_emoji_count > MAX_EMOJI_COUNT:
@@ -205,6 +216,18 @@ def publish_cool(cool: int):
     )
     if response.status_code != 200:
         LOG.error(f"Failed to publish sub summary: {response.text}")
+
+
+def get_length_for_user(roles: list[Role], user_id: int) -> int:
+    for id, override in sorted(
+        ROLE_AND_USER_OVERRIDE.items(), key=lambda item: item[1], reverse=True
+    ):
+        if user_id == id:
+            return override
+        role = discord.utils.get(roles, id=id)
+        if role is not None:
+            return override
+    return MAX_CHARACTER_LENGTH
 
 
 async def main():

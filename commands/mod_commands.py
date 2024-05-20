@@ -112,9 +112,7 @@ class ModCommands(app_commands.Group, name="mod"):
         """Toggles the given user to show up as a talking entity on stream."""
         Thread(
             target=publish_talker,
-            args=(
-                user.id,
-            ),
+            args=(user.id,),
         ).start()
 
         await interaction.response.send_message("Talk event sent!", ephemeral=True)

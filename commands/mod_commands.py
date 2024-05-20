@@ -52,6 +52,7 @@ AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
 PUBLISH_TIMER_URL = f"{get_base_url()}/publish-timer"
 PUBLISH_CHESS_URL = f"{get_base_url()}/publish-chess"
+PUBLISH_STREAMDECK_URL = f"{get_base_url()}/publish-streamdeck"
 
 ACTIVE_DURATION = 5 * 60
 ACTIVE_CHATTERS = {}
@@ -103,6 +104,20 @@ class ModCommands(app_commands.Group, name="mod"):
         """Allows the given userID to submit a VOD."""
         DB().reset_user(user.id)
         await interaction.response.send_message("Success!", ephemeral=True)
+
+    @app_commands.command(name="talk")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(user="Discord user to talk on stream")
+    async def talk(self, interaction: Interaction, user: User) -> None:
+        """Toggles the given user to show up as a talking entity on stream."""
+        Thread(
+            target=publish_talker,
+            args=(
+                user.id,
+            ),
+        ).start()
+
+        await interaction.response.send_message("Talk event sent!", ephemeral=True)
 
     @app_commands.command(name="chess")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
@@ -645,18 +660,18 @@ def publish_chess(openValue, na, eu):
         LOG.error(f"Failed to publish chess: {response.text}")
 
 
-def publish_timer(time, direction: TimerDirection):
+def publish_talker(user_id):
     payload = {
-        "time": time,
-        "direction": direction.value,
+        "type": "talker",
+        "value": user_id,
     }
 
     response = requests.post(
-        url=PUBLISH_TIMER_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+        url=PUBLISH_STREAMDECK_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
     )
 
     if response.status_code != 200:
-        LOG.error(f"Failed to publish timer: {response.text}")
+        LOG.error(f"Failed to publish talker: {response.text}")
 
 
 def publish_timer(time, direction: TimerDirection):

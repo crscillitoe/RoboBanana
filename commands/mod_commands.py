@@ -108,12 +108,14 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.command(name="talk")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Discord user to talk on stream")
-    async def talk(self, interaction: Interaction, user: User) -> None:
+    @app_commands.describe(name="Name to render on overlay")
+    async def talk(self, interaction: Interaction, user: User, name: str) -> None:
         """Toggles the given user to show up as a talking entity on stream."""
         Thread(
             target=publish_talker,
             args=(
                 user.id,
+                name,
             ),
         ).start()
 
@@ -660,10 +662,11 @@ def publish_chess(openValue, na, eu):
         LOG.error(f"Failed to publish chess: {response.text}")
 
 
-def publish_talker(user_id):
+def publish_talker(user_id, name):
     payload = {
         "type": "talker",
         "value": user_id,
+        "name": name,
     }
 
     response = requests.post(

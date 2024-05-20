@@ -2,6 +2,7 @@ from typing import Optional
 from discord import app_commands, Interaction, Client, User
 from threading import Thread
 from config import YAMLConfig as Config
+from util.command_utils import CommandUtils
 from util.server_utils import get_base_url
 import requests
 import logging
@@ -43,7 +44,7 @@ class VodCommands(app_commands.Group, name="vod"):
         interaction: Interaction,
         user: User,
         riotid: str,
-        rank: str,
+        rank: CommandUtils.Ranks,
         username: Optional[str] = None,
     ) -> None:
         """Start a VOD review for the given username"""
@@ -53,7 +54,7 @@ class VodCommands(app_commands.Group, name="vod"):
                 user.display_name if username is None else username,
                 user.id,
                 riotid,
-                rank,
+                rank.name,
                 False,
             ),
         ).start()

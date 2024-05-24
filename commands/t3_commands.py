@@ -40,6 +40,7 @@ class VoiceAI(enum.Enum):
     Ulius = "iaQJDqRU1tDyF3NIhqsE"
     noodabooda = "zZnQVN1B20Q4qqE0fg8e"
     Woohoojin = "7ZWN6n7MF2qj1tgTiosb"
+    PeppaPig = "rCmVtv8cYU60uhlsOo1M"
 
 
 class EmoteAnimation(enum.Enum):

@@ -149,6 +149,17 @@ class RaffleBot(Client):
         if message.author == self.user or message.author.id == FOSSA_BOT_ID:
             return
 
+        # Hippo Sigma Check
+        if message.author.id == 908104473400987699:
+            brainrot = likely_brain_rot(message)
+            if brainrot[0]:
+                await message.channel.send(f"Hippo used a cringe word: {brainrot[1]}. I've timed him out for a minute.")
+                await message.author.timeout(
+                    timedelta(minutes=1),
+                    reason=f"Gen Alpha cringe detected: {brainrot[1]}",
+                )
+
+
         asyncio.get_event_loop().create_task(
             ReactionController.apply_reactions(message)
         )
@@ -197,6 +208,55 @@ class RaffleBot(Client):
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
         await ReactionController.apply_crowd_mute(reaction)
 
+
+def likely_brain_rot(message: Message) -> (bool, str):
+    content = message.content
+
+    # No leet speak here.
+    content = content.replace("1", "i")
+    content = content.replace("3", "e")
+    content = content.replace("4", "a")
+    content = content.replace("5", "s")
+    content = content.replace("0", "o")
+    content = content.replace("7", "t")
+    content = content.replace("$", "s")
+
+    brainrot = [
+        build_regex('sigma'),
+        build_regex('omega'),
+        build_regex('skibidi'),
+        build_regex('gyat'),
+        build_regex('rizz'),
+        build_regex('boomer'),
+        build_regex('ohio'),
+        build_regex('cope'),
+        build_regex('ratio'),
+        build_regex('nerd'),
+        build_regex('bussin'),
+        build_regex('mewing'),
+        build_regex('gronk'),
+        build_regex('jelq'),
+        build_regex('griddy'),
+        build_regex('ligma'),
+        build_regex('imposter'),
+        build_regex('amogus'),
+        build_regex('fanum'),
+        build_regex('maxxing'),
+    ]
+
+    for rot in brainrot:
+        found = re.findall(rot, content)
+        if len(found) > 0:
+            return (True, found[0])
+
+    return (False, "")
+
+def build_regex(cringe_word: str) -> str:
+    to_return = '(?i)'
+    for c in cringe_word:
+        to_return += c + '+'
+
+    return to_return
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)

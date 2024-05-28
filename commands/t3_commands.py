@@ -41,6 +41,8 @@ class VoiceAI(enum.Enum):
     noodabooda = "zZnQVN1B20Q4qqE0fg8e"
     Woohoojin = "7ZWN6n7MF2qj1tgTiosb"
     PeppaPig = "rCmVtv8cYU60uhlsOo1M"
+    LuckyGood = "SyxY6Mf6tHxMbEqcVguz"
+    LuckyFried = "4yqaHlXmTcFs0xjmQ6if"
 
 
 class EmoteAnimation(enum.Enum):

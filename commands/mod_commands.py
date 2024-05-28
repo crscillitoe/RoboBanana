@@ -109,13 +109,15 @@ class ModCommands(app_commands.Group, name="mod"):
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
     @app_commands.describe(user="Discord user to talk on stream")
     @app_commands.describe(name="Name to render on overlay")
-    async def talk(self, interaction: Interaction, user: User, name: str) -> None:
+    @app_commands.describe(voice="The voice to use for the TTS message.")
+    async def talk(self, interaction: Interaction, user: User, name: str, voice: t3_commands.VoiceAI) -> None:
         """Toggles the given user to show up as a talking entity on stream."""
         Thread(
             target=publish_talker,
             args=(
                 user.id,
                 name,
+                voice.value,
             ),
         ).start()
 
@@ -662,11 +664,12 @@ def publish_chess(openValue, na, eu):
         LOG.error(f"Failed to publish chess: {response.text}")
 
 
-def publish_talker(user_id, name):
+def publish_talker(user_id, name, voice):
     payload = {
         "type": "talker",
         "value": user_id,
         "name": name,
+        "voice": voice
     }
 
     response = requests.post(

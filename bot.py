@@ -149,11 +149,14 @@ class RaffleBot(Client):
         if message.author == self.user or message.author.id == FOSSA_BOT_ID:
             return
 
-        # Hippo Sigma Check
-        if message.author.id == 908104473400987699:
+        # Gen Alpha Role Custom Rules
+        if any(
+            role.id in [1245138880626425866]
+            for role in message.author.roles
+        ):
             brainrot = likely_brain_rot(message)
             if brainrot[0]:
-                await message.channel.send(f"Hippo used a cringe word: {brainrot[1]}. I've timed him out for a minute.")
+                await message.channel.send(f"{message.author.mention} used a cringe word: {brainrot[1]}. I've timed them out for a minute.")
                 await message.author.timeout(
                     timedelta(minutes=1),
                     reason=f"Gen Alpha cringe detected: {brainrot[1]}",

@@ -153,12 +153,13 @@ class RaffleBot(Client):
         if message.author.id == 908104473400987699:
             brainrot = likely_brain_rot(message)
             if brainrot[0]:
-                await message.channel.send(f"Hippo used a cringe word: {brainrot[1]}. I've timed him out for a minute.")
+                await message.channel.send(
+                    f"Hippo used a cringe word: {brainrot[1]}. I've timed him out for a minute."
+                )
                 await message.author.timeout(
                     timedelta(minutes=1),
                     reason=f"Gen Alpha cringe detected: {brainrot[1]}",
                 )
-
 
         asyncio.get_event_loop().create_task(
             ReactionController.apply_reactions(message)
@@ -222,26 +223,26 @@ def likely_brain_rot(message: Message) -> (bool, str):
     content = content.replace("$", "s")
 
     brainrot = [
-        build_regex('sigma'),
-        build_regex('omega'),
-        build_regex('skibidi'),
-        build_regex('gyat'),
-        build_regex('rizz'),
-        build_regex('boomer'),
-        build_regex('ohio'),
-        build_regex('cope'),
-        build_regex('ratio'),
-        build_regex('nerd'),
-        build_regex('bussin'),
-        build_regex('mewing'),
-        build_regex('gronk'),
-        build_regex('jelq'),
-        build_regex('griddy'),
-        build_regex('ligma'),
-        build_regex('imposter'),
-        build_regex('amogus'),
-        build_regex('fanum'),
-        build_regex('maxxing'),
+        build_regex("sigma"),
+        build_regex("omega"),
+        build_regex("skibidi"),
+        build_regex("gyat"),
+        build_regex("rizz"),
+        build_regex("boomer"),
+        build_regex("ohio"),
+        build_regex("cope"),
+        build_regex("ratio"),
+        build_regex("nerd"),
+        build_regex("bussin"),
+        build_regex("mewing"),
+        build_regex("gronk"),
+        build_regex("jelq"),
+        build_regex("griddy"),
+        build_regex("ligma"),
+        build_regex("imposter"),
+        build_regex("amogus"),
+        build_regex("fanum"),
+        build_regex("maxxing"),
     ]
 
     for rot in brainrot:
@@ -251,12 +252,14 @@ def likely_brain_rot(message: Message) -> (bool, str):
 
     return (False, "")
 
+
 def build_regex(cringe_word: str) -> str:
-    to_return = '(?i)'
+    to_return = "(?i)"
     for c in cringe_word:
-        to_return += c + '+'
+        to_return += c + "+"
 
     return to_return
+
 
 client = RaffleBot()
 tree = app_commands.CommandTree(client)

@@ -150,13 +150,12 @@ class RaffleBot(Client):
             return
 
         # Gen Alpha Role Custom Rules
-        if any(
-            role.id in [1245138880626425866]
-            for role in message.author.roles
-        ):
+        if any(role.id in [1245138880626425866] for role in message.author.roles):
             brainrot = likely_brain_rot(message)
             if brainrot[0]:
-                await message.channel.send(f"{message.author.mention} broke a rule applied to all Gen Alpha T3s: {brainrot[1]}. I've timed them out for a minute.")
+                await message.channel.send(
+                    f"{message.author.mention} used a cringe word: {brainrot[1]}. I've timed them out for a minute."
+                )
                 await message.author.timeout(
                     timedelta(minutes=1),
                     reason=f"Gen Alpha cringe detected: {brainrot[1]}",

@@ -156,7 +156,7 @@ class RaffleBot(Client):
         ):
             brainrot = likely_brain_rot(message)
             if brainrot[0]:
-                await message.channel.send(f"{message.author.mention} used a cringe word: {brainrot[1]}. I've timed them out for a minute.")
+                await message.channel.send(f"{message.author.mention} broke a rule applied to all Gen Alpha T3s: {brainrot[1]}. I've timed them out for a minute.")
                 await message.author.timeout(
                     timedelta(minutes=1),
                     reason=f"Gen Alpha cringe detected: {brainrot[1]}",
@@ -222,6 +222,10 @@ def likely_brain_rot(message: Message) -> (bool, str):
     content = content.replace("0", "o")
     content = content.replace("7", "t")
     content = content.replace("$", "s")
+    content = content.replace("|", "l")
+    content = content.replace("/", "l")
+    content = content.replace("\\", "l")
+    content = content.replace("*", "")
 
     brainrot = [
         build_regex("sigma"),
@@ -244,12 +248,17 @@ def likely_brain_rot(message: Message) -> (bool, str):
         build_regex("amogus"),
         build_regex("fanum"),
         build_regex("maxxing"),
+        build_regex("Σ"),
+        build_regex("erm what the"),
+        build_regex("erm, what the"),
+        build_regex("chat"),
+        build_regex("is this real"),
     ]
 
     for rot in brainrot:
         found = re.findall(rot, content)
         if len(found) > 0:
-            return (True, found[0])
+            return (True, rot)
 
     return (False, "")
 
@@ -257,7 +266,10 @@ def likely_brain_rot(message: Message) -> (bool, str):
 def build_regex(cringe_word: str) -> str:
     to_return = "(?i)"
     for c in cringe_word:
-        to_return += c + "+"
+        if c == "l" or c == "i":
+            to_return += "(l|i)" + "+"
+        else:
+            to_return += c + "+"
 
     return to_return
 

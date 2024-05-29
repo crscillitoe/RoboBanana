@@ -236,7 +236,6 @@ def likely_brain_rot(message: Message) -> (bool, str):
         build_regex("ohio"),
         build_regex("cope"),
         build_regex("ratio"),
-        build_regex("nerd"),
         build_regex("bussin"),
         build_regex("mewing"),
         build_regex("gronk"),

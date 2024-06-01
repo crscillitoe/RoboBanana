@@ -116,11 +116,14 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         # Disable submissions on vod review day and inform user what time they can submit again
         if today.weekday() == VOD_REVIEW_DAY:
             today = today.replace(hour=VOD_REVIEW_DAY_END, minute=0)
-            vod_review_date = (today + datetime.timedelta((VOD_REVIEW_DAY-today.weekday())%7)).astimezone(timezone('UTC'))
+            vod_review_date = (
+                today + datetime.timedelta((VOD_REVIEW_DAY - today.weekday()) % 7)
+            ).astimezone(timezone("UTC"))
             unixtime = time.mktime(vod_review_date.timetuple())
 
             return await interaction.response.send_message(
-                f"No new vods are accepted on vod review day, you can submit again at <t:{unixtime:.0f}:f>", ephemeral=True
+                f"No new vods are accepted on vod review day, you can submit again at <t:{unixtime:.0f}:f>",
+                ephemeral=True,
             )
         modal = NewVodSubmissionModal(self.client)
         await interaction.response.send_modal(modal)

@@ -43,9 +43,11 @@ PACIFIC_TZ = timezone("US/Pacific")
 
 LOG = logging.getLogger(__name__)
 
+
 class VODType(enum.Enum):
     approved = 1
     rejected = 2
+
 
 FIRST_HALF_STARTING_ROUNDS = [1, 2, 3]
 FIRST_HALF_NORMAL_ROUNDS_START = 4
@@ -78,7 +80,9 @@ class ManagerCommands(app_commands.Group, name="manager"):
     ) -> None:
         """Flag a VOD as the given type"""
         if not duration:
-            duration = await ManagerCommands.temprole_datetime_to(VOD_REVIEW_DAY,VOD_REVIEW_DAY_END)
+            duration = await ManagerCommands.temprole_datetime_to(
+                VOD_REVIEW_DAY, VOD_REVIEW_DAY_END
+            )
 
         if vod_type == VODType.approved:
             await ManagerCommands.process_vod(
@@ -248,14 +252,15 @@ class ManagerCommands(app_commands.Group, name="manager"):
         Desired day should be passed as a number between 0 and 6, representing the days of the week
         """
         today = datetime.datetime.now(PACIFIC_TZ)
-        today_desired_time = today.replace(hour=desired_hour,minute=0)
+        today_desired_time = today.replace(hour=desired_hour, minute=0)
 
         time_diff = datetime.timedelta(
-                days=(desired_day-today.weekday())%7,
-                hours=today_desired_time.hour-today.hour,
-                minutes=today_desired_time.minute-today.minute
+            days=(desired_day - today.weekday()) % 7,
+            hours=today_desired_time.hour - today.hour,
+            minutes=today_desired_time.minute - today.minute,
         )
 
-        temprole_time = f"{time_diff.days}d {time_diff.seconds//3600}h {time_diff.seconds//60%60}m"
+        temprole_time = (
+            f"{time_diff.days}d {time_diff.seconds//3600}h {time_diff.seconds//60%60}m"
+        )
         return temprole_time
-

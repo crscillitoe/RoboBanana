@@ -81,6 +81,29 @@ class T3Commands(app_commands.Group, name="tier3"):
         logging.error(error)
         return await super().on_error(interaction, error)
 
+    @app_commands.command(name="dnd")
+    @app_commands.checks.has_any_role(
+        T3_ROLE,
+        GIFTED_T3_ROLE,
+        TWITCH_T3_ROLE,
+        MOD_ROLE,
+        HIDDEN_MOD_ROLE,
+        STAFF_DEVELOPER_ROLE,
+    )
+    @app_commands.describe(voice="The voice your character will use in the overlay")
+    @app_commands.describe(use_spells="Set to True if you are comfortable with spell casting")
+    async def dnd(self, interaction: Interaction, voice: VoiceAI, use_spells: bool) -> None:
+        """Enter the raffle to play DND live on stream"""
+
+        Thread(
+            target=publish_dnd,
+            args=(interaction.user.id, voice.value, use_spells),
+        ).start()
+
+        return await interaction.response.send_message(
+            "You have entered the DND raffle!", ephemeral=True
+        )
+
     @app_commands.command(name="tts")
     @app_commands.checks.has_any_role(
         T3_ROLE,
@@ -230,3 +253,18 @@ def publish_emote_animation(animation: str, emotes: list[str]):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish emote animation: {response.text}")
+
+def publish_dnd(user_id: str, voice_id: str, can_mage: bool):
+    payload = {
+        "type": "dnd",
+        "user_id": user_id,
+        "voice_id": voice_id,
+        "can_mage": can_mage,
+    }
+
+    response = requests.post(
+        url=PUBLISH_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}
+    )
+
+    if response.status_code != 200:
+        LOG.error(f"Failed to dnd: {response.text}")

@@ -12,6 +12,7 @@ from threading import Thread
 import requests
 import logging
 import datetime
+import time
 from pytz import timezone
 from config import YAMLConfig as Config
 from discord.app_commands.errors import AppCommandError, CheckFailure
@@ -33,6 +34,7 @@ ACTIVE_CHATTER_KEYWORD = None
 PACIFIC_TZ = timezone("US/Pacific")
 # Number representing day of the week, from 0 through to 6
 VOD_REVIEW_DAY = 3
+VOD_REVIEW_DAY_END = 23
 
 
 @app_commands.guild_only()
@@ -110,10 +112,15 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     @app_commands.command(name="submit_vod")
     async def start(self, interaction: Interaction):
         """Opens the VOD Submission Prompt"""
-        today_weekday = datetime.datetime.now(PACIFIC_TZ).weekday()
-        if today_weekday == VOD_REVIEW_DAY:
+        today = datetime.datetime.now(PACIFIC_TZ)
+        # Disable submissions on vod review day and inform user what time they can submit again
+        if today.weekday() == VOD_REVIEW_DAY:
+            today = today.replace(hour=VOD_REVIEW_DAY_END, minute=0)
+            vod_review_date = (today + datetime.timedelta((VOD_REVIEW_DAY-today.weekday())%7)).astimezone(timezone('UTC'))
+            unixtime = time.mktime(vod_review_date.timetuple())
+
             return await interaction.response.send_message(
-                "No new vods are accepted on vod review day", ephemeral=True
+                f"No new vods are accepted on vod review day, you can submit again at <t:{unixtime:.0f}:f>", ephemeral=True
             )
         modal = NewVodSubmissionModal(self.client)
         await interaction.response.send_modal(modal)

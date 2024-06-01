@@ -11,6 +11,8 @@ from views.rewards.redeem_reward_view import RedeemRewardView
 from threading import Thread
 import requests
 import logging
+import datetime
+from pytz import timezone
 from config import YAMLConfig as Config
 from discord.app_commands.errors import AppCommandError, CheckFailure
 from util.server_utils import get_base_url
@@ -27,6 +29,10 @@ AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 # It's stupid that it's here but I don't know how else to make it work
 ACTIVE_CHATTER_KEYWORD = None
+
+PACIFIC_TZ = timezone("US/Pacific")
+# Number representing day of the week, from 0 through to 6
+VOD_REVIEW_DAY = 3
 
 
 @app_commands.guild_only()
@@ -104,7 +110,11 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     @app_commands.command(name="submit_vod")
     async def start(self, interaction: Interaction):
         """Opens the VOD Submission Prompt"""
-
+        today_weekday = datetime.datetime.now(PACIFIC_TZ).weekday()
+        if today_weekday == VOD_REVIEW_DAY:
+            return await interaction.response.send_message(
+                "No new vods are accepted on vod review day", ephemeral=True
+            )
         modal = NewVodSubmissionModal(self.client)
         await interaction.response.send_modal(modal)
 

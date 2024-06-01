@@ -91,8 +91,12 @@ class T3Commands(app_commands.Group, name="tier3"):
         STAFF_DEVELOPER_ROLE,
     )
     @app_commands.describe(voice="The voice your character will use in the overlay")
-    @app_commands.describe(use_spells="Set to True if you are comfortable with spell casting")
-    async def dnd(self, interaction: Interaction, voice: VoiceAI, use_spells: bool) -> None:
+    @app_commands.describe(
+        use_spells="Set to True if you are comfortable with spell casting"
+    )
+    async def dnd(
+        self, interaction: Interaction, voice: VoiceAI, use_spells: bool
+    ) -> None:
         """Enter the raffle to play DND live on stream"""
 
         Thread(
@@ -253,6 +257,7 @@ def publish_emote_animation(animation: str, emotes: list[str]):
 
     if response.status_code != 200:
         LOG.error(f"Failed to publish emote animation: {response.text}")
+
 
 def publish_dnd(user_id: str, voice_id: str, can_mage: bool):
     payload = {

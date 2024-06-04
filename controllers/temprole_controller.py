@@ -34,7 +34,6 @@ class TempRoleController:
         else:
             user_id = user
 
-        LOG.info(f"User id: {user_id}")
         try:
             delta = timedelta(seconds=timeparse(duration))
             expiration = datetime.now() + delta
@@ -152,7 +151,6 @@ class TempRoleController:
         except:
             LOG.warn(f"Failed to remove {role} from {member.name}")
             DB().delete_temprole(temprole.id)
-            continue
         return True, f"Removed {role.mention} from {user.mention}."
 
     @staticmethod

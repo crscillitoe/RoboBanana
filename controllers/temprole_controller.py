@@ -236,7 +236,9 @@ class TempRoleController:
             return False, f"{role} is higher than the top role accepted"
 
     @staticmethod
-    async def check_removed_roles(removed_roles : list[int], user: Member, guild_id: int):
+    async def check_removed_roles(
+        removed_roles: list[int], user: Member, guild_id: int
+    ):
         """
         Takes a list of roles that was removed from the user and
         checks if the removed role is part of any temproles assigned
@@ -246,10 +248,15 @@ class TempRoleController:
         """
         temproles = DB().get_user_temproles(user.id, guild_id)
 
-        removed_temproles = [temp for temp in temproles if temp.role_id in removed_roles]
+        removed_temproles = [
+            temp for temp in temproles if temp.role_id in removed_roles
+        ]
 
         for removed_temprole in removed_temproles:
-            if removed_temprole.role_id == APPROVED_ROLE or removed_temprole.role_id == REJECTED_ROLE:
+            if (
+                removed_temprole.role_id == APPROVED_ROLE
+                or removed_temprole.role_id == REJECTED_ROLE
+            ):
                 DB().reset_user(user.id)
             DB().delete_temprole(removed_temprole.id)
 

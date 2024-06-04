@@ -216,7 +216,6 @@ class RaffleBot(Client):
             await TempRoleController.check_removed_roles(removed_roles, after, GUILD_ID)
 
 
-
 def likely_brain_rot(message: Message) -> (bool, str):
     content = message.content
 

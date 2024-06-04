@@ -18,8 +18,9 @@ Base = declarative_base()
 
 
 class RaffleType(enum.Enum):
-    normal = 1
+    vod_review = 1
     anyone = 2
+    t3_only = 3
 
 
 class PredictionChoice(enum.Enum):
@@ -66,7 +67,7 @@ class Raffle(Base):
     ended = Column(Boolean, nullable=False, default=False)
     start_time = Column(DateTime, default=func.now())
     end_time = Column(DateTime, nullable=True)
-    raffle_type = Column(Enum(RaffleType), default=RaffleType.normal)
+    raffle_type = Column(Enum(RaffleType), default=RaffleType.vod_review)
 
     entries = relationship("RaffleEntry", back_populates="raffle")
 

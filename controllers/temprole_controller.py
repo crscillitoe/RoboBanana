@@ -145,7 +145,14 @@ class TempRoleController:
         if member is None:
             return False, f"Could not find user {user.mention}!"
 
-        await member.remove_roles(role)
+        # If role is removed, temprole will automatically be removed from the database
+        # through member_update event
+        try:
+            await member.remove_roles(role)
+        except:
+            LOG.warn(f"Failed to remove {role} from {member.name}")
+            DB().delete_temprole(temprole.id)
+            continue
         return True, f"Removed {role.mention} from {user.mention}."
 
     @staticmethod

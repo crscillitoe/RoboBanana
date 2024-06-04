@@ -1,4 +1,8 @@
 # RoboBanana Changelog
+## 2024.06.01
+### Additions and Fixes:
+- /manager flag_vod automatically calculates duration required for temprole until desired vod review day ([#158](https://github.com/crscillitoe/RoboBanana/pull/158)) (By [Leshy](https://github.com/lorinvzyl))
+- /hooj submit_vod is disabled on vod review days and displays when a user can submit ([#158](https://github.com/crscillitoe/RoboBanana/pull/158)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.05.11
 ### Additions and Fixes:
 - Assign 12mo and 6mo role if exceeding 12mo sub reward ([#156](https://github.com/crscillitoe/RoboBanana/pull/156)) (By [Leshy](https://github.com/lorinvzyl))

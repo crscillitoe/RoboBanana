@@ -15,6 +15,8 @@ import enum
 import logging
 import random
 import re
+import datetime
+from pytz import timezone
 
 from controllers.temprole_controller import TempRoleController
 from controllers.vod_review_bank_controller import VODReviewBankController
@@ -32,6 +34,12 @@ USER_ID_PATTERN = re.compile(r"(<@([0-9]+)>)")
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
 HIDDEN_MOD_ROLE = 1040337265790042172
+
+# Number representing day of the week, from 0 through to 6
+VOD_REVIEW_DAY = 3
+# Hour of day when vod review is considered done
+VOD_REVIEW_DAY_END = 23
+PACIFIC_TZ = timezone("US/Pacific")
 
 LOG = logging.getLogger(__name__)
 
@@ -68,9 +76,13 @@ class ManagerCommands(app_commands.Group, name="manager"):
     @app_commands.describe(vod_type="VOD Type (Approved/Rejected)")
     @app_commands.describe(duration="Duration to add to temprole")
     async def flag_vod(
-        self, interaction: Interaction, vod_type: VODType, duration: str = "7d"
+        self, interaction: Interaction, vod_type: VODType, duration: Optional[str]
     ) -> None:
         """Flag a VOD as the given type"""
+        if not duration:
+            duration = await ManagerCommands.temprole_datetime_to(
+                VOD_REVIEW_DAY, VOD_REVIEW_DAY_END
+            )
 
         if vod_type == VODType.approved:
             await ManagerCommands.process_vod(
@@ -232,3 +244,23 @@ class ManagerCommands(app_commands.Group, name="manager"):
             )
 
         await interaction.response.send_message(returnString, ephemeral=True)
+
+    @staticmethod
+    async def temprole_datetime_to(desired_day: int, desired_hour: int):
+        """
+        Returns a string that can be used for temprole for the upcoming desired day
+        Desired day should be passed as a number between 0 and 6, representing the days of the week
+        """
+        today = datetime.datetime.now(PACIFIC_TZ)
+        today_desired_time = today.replace(hour=desired_hour, minute=0)
+
+        time_diff = datetime.timedelta(
+            days=(desired_day - today.weekday()) % 7,
+            hours=today_desired_time.hour - today.hour,
+            minutes=today_desired_time.minute - today.minute,
+        )
+
+        temprole_time = (
+            f"{time_diff.days}d {time_diff.seconds//3600}h {time_diff.seconds//60%60}m"
+        )
+        return temprole_time

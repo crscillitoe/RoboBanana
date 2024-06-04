@@ -3,7 +3,7 @@ import asyncio
 import logging
 from datetime import datetime, timedelta
 import time
-from discord import Client, Interaction, Role, User, utils
+from discord import Client, Interaction, Role, User, Member, utils
 from pytimeparse.timeparse import timeparse
 from functools import partial
 from db import DB
@@ -14,6 +14,8 @@ from views.pagination.pagination_embed_view import PaginationEmbed, PaginationVi
 EXPIRATION_CHECK_CADENCE = Config.CONFIG["Discord"]["TempRoles"][
     "ExpirationCheckCadenceMinutes"
 ]
+APPROVED_ROLE = Config.CONFIG["Discord"]["VODReview"]["ApprovedRole"]
+REJECTED_ROLE = Config.CONFIG["Discord"]["VODReview"]["RejectedRole"]
 # this is hardcoded until raze to radiant is over, or config file changes are allowed
 # TOP_ROLE_ACCEPTED should be 1077265826886979634 when committing and refers to the ▬▬▬▬▬Subscriptions▬▬▬▬▬ role
 TOP_ROLE_ACCEPTED = 1077265826886979634
@@ -32,6 +34,7 @@ class TempRoleController:
         else:
             user_id = user
 
+        LOG.info(f"User id: {user_id}")
         try:
             delta = timedelta(seconds=timeparse(duration))
             expiration = datetime.now() + delta
@@ -143,7 +146,6 @@ class TempRoleController:
             return False, f"Could not find user {user.mention}!"
 
         await member.remove_roles(role)
-        DB().delete_temprole(temprole.id)
         return True, f"Removed {role.mention} from {user.mention}."
 
     @staticmethod
@@ -233,6 +235,24 @@ class TempRoleController:
         else:
             return False, f"{role} is higher than the top role accepted"
 
+    @staticmethod
+    async def check_removed_roles(removed_roles : list[int], user: Member, guild_id: int):
+        """
+        Takes a list of roles that was removed from the user and
+        checks if the removed role is part of any temproles assigned
+
+        Deletes temprole on the DB if the removed role is one of the assigned temproles
+        Deletes vod submission if removed role is APPROVED_ROLE or REJECTED_ROLE
+        """
+        temproles = DB().get_user_temproles(user.id, guild_id)
+
+        removed_temproles = [temp for temp in temproles if temp.role_id in removed_roles]
+
+        for removed_temprole in removed_temproles:
+            if removed_temprole.role_id == APPROVED_ROLE or removed_temprole.role_id == REJECTED_ROLE:
+                DB().reset_user(user.id)
+            DB().delete_temprole(removed_temprole.id)
+
     @tasks.loop(minutes=EXPIRATION_CHECK_CADENCE)
     async def expire_roles(self):
         LOG.info("[TEMPROLE TASK] Running expire roles...")
@@ -256,12 +276,14 @@ class TempRoleController:
                 DB().delete_temprole(expire_role.id)
                 continue
 
+            # If role is removed, temprole will automatically be removed from the database
+            # through member_update event
             try:
                 await member.remove_roles(role)
             except:
                 LOG.warn(f"Failed to remove {role} from {member.name}")
+                DB().delete_temprole(temprole.id)
                 continue
-            DB().delete_temprole(expire_role.id)
 
             # Rate limit
             await asyncio.sleep(1)

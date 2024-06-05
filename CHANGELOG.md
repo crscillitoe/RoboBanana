@@ -2,6 +2,11 @@
 ## 2024.06.05
 ### Additions and Fixes:
 - Set character limit of additional info section to 1000 on vod submission modal ([#160](https://github.com/crscillitoe/RoboBanana/pull/160)) (By [Leshy](https://github.com/lorinvzyl))
+## 2024.06.04
+### Additions and Fixes:
+- Add on_member_update event trigger which checks if roles are removed from the user. ([#159](https://github.com/crscillitoe/RoboBanana/pull/159)) (By [Leshy](https://github.com/lorinvzyl))
+    - If the role is related to a remprole assigned to the user, the temprole is removed from the database
+    - if the role is related to vod submissions, the vod submission entry is deleted from the database
 ## 2024.06.01
 ### Additions and Fixes:
 - /manager flag_vod automatically calculates duration required for temprole until desired vod review day ([#158](https://github.com/crscillitoe/RoboBanana/pull/158)) (By [Leshy](https://github.com/lorinvzyl))

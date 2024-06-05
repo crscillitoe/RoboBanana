@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.06.05
+### Additions and Fixes:
+- Set character limit of additional info section to 1000 on vod submission modal ([#160](https://github.com/crscillitoe/RoboBanana/pull/160)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.06.01
 ### Additions and Fixes:
 - /manager flag_vod automatically calculates duration required for temprole until desired vod review day ([#158](https://github.com/crscillitoe/RoboBanana/pull/158)) (By [Leshy](https://github.com/lorinvzyl))

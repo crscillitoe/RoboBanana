@@ -23,7 +23,7 @@ class RaffleEmbed(Embed):
 
         # global odds
         global_odds_str_parts = ["Everyone: +100 Tickets"]
-        if self.raffle_type == RaffleType.vod_review:
+        if self.raffle_type == RaffleType.normal:
             global_odds_str_parts += [
                 "Bad Luck Protection*: +5 Tickets",
                 "",

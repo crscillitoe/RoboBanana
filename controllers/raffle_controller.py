@@ -101,7 +101,7 @@ class RaffleController:
         tickets += sum(role_modifiers.get(r.id, 0) for r in user.roles)
 
         # add bad luck protection for normal raffles
-        if raffle_type == RaffleType.vod_review:
+        if raffle_type == RaffleType.normal:
             # + 5tk/loss since last win
             loss_streak = DB().get_loss_streak_for_user(user.id)
             tickets += 5 * loss_streak
@@ -113,7 +113,7 @@ class RaffleController:
         guild_id: int, user: Member, raffle_type: RaffleType
     ) -> tuple[bool, Optional[str]]:
 
-        if raffle_type == RaffleType.vod_review:
+        if raffle_type == RaffleType.normal:
             vod_approved_role = discord.utils.get(user.roles, id=VOD_APPROVED_ROLE_ID)
             if vod_approved_role is None:
                 return (

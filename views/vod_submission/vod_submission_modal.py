@@ -48,6 +48,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             label="Additional Information (Optional)",
             style=TextStyle.paragraph,
             required=False,
+            max_length=1000,
         )
 
         # Paragraph

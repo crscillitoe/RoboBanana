@@ -1,4 +1,7 @@
 # RoboBanana Changelog
+## 2024.06.05
+### Additions and Fixes:
+- Set character limit of additional info section to 1000 on vod submission modal ([#160](https://github.com/crscillitoe/RoboBanana/pull/160)) (By [Leshy](https://github.com/lorinvzyl))
 ## 2024.06.04
 ### Additions and Fixes:
 - Add on_member_update event trigger which checks if roles are removed from the user. ([#159](https://github.com/crscillitoe/RoboBanana/pull/159)) (By [Leshy](https://github.com/lorinvzyl))

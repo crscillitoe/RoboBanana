@@ -2,6 +2,7 @@
 ## 2024.06.05
 ### Additions and Fixes:
 - Set character limit of additional info section to 1000 on vod submission modal ([#160](https://github.com/crscillitoe/RoboBanana/pull/160)) (By [Leshy](https://github.com/lorinvzyl))
+- Add new raffle type that only allows T3 subscribers to join it ([#161](https://github.com/crscillitoe/RoboBanana/pull/161))
 ## 2024.06.04
 ### Additions and Fixes:
 - Add on_member_update event trigger which checks if roles are removed from the user. ([#159](https://github.com/crscillitoe/RoboBanana/pull/159)) (By [Leshy](https://github.com/lorinvzyl))

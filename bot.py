@@ -209,6 +209,12 @@ class RaffleBot(Client):
     async def on_reaction_add(self, reaction: Reaction, user: Member | User):
         await ReactionController.apply_crowd_mute(reaction)
 
+    async def on_member_update(self, before: Member, after: Member):
+        removed_roles = set(before.roles) - set(after.roles)
+        if removed_roles:
+            removed_roles = [role.id for role in removed_roles]
+            await TempRoleController.check_removed_roles(removed_roles, after, GUILD_ID)
+
 
 def likely_brain_rot(message: Message) -> (bool, str):
     content = message.content

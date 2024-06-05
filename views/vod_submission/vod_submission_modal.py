@@ -48,6 +48,7 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             label="Additional Information (Optional)",
             style=TextStyle.paragraph,
             required=False,
+            max_length=1000,
         )
 
         # Paragraph
@@ -96,15 +97,13 @@ class NewVodSubmissionModal(Modal, title="Submit a VOD for review!"):
             )
             return
 
-        # Check that we can make the post (they dont have an active submission <1 week old)
+        # Check that we can make the post (they dont have an active submission)
         timestamp = DB().get_latest_timestamp(interaction.user.id)
-        one_week_ago = datetime.now().date() - timedelta(days=6)
 
-        if timestamp is not None and not timestamp.date() <= one_week_ago:
-            # Bad, not enough time
+        if timestamp is not None:
             await interaction.response.send_message(
-                f"You appear to have submitted a VOD less than one week ago. Try"
-                f" again in one week.",
+                f"You appear to have submitted a VOD for this submission week."
+                f"Try again next submission week.",
                 ephemeral=True,
             )
             return

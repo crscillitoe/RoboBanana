@@ -3,7 +3,9 @@ from server.util.token_required import token_required
 from server.util.constants import (
     CHAT_MESSAGE_TEST_TYPE,
     CHAT_MESSAGE_STREAM_TYPE,
+    SIMPLE_CHAT_MESSAGE_STREAM_TYPE,
     EVENTS_CHANNEL,
+    SIMPLE_CHANNEL,
 )
 from .sse import sse
 import re
@@ -32,6 +34,15 @@ async def publish_chat(chat_message):
     try:
         await sse.publish(
             chat_message, type=CHAT_MESSAGE_STREAM_TYPE, channel=EVENTS_CHANNEL
+        )
+        return ("OK", 200)
+    except (KeyError, ValueError):
+        return ("Bad Request", 400)
+
+async def publish_chat_simple(chat_message):
+    try:
+        await sse.publish(
+            chat_message, type=SIMPLE_CHAT_MESSAGE_STREAM_TYPE, channel=SIMPLE_CHANNEL
         )
         return ("OK", 200)
     except (KeyError, ValueError):

@@ -1,7 +1,7 @@
 import logging
 from discord import Client, ClientUser, Intents, Message
 
-from server.blueprints.chat import publish_chat
+from server.blueprints.chat import publish_chat, publish_chat_simple
 
 from config import YAMLConfig as Config
 import re
@@ -46,6 +46,12 @@ class ServerBot(Client):
             if type(message.author) != ClientUser:
                 roles = message.author.roles
 
+            simple = {
+                "content": modified_message_content,
+                "author_id": message.author.id,
+                "platform": "discord",
+            }
+
             to_send = {
                 "content": modified_message_content,
                 "displayName": message.author.display_name,
@@ -72,6 +78,7 @@ class ServerBot(Client):
             }
             LOG.debug(to_send)
             await publish_chat(to_send)
+            await publish_chat_simple(simple)
 
     def find_emojis(self, content: str):
         stream_content = []

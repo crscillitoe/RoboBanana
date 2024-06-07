@@ -1,4 +1,5 @@
 EVENTS_CHANNEL = "events"
+SIMPLE_CHANNEL = "simple-chat"
 PREDICTIONS_TYPE = "predictions"
 SUBS_TYPE = "subs"
 SUBS_COUNT_TYPE = "subs-count"
@@ -24,6 +25,7 @@ VOD_REVIEW_TYPE = "vod-reviews"
 TIMER_TYPE = "timer"
 
 CHAT_MESSAGE_STREAM_TYPE = "chat-message"
+SIMPLE_CHAT_MESSAGE_STREAM_TYPE = "chat-simple"
 
 CHAT_MESSAGE_TEST_TYPE = "chat-test-message"
 

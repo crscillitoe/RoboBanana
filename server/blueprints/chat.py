@@ -39,6 +39,7 @@ async def publish_chat(chat_message):
     except (KeyError, ValueError):
         return ("Bad Request", 400)
 
+
 async def publish_chat_simple(chat_message):
     try:
         await sse.publish(

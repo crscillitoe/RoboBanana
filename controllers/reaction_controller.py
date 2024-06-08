@@ -82,7 +82,9 @@ class ReactionController:
                 " 3. A question answered directly within our <#1035739990413545492>."
             )
 
-            mute_reason = f"BLOWN UP BY A BOMB. RECOVERY WILL TAKE {CROWD_MUTE_DURATION} MINUTES."
+            mute_reason = (
+                f"BLOWN UP BY A BOMB. RECOVERY WILL TAKE {CROWD_MUTE_DURATION} MINUTES."
+            )
 
             if is_timed_out != True:
                 await reaction.message.author.timeout(

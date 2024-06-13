@@ -47,7 +47,7 @@ class VodCommands(app_commands.Group, name="vod"):
         riotid: str,
         rank: CommandUtils.Ranks,
         username: Optional[str] = None,
-        pronouns: Optional[str] = None,
+        pronouns: Optional[str] = "",
     ) -> None:
         """Start a VOD review for the given username"""
         Thread(

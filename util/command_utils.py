@@ -46,6 +46,7 @@ class CommandUtils:
         Pearl = "Pearl"
         Lotus = "Lotus"
         Sunset = "Sunset"
+        Abyss = "Abyss"
 
     class Ranks(enum.Enum):
         Iron_1 = "Iron 1"

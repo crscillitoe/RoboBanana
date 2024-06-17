@@ -1,13 +1,20 @@
 import discord
 from datetime import datetime, timedelta
 from typing import Optional
-from discord import Interaction, Member, User
+from discord import Interaction, Member
+from commands.overlay_commands import LOG
 from db import DB, RaffleEntry, RaffleType
 from config import YAMLConfig as Config
 import random
 
 VOD_APPROVED_ROLE_ID = Config.CONFIG["Discord"]["VODReview"]["ApprovedRole"]
 VOD_SUBMISSION_CHANNEL_ID = Config.CONFIG["Discord"]["VODReview"]["SubmissionChannel"]
+
+TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
+GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
+HIDDEN_MOD_ROLE = 1040337265790042172
+STAFF_DEVELOPER_ROLE = 1226317841272279131
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 
 class RaffleController:
@@ -33,7 +40,12 @@ class RaffleController:
             await interaction.followup.send("No one is elligible to win the raffle.")
             return
 
-        winner_ids = RaffleController.choose_winners(raffle_entries, num_winners)
+        try:
+            winner_ids = RaffleController.choose_winners(raffle_entries, num_winners)
+        except Exception as e:
+            await interaction.followup.send(str(e))
+            return
+
         winners = [interaction.guild.get_member(_id) for _id in winner_ids]
 
         if len(winners) == 1:
@@ -97,31 +109,56 @@ class RaffleController:
         return tickets
 
     @staticmethod
-    def eligible_for_raffle(guild_id: int, user: User) -> tuple[bool, Optional[str]]:
-        vod_approved_role = discord.utils.get(user.roles, id=VOD_APPROVED_ROLE_ID)
-        if vod_approved_role is None:
-            return (
-                False,
-                (
-                    f"VODs must be submitted to <#{VOD_SUBMISSION_CHANNEL_ID}> and"
-                    " approved ahead of entering a raffle."
-                ),
-            )
+    def eligible_for_raffle(
+        guild_id: int, user: Member, raffle_type: RaffleType
+    ) -> tuple[bool, Optional[str]]:
 
-        one_week_ago = datetime.now().date() - timedelta(days=6)
-        weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(
-            guild_id=guild_id, user_id=user.id, after=one_week_ago
-        )
-        if weekly_wins > 0 and last_win_entry_dt is not None:
-            next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
-            next_eligible_ts = int(
-                datetime.combine(next_eligible_date, datetime.min.time()).timestamp()
+        if raffle_type == RaffleType.normal:
+            vod_approved_role = discord.utils.get(user.roles, id=VOD_APPROVED_ROLE_ID)
+            if vod_approved_role is None:
+                return (
+                    False,
+                    (
+                        f"VODs must be submitted to <#{VOD_SUBMISSION_CHANNEL_ID}> and"
+                        " approved ahead of entering a VOD Review raffle."
+                    ),
+                )
+
+            one_week_ago = datetime.now().date() - timedelta(days=6)
+            weekly_wins, last_win_entry_dt = DB().get_recent_win_stats(
+                guild_id=guild_id, user_id=user.id, after=one_week_ago
             )
+            if weekly_wins > 0 and last_win_entry_dt is not None:
+                next_eligible_date = last_win_entry_dt.date() + timedelta(days=7)
+                next_eligible_ts = int(
+                    datetime.combine(
+                        next_eligible_date, datetime.min.time()
+                    ).timestamp()
+                )
+                return (
+                    False,
+                    (
+                        "You can only win the raffle once per week. You can next enter on"
+                        f" <t:{next_eligible_ts}:D>"
+                    ),
+                )
+            return True, None
+
+        if raffle_type == RaffleType.t3_only:
+            if any(
+                role.id
+                in [
+                    TIER3_ROLE,
+                    GIFTED_TIER3_ROLE,
+                    MOD_ROLE,
+                    HIDDEN_MOD_ROLE,
+                    STAFF_DEVELOPER_ROLE,
+                ]
+                for role in user.roles
+            ):
+                return True, None
+
             return (
                 False,
-                (
-                    "You can only win the raffle once per week. You can next enter on"
-                    f" <t:{next_eligible_ts}:D>"
-                ),
+                ("You must be a Tier 3 subscriber to enter this raffle."),
             )
-        return True, None

@@ -66,10 +66,10 @@ class RaffleView(View):
         # Mods can always enter a raffle, anyone can enter in "anyone" raffle type
         if (
             not self.has_role("Mod", interaction)
-            and self.raffle_type == RaffleType.normal
+            and self.raffle_type != RaffleType.anyone
         ):
             eligible, ineligibility_message = RaffleController.eligible_for_raffle(
-                guild_id, user
+                guild_id, user, self.raffle_type
             )
             if not eligible:
                 await interaction.followup.send(

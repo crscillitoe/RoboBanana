@@ -20,6 +20,7 @@ Base = declarative_base()
 class RaffleType(enum.Enum):
     normal = 1
     anyone = 2
+    t3_only = 3
 
 
 class PredictionChoice(enum.Enum):

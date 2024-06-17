@@ -302,7 +302,7 @@ class ModCommands(app_commands.Group, name="mod"):
 
     @app_commands.command(name="start")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
-    @app_commands.describe(raffle_type="Raffle Type (default: normal)")
+    @app_commands.describe(raffle_type="Raffle Type, default: Normal (VOD Review)")
     async def start(
         self, interaction: Interaction, raffle_type: RaffleType = RaffleType.normal
     ):

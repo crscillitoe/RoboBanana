@@ -208,7 +208,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     @app_commands.command(name="gift_t2")
     @app_commands.describe(member="The member to gift 1 month of T2 to.")
     async def gift_t2(self, interaction: Interaction, member: Member) -> None:
-        """Gift a member 1 month of T2 subscription"""
+        """Gift a member 1 month of T2 subscription (costs 50k Hoojbucks normally)"""
 
         if GIFTED_T2_ENABLED == False:
             return await interaction.response.send_message(

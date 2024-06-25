@@ -43,10 +43,8 @@ BOT_ROLE = Config.CONFIG["Discord"]["Roles"]["Bot"]
 GIFTED_TIER1_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier1Role"]
 GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
-# these are hardcoded until raze to radiant is over, or config file changes are allowed
-# for testing on own setup, these need to be changed to your appropriate IDs
-# HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
-HIDDEN_MOD_ROLE = 1040337265790042172
+HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["HiddenMod"]
+STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Roles"]["StaffDev"]
 
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
@@ -133,7 +131,7 @@ class ModCommands(app_commands.Group, name="mod"):
         await interaction.response.send_message("Talk event sent!", ephemeral=True)
 
     @app_commands.command(name="game")
-    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE)
     @app_commands.describe(overlay_status="Whether or not to display the overlay.")
     @app_commands.describe(game_name="Name of the game being played. (Optional).")
     async def talk(

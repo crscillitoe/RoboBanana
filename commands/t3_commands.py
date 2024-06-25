@@ -54,8 +54,8 @@ T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
 TWITCH_T3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["TwitchTier3Role"]
 
-HIDDEN_MOD_ROLE = 1040337265790042172
-STAFF_DEVELOPER_ROLE = 1226317841272279131
+HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["HiddenMod"]
+STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Roles"]["StaffDev"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 T3_TTS_ENABLED = True

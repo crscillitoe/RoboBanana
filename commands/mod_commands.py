@@ -1,8 +1,11 @@
 from asyncio import Lock
-from datetime import datetime, timedelta
+import calendar
+from datetime import datetime, time, timedelta
+from pytz import timezone
 from typing import Optional
 from discord import (
     AllowedMentions,
+    File,
     Role,
     app_commands,
     Interaction,
@@ -46,6 +49,8 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["HiddenMod"]
 STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Roles"]["StaffDev"]
 
+GUILD_ID = Config.CONFIG["Discord"]["GuildID"]
+
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll"
 PUBLISH_TIMER_URL = f"{get_base_url()}/publish-timer"
@@ -57,6 +62,8 @@ ACTIVE_CHATTERS = {}
 ACTIVE_T3_CHATTERS = {}
 
 PERMISSION_LOCK = Lock()
+
+PACIFIC_TZ = timezone("US/Pacific")
 
 
 class ChannelPerms(enum.Enum):
@@ -83,6 +90,7 @@ class ModCommands(app_commands.Group, name="mod"):
         super().__init__()
         self.tree = tree
         self.client = client
+        self.change_frog_sticker.start()
 
     @staticmethod
     def check_owner(interaction: Interaction) -> bool:
@@ -680,6 +688,39 @@ class ModCommands(app_commands.Group, name="mod"):
             f"Gifted T2 set to {enabled_text}, cost set to {cost} points! Will reset to enabled and 50k points on bot restart.",
             ephemeral=True,
         )
+
+    # I hate Python Time objects, so I'm just going to do this manually
+    last_weekday = datetime.now(tz=PACIFIC_TZ).weekday()
+
+    @tasks.loop(minutes=10)
+    async def change_frog_sticker(self):
+        today = datetime.now(tz=PACIFIC_TZ).weekday()
+        if today == self.last_weekday:
+            return
+
+        guild = self.client.get_guild(GUILD_ID)
+        if guild is not None:
+            LOG.info("[MOD] Changing frog sticker")
+
+            today_name = calendar.day_name[today].lower()
+            yesterday_name = calendar.day_name[today - 1].lower()
+
+            guild_stickers = await guild.fetch_stickers()
+            for sticker in guild_stickers:
+                if sticker.name == yesterday_name:
+                    LOG.info(f"[MOD] Deleting old frog sticker '{sticker.name}'")
+                    await sticker.delete()
+                    break
+
+            LOG.info(f"[MOD] Uploading new frog sticker '{today_name}'")
+            await guild.create_sticker(
+                name=today_name,
+                description=f"It is {today_name}, my dudes",
+                file=File(open(f"assets/frogs/{today_name}.png", "rb")),
+                emoji="🐸",
+                reason="Daily frog sticker swap",
+            )
+            self.last_weekday = datetime.now(tz=PACIFIC_TZ).weekday()
 
 
 def publish_poll(title, option_one, option_two, option_three, option_four):

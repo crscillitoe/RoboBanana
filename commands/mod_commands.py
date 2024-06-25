@@ -703,7 +703,8 @@ class ModCommands(app_commands.Group, name="mod"):
             LOG.info("[MOD] Changing frog sticker")
 
             today_name = calendar.day_name[today].lower()
-            yesterday_name = calendar.day_name[today - 1].lower()
+            yesterday_number = today - 1 if today > 0 else 6
+            yesterday_name = calendar.day_name[yesterday_number].lower()
 
             guild_stickers = await guild.fetch_stickers()
             for sticker in guild_stickers:

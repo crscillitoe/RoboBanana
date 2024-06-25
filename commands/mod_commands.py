@@ -66,9 +66,11 @@ class ChannelPerms(enum.Enum):
     subchat = 4
     off = 5
 
+
 class GameOverlay(enum.Enum):
     on = 1
     off = 2
+
 
 class TimerDirection(enum.Enum):
     increment = "inc"
@@ -149,7 +151,9 @@ class ModCommands(app_commands.Group, name="mod"):
             ),
         ).start()
 
-        await interaction.response.send_message("Game overlay event sent!", ephemeral=True)
+        await interaction.response.send_message(
+            "Game overlay event sent!", ephemeral=True
+        )
 
     @app_commands.command(name="chess")
     @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
@@ -727,8 +731,13 @@ def publish_talker(user_id, name, voice):
     if response.status_code != 200:
         LOG.error(f"Failed to publish talker: {response.text}")
 
+
 def publish_game_overlay(overlay_state, game_name):
-    payload = {"type": "gameOverlay", "overlayState": overlay_state.value, "gameName": game_name}
+    payload = {
+        "type": "gameOverlay",
+        "overlayState": overlay_state.value,
+        "gameName": game_name,
+    }
 
     response = requests.post(
         url=PUBLISH_STREAMDECK_URL, json=payload, headers={"x-access-token": AUTH_TOKEN}

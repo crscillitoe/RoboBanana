@@ -630,6 +630,31 @@ class ModCommands(app_commands.Group, name="mod"):
             ephemeral=True,
         )
 
+    @app_commands.command(name="set_gifted_t2_values")
+    @app_commands.checks.has_any_role(MOD_ROLE, HIDDEN_MOD_ROLE)
+    @app_commands.describe(
+        enabled="Whether or not T2 gifting should be enabeld. Set to Enabled by default."
+    )
+    @app_commands.describe(
+        cost="The cost to use T2 gifting redemption. Set to 50k by default."
+    )
+    async def set_gifted_t2_values(
+        self,
+        interaction: Interaction,
+        enabled: Optional[bool] = True,
+        cost: Optional[int] = 50000,
+    ) -> None:
+        """Temporarily sets availability and cost of the gifted T2 redemption. Resets to Enabled and 50k on bot restarts."""
+
+        viewer_commands.GIFTED_T2_ENABLED = enabled
+        viewer_commands.GIFTED_T2_REQUIRED_POINTS = cost
+        enabled_text = "enabled" if enabled else "disabled"
+
+        await interaction.response.send_message(
+            f"Gifted T2 set to {enabled_text}, cost set to {cost} points! Will reset to enabled and 50k points on bot restart.",
+            ephemeral=True,
+        )
+
 
 def publish_poll(title, option_one, option_two, option_three, option_four):
     payload = {

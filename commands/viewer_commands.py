@@ -1,12 +1,15 @@
-from discord import app_commands, Interaction, Client, AllowedMentions
+from discord import Member, app_commands, Interaction, Client, AllowedMentions
 from discord.app_commands import Choice, Range
 from typing import Optional
 from controllers.good_morning_controller import GoodMorningController
+from controllers.point_history_controller import PointHistoryController
 from controllers.predictions.prediction_entry_controller import (
     PredictionEntryController,
 )
+from controllers.temprole_controller import TempRoleController
 from db import DB
 from db.models import PredictionChoice
+from models.transaction import Transaction
 from views.rewards.redeem_reward_view import RedeemRewardView
 from threading import Thread
 import requests
@@ -26,6 +29,11 @@ POKEMON_THREAD_ID = 1233467109485314150
 PUBLISH_POLL_URL = f"{get_base_url()}/publish-poll-answer"
 POKEMON_PUBLISH_URL = f"{get_base_url()}/publish-streamdeck"
 
+HIDDEN_MOD_ROLE = 1040337265790042172
+STAFF_DEVELOPER_ROLE = 1226317841272279131
+MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
+GIFTED_T2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier2Role"]
+
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
 # It's stupid that it's here but I don't know how else to make it work
@@ -35,6 +43,9 @@ PACIFIC_TZ = timezone("US/Pacific")
 # Number representing day of the week, from 0 through to 6
 VOD_REVIEW_DAY = 3
 VOD_REVIEW_DAY_END = 23
+
+GIFTED_T2_ENABLED = True
+GIFTED_T2_REQUIRED_POINTS = 50000
 
 
 @app_commands.guild_only()
@@ -193,6 +204,72 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     async def good_morning_points(self, interaction: Interaction):
         """Check your current good morning points! Check #good-morning-faq for details"""
         await GoodMorningController.get_morning_points(interaction)
+
+    @app_commands.command(name="gift_t2")
+    @app_commands.describe(member="The member to gift 1 month of T2 to.")
+    async def gift_t2(self, interaction: Interaction, member: Member) -> None:
+        """Gift a member 1 month of T2 subscription"""
+
+        if GIFTED_T2_ENABLED == False:
+            return await interaction.response.send_message(
+                f"Gifting T2 is currently disabled.",
+                ephemeral=True,
+            )
+
+        required_points = GIFTED_T2_REQUIRED_POINTS
+
+        if any(
+            role.id in [MOD_ROLE, HIDDEN_MOD_ROLE, STAFF_DEVELOPER_ROLE]
+            for role in interaction.user.roles
+        ):
+            required_points = 0
+
+        user_points = DB().get_point_balance(interaction.user.id)
+        if not user_points:
+            return await interaction.response.send_message(
+                "Failed to retrieve point balance - please try again.", ephemeral=True
+            )
+
+        if user_points < required_points:
+            return await interaction.response.send_message(
+                f"You need {required_points} points to redeem a TTS message. You currently have: {user_points}",
+                ephemeral=True,
+            )
+
+        if required_points > 0:
+            success, balance = DB().withdraw_points(
+                interaction.user.id, required_points
+            )
+            if not success:
+                return await interaction.response.send_message(
+                    "Failed to redeem reward - please try again.", ephemeral=True
+                )
+
+            PointHistoryController.record_transaction(
+                Transaction(
+                    interaction.user.id,
+                    -required_points,
+                    user_points,
+                    balance,
+                    "TTS Redemption",
+                )
+            )
+        else:
+            balance = DB().get_point_balance(interaction.user.id)
+
+        gifted_role = interaction.guild.get_role(GIFTED_T2_ROLE)
+        success, message = await TempRoleController.extend_role(
+            member._user, gifted_role, "31d"
+        )
+
+        if not success:
+            return await interaction.response.send_message(
+                f"Failed to gift T2: {message}", ephemeral=True
+            )
+
+        await interaction.response.send_message(
+            f"{member.mention} has been gifted one month of T2 by {interaction.user.mention}!"
+        )
 
 
 def publish_poll_answer(user_id, choice, roles):

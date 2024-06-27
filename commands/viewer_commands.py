@@ -1,4 +1,4 @@
-from discord import Member, app_commands, Interaction, Client, AllowedMentions
+from discord import Colour, Member, app_commands, Interaction, Client, AllowedMentions
 from discord.app_commands import Choice, Range
 from typing import Optional
 from controllers.good_morning_controller import GoodMorningController
@@ -10,6 +10,7 @@ from controllers.temprole_controller import TempRoleController
 from db import DB
 from db.models import PredictionChoice
 from models.transaction import Transaction
+from util.discord_utils import DiscordUtils
 from views.rewards.redeem_reward_view import RedeemRewardView
 from threading import Thread
 import requests
@@ -33,6 +34,7 @@ HIDDEN_MOD_ROLE = 1040337265790042172
 STAFF_DEVELOPER_ROLE = 1226317841272279131
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 GIFTED_T2_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier2Role"]
+TEMPROLE_AUDIT_CHANNEL = 1225769539267199026
 
 AUTH_TOKEN = Config.CONFIG["Secrets"]["Server"]["Token"]
 
@@ -260,6 +262,15 @@ class ViewerCommands(app_commands.Group, name="hooj"):
         gifted_role = interaction.guild.get_role(GIFTED_T2_ROLE)
         success, message = await TempRoleController.extend_role(
             member._user, gifted_role, "31d"
+        )
+
+        audit_channel = interaction.guild.get_channel(TEMPROLE_AUDIT_CHANNEL)
+        await DiscordUtils.audit(
+            interaction=interaction,
+            user=interaction.user,
+            message=f"{member.name} (ID {member.id}) has been gifted one month of T2 by {interaction.user.name} (ID {interaction.user.id})",
+            color=Colour.green(),
+            channel=audit_channel,
         )
 
         if not success:

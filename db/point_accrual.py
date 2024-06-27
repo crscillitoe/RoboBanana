@@ -145,7 +145,7 @@ def accrue_channel_points(
             return True
 
         # Ensure points are not accruing on every message
-        # Only award points once per hour
+        # Only award points once per MIN_ACCRUAL_TIME
         channel_points: ChannelPoints = result[0]
         last_accrued: datetime = channel_points.timestamp
         now = datetime.now()

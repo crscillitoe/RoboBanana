@@ -39,6 +39,7 @@ class VodCommands(app_commands.Group, name="vod"):
     @app_commands.describe(riotid="riotid")
     @app_commands.describe(rank="rank")
     @app_commands.describe(username="Override Discord Display Name")
+    @app_commands.describe(pronouns="Pronouns to display")
     async def vod(
         self,
         interaction: Interaction,
@@ -46,6 +47,7 @@ class VodCommands(app_commands.Group, name="vod"):
         riotid: str,
         rank: CommandUtils.Ranks,
         username: Optional[str] = None,
+        pronouns: Optional[str] = "",
     ) -> None:
         """Start a VOD review for the given username"""
         Thread(
@@ -56,6 +58,7 @@ class VodCommands(app_commands.Group, name="vod"):
                 riotid,
                 rank.name,
                 False,
+                pronouns,
             ),
         ).start()
 
@@ -73,6 +76,7 @@ class VodCommands(app_commands.Group, name="vod"):
                 "",
                 "",
                 True,
+                "",
             ),
         ).start()
 
@@ -81,13 +85,14 @@ class VodCommands(app_commands.Group, name="vod"):
         )
 
 
-def publish_update(username: str, user_id: int, riotid: str, rank: str, complete: bool):
+def publish_update(username: str, user_id: int, riotid: str, rank: str, complete: bool, pronouns: str):
     payload = {
         "username": username,
         "userid": user_id,
         "riotid": riotid,
         "rank": rank,
         "complete": complete,
+        "pronouns": pronouns,
     }
 
     response = requests.post(

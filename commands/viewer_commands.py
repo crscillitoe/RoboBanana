@@ -253,7 +253,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
                     -required_points,
                     user_points,
                     balance,
-                    "TTS Redemption",
+                    f"Gifted T2 to {member.name} (ID {member.id})",
                 )
             )
         else:

@@ -125,6 +125,7 @@ class ViewerCommands(app_commands.Group, name="hooj"):
     @app_commands.command(name="submit_vod")
     async def start(self, interaction: Interaction):
         """Opens the VOD Submission Prompt"""
+        return await interaction.response.send_message(f"No new vods are accepted at this time.", ephemeral=True)
         today = datetime.datetime.now(PACIFIC_TZ)
         # Disable submissions on vod review day and inform user what time they can submit again
         if today.weekday() == VOD_REVIEW_DAY:

@@ -35,8 +35,8 @@ MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
 # STAFF_DEVELOPER_ROLE should be 1226317841272279131 when committing and refers to the Staff Developer role
 # PREDICTION_DEALER_ROLE should be 1229896209515282472 when committing and refers to the Dealer role for Predictions
-HIDDEN_MOD_ROLE = 1040337265790042172
-STAFF_DEVELOPER_ROLE = 1226317841272279131
+HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Subscribers"]["HiddenMod"]
+STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Subscribers"]["StaffDev"]
 PREDICTION_DEALER_ROLE = 1229896209515282472
 
 

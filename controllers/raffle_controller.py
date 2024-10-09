@@ -12,8 +12,8 @@ VOD_SUBMISSION_CHANNEL_ID = Config.CONFIG["Discord"]["VODReview"]["SubmissionCha
 
 TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["Tier3Role"]
 GIFTED_TIER3_ROLE = Config.CONFIG["Discord"]["Subscribers"]["GiftedTier3Role"]
-HIDDEN_MOD_ROLE = 1040337265790042172
-STAFF_DEVELOPER_ROLE = 1226317841272279131
+HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Subscribers"]["HiddenMod"]
+STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Subscribers"]["StaffDev"]
 MOD_ROLE = Config.CONFIG["Discord"]["Roles"]["Mod"]
 
 

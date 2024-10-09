@@ -18,8 +18,8 @@ TRUSTWORTHY = Config.CONFIG["Discord"]["Roles"]["Trustworthy"]
 # for testing on own setup, these need to be changed to your appropriate IDs
 # HIDDEN_MOD_ROLE should be 1040337265790042172 when committing and refers to the Mod (Role Hidden)
 # STAFF_DEVELOPER_ROLE should be 1226317841272279131 when committing and refers to the Staff Developer role
-HIDDEN_MOD_ROLE = 1040337265790042172
-STAFF_DEVELOPER_ROLE = 1226317841272279131
+HIDDEN_MOD_ROLE = Config.CONFIG["Discord"]["Subscribers"]["HiddenMod"]
+STAFF_DEVELOPER_ROLE = Config.CONFIG["Discord"]["Subscribers"]["StaffDev"]
 
 
 @app_commands.guild_only()
